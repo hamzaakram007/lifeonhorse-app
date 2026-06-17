@@ -1,15 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { playfair, sourceSans } from "@/lib/fonts";
+import { defaultMetadata } from "@/lib/seo";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: {
-    default: "LifeOnHorse — Global Horse Marketplace & Community",
-    template: "%s | LifeOnHorse",
-  },
-  description:
-    "Buy and sell horses, find clubs, trainers, events, courses, and expert horse health help worldwide.",
+  ...defaultMetadata,
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -19,7 +16,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#8b4513",
+  themeColor: "#c45c26",
   width: "device-width",
   initialScale: 1,
 };
@@ -28,10 +25,10 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-      <body className="flex min-h-screen flex-col">
+    <html lang="en" className={`${playfair.variable} ${sourceSans.variable}`}>
+      <body className="flex min-h-screen flex-col font-sans">
         <Header />
-        <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8">{children}</main>
+        <main id="main-content" className="mx-auto w-full max-w-7xl flex-1 px-4 py-8">{children}</main>
         <Footer />
       </body>
     </html>

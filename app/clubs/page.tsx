@@ -2,39 +2,54 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { ListingCard, EmptyState, VerifiedBadge, FeaturedBadge } from "@/components/ui";
-import { getCountryName } from "@/lib/countries";
+import { SectionHero } from "@/components/layout/SectionHero";
+import { formatLocation } from "@/lib/location";
+import { SECTION_IMAGES } from "@/lib/section-images";
 
 export const metadata: Metadata = {
   title: "Clubs",
-  description: "Horse clubs and communities worldwide",
+  description: "Elite polo clubs, riding schools, and equestrian communities worldwide",
 };
 
 export default async function Page() {
   const supabase = await createClient();
-  const { data } = await supabase.from("clubs").select("id, name, club_type, country_code, city, logo_url, is_verified, is_featured").eq("status", "published").order("is_featured", { ascending: false }).limit(24);
+  const { data } = await supabase
+    .from("clubs")
+    .select("id, name, club_type, country_code, city, logo_url, is_verified, is_featured")
+    .eq("status", "published")
+    .order("is_featured", { ascending: false })
+    .limit(24);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-bold">Clubs</h1>
-          <p className="text-[var(--color-muted)]">Horse clubs and communities worldwide</p>
-        </div>
-        <Link href="/clubs/new" className="btn btn-primary">+ Create</Link>
-      </div>
+    <div className="space-y-8">
+      <SectionHero
+        title="Equestrian Clubs"
+        subtitle="From championship polo grounds to world-class riding academies — find your community among the finest clubs on earth."
+        image={SECTION_IMAGES.clubs}
+        action={{ href: "/clubs/register", label: "+ Register club" }}
+      />
       {!data?.length ? (
-        <EmptyState title="No listings yet" description="Be the first to add one." action={<Link href="/clubs/new" className="btn btn-primary">Create</Link>} />
+        <EmptyState
+          title="No clubs listed yet"
+          description="Be the first to showcase your club to a global audience of riders and enthusiasts."
+          action={<Link href="/clubs/register" className="btn btn-primary">Register club</Link>}
+        />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {data.map((item: Record<string, unknown>) => (
+        <div className="listing-grid">
+          {data.map((item) => (
             <ListingCard
-              key={String(item.id)}
+              key={item.id}
               href={`/clubs/${item.id}`}
-              title={String(item.name)}
-              subtitle={String(item.club_type ?? '')}
-              image={item.logo_url as string | null}
-              badges={<>{item.is_verified ? <VerifiedBadge /> : null}{item.is_featured ? <FeaturedBadge /> : null}</>}
-              meta={undefined}
+              title={item.name}
+              subtitle={item.club_type ?? undefined}
+              image={item.logo_url}
+              badges={
+                <>
+                  {item.is_verified ? <VerifiedBadge /> : null}
+                  {item.is_featured ? <FeaturedBadge /> : null}
+                </>
+              }
+              meta={formatLocation(item.city, item.country_code)}
             />
           ))}
         </div>

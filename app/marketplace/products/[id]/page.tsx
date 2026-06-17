@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { PhotoGallery, VerifiedBadge } from "@/components/ui";
+import { ListingGallery } from "@/components/ui";
 import { ReviewsSection } from "@/components/ReviewsSection";
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -13,7 +13,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">{product.title}</h1>
       <p>{product.price ? `${product.currency} ${product.price}` : "Price on request"}</p>
-      <PhotoGallery photos={Array.isArray(product.photos) ? product.photos : []} />
+      <ListingGallery photos={product.photos} alt={product.title} />
       <p>{product.description}</p>
       <ReviewsSection entityType="product" entityId={id} />
     </div>

@@ -1,16 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-
-const navLinks = [
-  { href: "/marketplace", label: "Marketplace" },
-  { href: "/health", label: "Horse Health" },
-  { href: "/clubs", label: "Clubs" },
-  { href: "/trainers", label: "Trainers" },
-  { href: "/events", label: "Events" },
-  { href: "/courses", label: "Courses" },
-  { href: "/blog", label: "Blog" },
-  { href: "/community", label: "Community" },
-];
+import { HeaderNav } from "@/components/HeaderNav";
 
 export async function Header() {
   const supabase = await createClient();
@@ -30,53 +20,44 @@ export async function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-surface)]/95 backdrop-blur">
+      <a href="#main-content" className="skip-link">
+        Skip to content
+      </a>
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3">
-        <Link href="/" className="text-xl font-bold text-[var(--color-primary)] no-underline">
+        <Link href="/" className="font-serif text-xl font-bold text-[var(--color-primary)] no-underline" aria-label="LifeOnHorse home">
           LifeOnHorse
         </Link>
-        <nav className="hidden flex-wrap gap-x-4 gap-y-1 text-sm font-medium lg:flex">
-          {navLinks.map((link) => (
-            <Link key={link.href} href={link.href} className="no-underline hover:text-[var(--color-primary-dark)]">
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+        <HeaderNav variant="desktop" />
         <div className="flex items-center gap-2">
           {user ? (
             <>
-              <Link href="/dashboard" className="btn btn-secondary text-sm py-2 px-3">
+              <Link href="/dashboard" className="btn btn-secondary px-3 py-2 text-sm">
                 {profile?.full_name ?? "Dashboard"}
               </Link>
               {["admin", "moderator"].includes(profile?.role ?? "") && (
-                <Link href="/admin" className="btn btn-primary text-sm py-2 px-3">
+                <Link href="/admin" className="btn btn-primary px-3 py-2 text-sm">
                   Admin
                 </Link>
               )}
               <form action="/auth/signout" method="post">
-                <button type="submit" className="btn btn-secondary text-sm py-2 px-3">
+                <button type="submit" className="btn btn-secondary px-3 py-2 text-sm">
                   Sign out
                 </button>
               </form>
             </>
           ) : (
             <>
-              <Link href="/auth/login" className="btn btn-secondary text-sm py-2 px-3">
+              <Link href="/auth/login" className="btn btn-secondary px-3 py-2 text-sm">
                 Log in
               </Link>
-              <Link href="/auth/signup" className="btn btn-primary text-sm py-2 px-3">
+              <Link href="/auth/signup" className="btn btn-primary px-3 py-2 text-sm">
                 Sign up
               </Link>
             </>
           )}
         </div>
       </div>
-      <nav className="flex gap-3 overflow-x-auto border-t border-[var(--color-border)] px-4 py-2 text-sm lg:hidden">
-        {navLinks.map((link) => (
-          <Link key={link.href} href={link.href} className="whitespace-nowrap no-underline">
-            {link.label}
-          </Link>
-        ))}
-      </nav>
+      <HeaderNav variant="mobile" />
     </header>
   );
 }

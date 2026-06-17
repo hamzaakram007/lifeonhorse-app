@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea, Label, Select } from "@/components/ui/Input";
 import { CountrySelect } from "@/components/ui/CountrySelect";
-import { ImageUpload } from "@/components/ui/ImageUpload";
+import { MediaUpload } from "@/components/ui/MediaUpload";
 import { MarketplaceNav } from "@/components/marketplace/MarketplaceNav";
 import { SERVICE_CATEGORIES, PRICING_MODELS } from "@/lib/constants";
 import { STORAGE_BUCKETS } from "@/lib/storage/upload";
@@ -17,6 +17,7 @@ export default function NewServicePage() {
   const [error, setError] = useState("");
   const [sellerId, setSellerId] = useState<string | null>(null);
   const [photos, setPhotos] = useState<string[]>([]);
+  const [videoUrl, setVideoUrl] = useState("");
   const [form, setForm] = useState({
     title: "",
     category: "other",
@@ -68,6 +69,7 @@ export default function NewServicePage() {
       form.pricing_details && `Pricing: ${form.pricing_details} (${form.pricing_model.replace(/_/g, " ")})`,
       form.availability && `Availability: ${form.availability}`,
       form.city && `City: ${form.city}`,
+      videoUrl && `Service video: ${videoUrl}`,
     ].filter(Boolean);
 
     const { data, error: insertError } = await supabase
@@ -105,7 +107,15 @@ export default function NewServicePage() {
           <Label required>Title</Label>
           <Input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
         </div>
-        <ImageUpload bucket={STORAGE_BUCKETS.gallery} label="Service photos" multiple maxFiles={6} value={photos} onChange={setPhotos} />
+        <MediaUpload
+          imageBucket={STORAGE_BUCKETS.gallery}
+          photos={photos}
+          onPhotosChange={setPhotos}
+          videoUrl={videoUrl}
+          onVideoChange={setVideoUrl}
+          maxImages={8}
+          imageLabel="Service photos"
+        />
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <Label>Category</Label>

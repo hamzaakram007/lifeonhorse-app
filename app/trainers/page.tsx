@@ -2,39 +2,55 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { ListingCard, EmptyState, VerifiedBadge, FeaturedBadge } from "@/components/ui";
-import { getCountryName } from "@/lib/countries";
+import { SectionHero } from "@/components/layout/SectionHero";
+import { formatLocation } from "@/lib/location";
+import { SECTION_IMAGES } from "@/lib/section-images";
 
 export const metadata: Metadata = {
   title: "Trainers",
-  description: "Riding coaches, vets, farriers and experts",
+  description: "Elite riding coaches, vets, farriers, and equestrian experts",
 };
 
 export default async function Page() {
   const supabase = await createClient();
-  const { data } = await supabase.from("trainers").select("id, display_name, specialty, country_code, city, photos, is_verified, is_featured").eq("status", "published").order("is_featured", { ascending: false }).limit(24);
+  const { data } = await supabase
+    .from("trainers")
+    .select("id, display_name, specialty, country_code, city, photos, is_verified, is_featured")
+    .eq("status", "published")
+    .order("is_featured", { ascending: false })
+    .limit(24);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-bold">Trainers</h1>
-          <p className="text-[var(--color-muted)]">Riding coaches, vets, farriers and experts</p>
-        </div>
-        <Link href="/trainers/new" className="btn btn-primary">+ Create</Link>
-      </div>
+    <div className="space-y-8">
+      <SectionHero
+        title="Expert Trainers"
+        subtitle="Connect with Olympic-caliber coaches, master farriers, and renowned equine specialists trusted by champions."
+        image={SECTION_IMAGES.trainers}
+        action={{ href: "/trainers/new", label: "+ Join as trainer" }}
+      />
       {!data?.length ? (
-        <EmptyState title="No listings yet" description="Be the first to add one." action={<Link href="/trainers/new" className="btn btn-primary">Create</Link>} />
+        <EmptyState
+          title="No trainers listed yet"
+          description="Showcase your expertise to a discerning global audience of riders and stable owners."
+          action={<Link href="/trainers/new" className="btn btn-primary">Join as trainer</Link>}
+        />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {data.map((item: Record<string, unknown>) => (
+        <div className="listing-grid">
+          {data.map((item) => (
             <ListingCard
-              key={String(item.id)}
+              key={item.id}
               href={`/trainers/${item.id}`}
-              title={String(item.display_name)}
-              subtitle={String(item.specialty ?? '')}
-              image={Array.isArray(item.photos) ? (item.photos as string[])[0] : null}
-              badges={<>{item.is_verified ? <VerifiedBadge /> : null}{item.is_featured ? <FeaturedBadge /> : null}</>}
-              meta={undefined}
+              title={item.display_name}
+              subtitle={item.specialty ?? undefined}
+              image={Array.isArray(item.photos) ? item.photos[0] : null}
+              photoCount={Array.isArray(item.photos) ? item.photos.length : undefined}
+              badges={
+                <>
+                  {item.is_verified ? <VerifiedBadge /> : null}
+                  {item.is_featured ? <FeaturedBadge /> : null}
+                </>
+              }
+              meta={formatLocation(item.city, item.country_code)}
             />
           ))}
         </div>

@@ -1,8 +1,10 @@
+import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import Link from "next/link";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  await requireAdmin();
+  const profile = await requireAdmin();
+  if (!profile) redirect("/auth/login?redirect=/admin");
 
   const links = [
     { href: "/admin", label: "Overview" },

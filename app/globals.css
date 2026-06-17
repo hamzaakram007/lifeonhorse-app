@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
 :root {
-  --color-primary: #8b4513;
-  --color-primary-dark: #5c2e0e;
+  --color-primary: #c45c26;
+  --color-primary-dark: #a84d1f;
   --color-accent: #c49a6c;
-  --color-bg: #faf6f0;
+  --color-bg: #faf8f5;
   --color-surface: #ffffff;
   --color-text: #2c1810;
   --color-muted: #6b5344;
@@ -12,13 +12,19 @@
   --color-success: #2d6a4f;
   --color-warning: #b45309;
   --color-danger: #b91c1c;
+  --font-serif: var(--font-playfair), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-source-sans), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
 body {
   background: var(--color-bg);
   color: var(--color-text);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-sans);
   line-height: 1.6;
+}
+
+.font-serif {
+  font-family: var(--font-serif);
 }
 
 a {
@@ -133,4 +139,104 @@ a:hover {
   list-style: disc;
   padding-left: 1.5rem;
   margin-bottom: 1rem;
+}
+
+.hero-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2rem;
+  padding: 0.875rem 2.25rem;
+  border-radius: 9999px;
+  background: var(--color-primary);
+  color: #fff !important;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  border: 2px solid rgb(255 255 255 / 0.25);
+  box-shadow:
+    0 4px 14px rgb(0 0 0 / 0.25),
+    0 0 0 1px rgb(0 0 0 / 0.08);
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.hero-cta:hover {
+  background: var(--color-primary-dark);
+  color: #fff !important;
+  border-color: rgb(255 255 255 / 0.4);
+  box-shadow:
+    0 8px 24px rgb(0 0 0 / 0.35),
+    0 0 0 1px rgb(0 0 0 / 0.1);
+  transform: translateY(-2px);
+}
+
+.hero-cta:active {
+  transform: translateY(0);
+}
+
+.section-hero:not([style]) {
+  background: linear-gradient(135deg, var(--color-text) 0%, var(--color-primary-dark) 100%);
+}
+
+.listing-grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+@media (min-width: 640px) {
+  .listing-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .listing-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-border) 0%,
+    #f5efe8 50%,
+    var(--color-border) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.card-hover {
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.card-hover:hover {
+  box-shadow: 0 12px 40px rgb(44 24 16 / 0.12);
+  transform: translateY(-2px);
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  z-index: 100;
+  padding: 0.5rem 1rem;
+  background: var(--color-primary);
+  color: white;
+  border-radius: 0.25rem;
+}
+
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
 }

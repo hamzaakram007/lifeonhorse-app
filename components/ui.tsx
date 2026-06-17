@@ -16,10 +16,13 @@ export function EmptyState({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="empty-state card p-8">
-      <h3 className="text-lg font-semibold text-[var(--color-text)]">{title}</h3>
-      {description && <p className="mt-2">{description}</p>}
-      {action && <div className="mt-4">{action}</div>}
+    <div className="empty-state card p-10">
+      <div className="mx-auto mb-4 text-5xl opacity-60" aria-hidden>
+        🐴
+      </div>
+      <h3 className="font-serif text-xl font-semibold text-[var(--color-text)]">{title}</h3>
+      {description && <p className="mt-2 max-w-md mx-auto">{description}</p>}
+      {action && <div className="mt-6">{action}</div>}
     </div>
   );
 }
@@ -54,36 +57,5 @@ export function PhotoGallery({ photos }: { photos: string[] }) {
   );
 }
 
-export function ListingCard({
-  href,
-  title,
-  subtitle,
-  image,
-  badges,
-  meta,
-}: {
-  href: string;
-  title: string;
-  subtitle?: string;
-  image?: string | null;
-  badges?: React.ReactNode;
-  meta?: string;
-}) {
-  return (
-    <a href={href} className="card block no-underline transition hover:shadow-md">
-      <div className="aspect-[4/3] bg-[var(--color-bg)]">
-        {image ? (
-          <img src={image} alt={title} className="h-full w-full object-cover" />
-        ) : (
-          <div className="flex h-full items-center justify-center text-[var(--color-muted)]">🐴</div>
-        )}
-      </div>
-      <div className="p-4">
-        <div className="flex flex-wrap gap-2">{badges}</div>
-        <h3 className="mt-1 font-semibold text-[var(--color-text)]">{title}</h3>
-        {subtitle && <p className="text-sm text-[var(--color-muted)]">{subtitle}</p>}
-        {meta && <p className="mt-2 text-sm font-medium">{meta}</p>}
-      </div>
-    </a>
-  );
-}
+export { ListingCard } from "@/components/ui/ListingCard";
+export { ListingGallery } from "@/components/ui/ListingGallery";

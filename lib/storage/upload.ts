@@ -5,12 +5,15 @@ export const STORAGE_BUCKETS = {
   clubs: "club-assets",
   avatars: "avatars",
   gallery: "gallery",
+  uploads: "uploads",
 } as const;
 
 export type StorageBucket = (typeof STORAGE_BUCKETS)[keyof typeof STORAGE_BUCKETS];
 
 const ALLOWED_EXTENSIONS = new Set(["jpg", "jpeg", "png", "webp", "gif"]);
+const ALLOWED_VIDEO_EXTENSIONS = new Set(["mp4", "webm", "mov"]);
 const MAX_BYTES = 5 * 1024 * 1024;
+const MAX_VIDEO_BYTES = 50 * 1024 * 1024;
 
 function sanitizeExt(filename: string): string {
   const ext = filename.split(".").pop()?.toLowerCase() ?? "jpg";
@@ -79,4 +82,46 @@ export function firstPhoto(value: unknown, fallback?: string): string | null {
   const photos = parsePhotoList(value);
   if (photos.length > 0) return photos[0];
   return fallback ?? null;
+}
+
+export function validateVideoFile(file: File): string | null {
+  if (!file.type.startsWith("video/")) return "Please choose a video file (MP4, WebM, or MOV).";
+  const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
+  if (!ALLOWED_VIDEO_EXTENSIONS.has(ext)) return "Supported formats: MP4, WebM, MOV.";
+  if (file.size > MAX_VIDEO_BYTES) return "Video must be under 50 MB.";
+  return null;
+}
+
+function sanitizeVideoExt(filename: string): string {
+  const ext = filename.split(".").pop()?.toLowerCase() ?? "mp4";
+  return ALLOWED_VIDEO_EXTENSIONS.has(ext) ? ext : "mp4";
+}
+
+export async function uploadVideo(
+  file: File,
+  bucket: StorageBucket = STORAGE_BUCKETS.uploads,
+  folder?: string
+): Promise<{ url: string | null; error: string | null }> {
+  const validationError = validateVideoFile(file);
+  if (validationError) return { url: null, error: validationError };
+
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { url: null, error: "Sign in to upload videos." };
+
+  const ext = sanitizeVideoExt(file.name);
+  const path = `${folder ?? user.id}/videos/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+
+  const { error } = await supabase.storage.from(bucket).upload(path, file, {
+    cacheControl: "3600",
+    upsert: false,
+    contentType: file.type || `video/${ext === "mov" ? "quicktime" : ext}`,
+  });
+
+  if (error) return { url: null, error: error.message };
+
+  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+  return { url: data.publicUrl, error: null };
 }

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Input, Textarea, Label, Select } from "@/components/ui/Input";
 import { CountrySelect } from "@/components/ui/CountrySelect";
 import { ImageUpload } from "@/components/ui/ImageUpload";
+import { MediaUpload } from "@/components/ui/MediaUpload";
 import { MarketplaceNav } from "@/components/marketplace/MarketplaceNav";
 import { PRODUCT_CATEGORIES } from "@/lib/constants";
 import { STORAGE_BUCKETS } from "@/lib/storage/upload";
@@ -17,6 +18,7 @@ export default function NewProductPage() {
   const [error, setError] = useState("");
   const [sellerId, setSellerId] = useState<string | null>(null);
   const [photos, setPhotos] = useState<string[]>([]);
+  const [videoUrl, setVideoUrl] = useState("");
   const [form, setForm] = useState({
     title: "",
     category: "other",
@@ -68,7 +70,10 @@ export default function NewProductPage() {
         price: form.price ? parseFloat(form.price) : null,
         currency: form.currency,
         country_code: form.country,
-        description: form.city ? `${form.description}\n\nCity: ${form.city}`.trim() : form.description || null,
+        description: [
+          form.city ? `${form.description}\n\nCity: ${form.city}`.trim() : form.description,
+          videoUrl && `Product video: ${videoUrl}`,
+        ].filter(Boolean).join("\n\n") || null,
         photos,
         status: "published",
       })
@@ -94,7 +99,15 @@ export default function NewProductPage() {
           <Label required>Title</Label>
           <Input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
         </div>
-        <ImageUpload bucket={STORAGE_BUCKETS.gallery} label="Product photos" multiple maxFiles={8} value={photos} onChange={setPhotos} />
+        <MediaUpload
+          imageBucket={STORAGE_BUCKETS.gallery}
+          photos={photos}
+          onPhotosChange={setPhotos}
+          videoUrl={videoUrl}
+          onVideoChange={setVideoUrl}
+          maxImages={10}
+          imageLabel="Product photos"
+        />
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <Label>Category</Label>

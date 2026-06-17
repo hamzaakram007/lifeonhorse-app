@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/Button";
 import { Input, Textarea, Label, Select } from "@/components/ui/Input";
 import { CountrySelect } from "@/components/ui/CountrySelect";
 import { ImageUpload } from "@/components/ui/ImageUpload";
+import { MediaUpload } from "@/components/ui/MediaUpload";
 import { CLUB_TYPES } from "@/lib/constants";
 import { STORAGE_BUCKETS } from "@/lib/storage/upload";
-import { slugify } from "@/lib/utils";
 
 export default function RegisterClubPage() {
   const router = useRouter();
@@ -17,19 +17,17 @@ export default function RegisterClubPage() {
   const [error, setError] = useState("");
   const [logoUrl, setLogoUrl] = useState<string[]>([]);
   const [photos, setPhotos] = useState<string[]>([]);
+  const [videoUrl, setVideoUrl] = useState("");
   const [form, setForm] = useState({
     name: "",
     description: "",
     club_type: "general",
-    country: "PK",
+    country_code: "PK",
     city: "",
     address: "",
-    contact_email: "",
-    contact_phone: "",
+    email: "",
+    phone: "",
     website: "",
-    services: "",
-    membership_available: false,
-    training_available: false,
   });
 
   async function handleSubmit(e: React.FormEvent) {
@@ -41,38 +39,35 @@ export default function RegisterClubPage() {
     }
     setLoading(true);
     const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       router.push("/auth/login?redirect=/clubs/register");
       return;
     }
 
-    const slug = slugify(form.name) + "-" + Date.now().toString(36);
+    const description = [
+      form.description,
+      videoUrl && `Club video: ${videoUrl}`,
+    ].filter(Boolean).join("\n\n");
+
     const { data, error: insertError } = await supabase
       .from("clubs")
       .insert({
         owner_id: user.id,
         name: form.name.trim(),
-        slug,
-        description: form.description || null,
+        description: description || null,
         club_type: form.club_type,
-        country: form.country,
+        country_code: form.country_code,
         city: form.city || null,
         address: form.address || null,
-        contact_email: form.contact_email || null,
-        contact_phone: form.contact_phone || null,
+        email: form.email || null,
+        phone: form.phone || null,
         website: form.website || null,
-        services: form.services || null,
-        membership_available: form.membership_available,
-        training_available: form.training_available,
         logo_url: logoUrl[0] ?? null,
         photos,
         status: "published",
-        published_at: new Date().toISOString(),
       })
-      .select("slug")
+      .select("id")
       .single();
 
     if (insertError) {
@@ -83,36 +78,35 @@ export default function RegisterClubPage() {
 
     if (data) {
       await supabase.from("profiles").update({ role: "club_owner" }).eq("id", user.id);
-      router.push(`/clubs/${data.slug}`);
+      router.push(`/clubs/${data.id}`);
     }
     setLoading(false);
   }
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
-      <h1 className="text-2xl font-bold">Register your horse club</h1>
-      <p className="text-sm text-amber-800">Clubs go live immediately — add a logo and photos for credibility.</p>
+      <h1 className="font-serif text-2xl font-bold">Register your horse club</h1>
+      <p className="text-sm text-stone-600">Clubs go live immediately — add a logo, photos, and optional video.</p>
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <div>
           <Label required>Club name</Label>
           <Input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
         </div>
         <ImageUpload bucket={STORAGE_BUCKETS.clubs} label="Club logo" value={logoUrl} onChange={setLogoUrl} />
-        <ImageUpload
-          bucket={STORAGE_BUCKETS.clubs}
-          label="Club photos"
-          multiple
-          maxFiles={6}
-          value={photos}
-          onChange={setPhotos}
+        <MediaUpload
+          imageBucket={STORAGE_BUCKETS.clubs}
+          photos={photos}
+          onPhotosChange={setPhotos}
+          videoUrl={videoUrl}
+          onVideoChange={setVideoUrl}
+          maxImages={8}
+          imageLabel="Club photos"
         />
         <div>
           <Label required>Club type</Label>
           <Select value={form.club_type} onChange={(e) => setForm({ ...form, club_type: e.target.value })}>
             {CLUB_TYPES.map((t) => (
-              <option key={t.value} value={t.value}>
-                {t.label}
-              </option>
+              <option key={t.value} value={t.value}>{t.label}</option>
             ))}
           </Select>
         </div>
@@ -123,7 +117,7 @@ export default function RegisterClubPage() {
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <Label required>Country</Label>
-            <CountrySelect required value={form.country} onChange={(country) => setForm({ ...form, country })} />
+            <CountrySelect required value={form.country_code} onChange={(c) => setForm({ ...form, country_code: c })} />
           </div>
           <div>
             <Label>City</Label>
@@ -134,30 +128,22 @@ export default function RegisterClubPage() {
           <Label>Address</Label>
           <Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
         </div>
-        <div>
-          <Label>Contact email</Label>
-          <Input type="email" value={form.contact_email} onChange={(e) => setForm({ ...form, contact_email: e.target.value })} />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <Label>Email</Label>
+            <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+          </div>
+          <div>
+            <Label>Phone</Label>
+            <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+          </div>
         </div>
         <div>
-          <Label>Contact phone</Label>
-          <Input value={form.contact_phone} onChange={(e) => setForm({ ...form, contact_phone: e.target.value })} />
+          <Label>Website</Label>
+          <Input value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} />
         </div>
-        <div>
-          <Label>Services offered</Label>
-          <Textarea value={form.services} onChange={(e) => setForm({ ...form, services: e.target.value })} />
-        </div>
-        <label className="flex items-center gap-2">
-          <input type="checkbox" checked={form.membership_available} onChange={(e) => setForm({ ...form, membership_available: e.target.checked })} />{" "}
-          Membership available
-        </label>
-        <label className="flex items-center gap-2">
-          <input type="checkbox" checked={form.training_available} onChange={(e) => setForm({ ...form, training_available: e.target.checked })} />{" "}
-          Training available
-        </label>
         {error && <p className="text-sm text-red-600">{error}</p>}
-        <Button type="submit" disabled={loading}>
-          {loading ? "Publishing…" : "Publish club"}
-        </Button>
+        <Button type="submit" disabled={loading}>{loading ? "Publishing…" : "Publish club"}</Button>
       </form>
     </div>
   );

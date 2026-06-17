@@ -59,16 +59,38 @@ Project ref: `ebgzqmnewtdippegphou`
 
 ## Scripts
 
-- `scripts/seed-demo.sql` — seed countries and demo content templates
-- `scripts/cleanup-demo.sql` — remove demo data before production
+- `npm run seed:all` — create 10 demo users + professional content (see `docs/DEMO_DATA.md`)
+- `npm run seed:cleanup` — remove all demo data
 - `docs/STAGING_CHECKLIST.md` — pre-launch smoke tests
 
 ## Deploy (Vercel)
 
-1. Push repo to GitHub and import in Vercel.
-2. Set environment variables from `.env.example`.
-3. `vercel.json` includes security headers.
-4. Health check: `GET /api/health`
+1. Push repo to GitHub and import in [Vercel](https://vercel.com).
+2. Set environment variables for **Production** and **Preview**:
+
+| Variable | Value |
+|----------|-------|
+| `NEXT_PUBLIC_SUPABASE_URL` | `https://ebgzqmnewtdippegphou.supabase.co` |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | From Supabase dashboard |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server-only service role JWT |
+| `NEXT_PUBLIC_APP_URL` | `https://your-app.vercel.app` |
+| `NEXT_PUBLIC_APP_ENV` | `production` |
+
+3. In Supabase → Authentication → URL configuration:
+   - **Site URL:** your Vercel production URL
+   - **Redirect URLs:** `https://*.vercel.app/auth/callback` and `https://your-app.vercel.app/auth/callback`
+
+4. Run `npm run seed:all` against staging Supabase for demo accounts.
+5. Health check: `GET /api/health`
+6. `vercel.json` includes security headers.
+
+### Custom domain (when ready)
+
+1. Add your domain in Vercel → Project Settings → Domains.
+2. Point DNS (CNAME) to Vercel as instructed.
+3. Update `NEXT_PUBLIC_APP_URL` to your custom domain and redeploy.
+4. Update Supabase Site URL and redirect URLs to match.
+5. Sitemap and Open Graph URLs update automatically via `metadataBase`.
 
 ## Features (5-phase roadmap)
 

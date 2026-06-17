@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { PhotoGallery, FeaturedBadge } from "@/components/ui";
+import { ListingGallery, FeaturedBadge } from "@/components/ui";
 import { getCountryName } from "@/lib/countries";
 import { InquiryForm } from "@/components/InquiryForm";
 import { FavoriteButton } from "@/components/FavoriteButton";
@@ -26,7 +25,7 @@ export default async function HorseDetailPage({ params }: { params: Promise<{ id
         {horse.is_featured && <FeaturedBadge />}
         <h1 className="text-3xl font-bold">{horse.title}</h1>
         <p className="text-[var(--color-muted)]">{[horse.city, getCountryName(horse.country_code)].filter(Boolean).join(", ")}</p>
-        <PhotoGallery photos={Array.isArray(horse.photos) ? horse.photos : []} />
+        <ListingGallery photos={horse.photos} videoUrl={horse.video_url} alt={horse.title} />
         <p>{horse.description}</p>
         <dl className="grid grid-cols-2 gap-3 text-sm">
           <div><dt className="font-semibold">Breed</dt><dd>{horse.breed ?? "—"}</dd></div>

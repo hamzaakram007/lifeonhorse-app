@@ -1,88 +1,69 @@
-# LifeOnHorse Demo Data
+# Demo Data — LifeOnHorse
 
-Professional staging dataset for LifeOnHorse. **Do not use in production without cleanup.**
+Professional multi-persona staging data for LifeOnHorse. Run against your Supabase project with service role credentials in `.env.local`.
 
 ## Quick start
 
-1. Set `SUPABASE_SERVICE_ROLE_KEY` (JWT from Supabase → Settings → API) in `.env.local`.
-2. From `lifeonhorse-app/`:
-
 ```bash
-npm run seed
+npm run seed:all
 ```
 
-3. Log in with any demo account (password below) or your real admin account.
+This creates 10 demo auth users, then seeds horses, clubs, trainers, products, services, events, blog posts, courses, community posts, and experts — each owned by the appropriate persona.
 
 ## Demo accounts
 
-All demo users use password: **`DemoLifeOnHorse2026!`**
+**Password for all accounts:** `DemoLifeOnHorse2026!`
 
-| Email | Role |
-|-------|------|
-| admin@demo.lifeonhorse.com | Admin |
-| breeder@demo.lifeonhorse.com | Seller / breeder |
-| tack@demo.lifeonhorse.com | Tack shop |
-| polo@demo.lifeonhorse.com | Polo club owner |
-| trainer@demo.lifeonhorse.com | Trainer |
-| community@demo.lifeonhorse.com | Member |
+| Email | Role | Persona |
+|-------|------|---------|
+| admin@demo.lifeonhorse.com | admin | Demo Admin (Lahore, PK) |
+| breeder@demo.lifeonhorse.com | seller | Aisha Khan — breeder |
+| tack@demo.lifeonhorse.com | seller | Lahore Premier Tack |
+| feed@demo.lifeonhorse.com | seller | Equine Nutrition Co (Jaipur) |
+| transport@demo.lifeonhorse.com | seller | Global Horse Transport (Dubai) |
+| polo@demo.lifeonhorse.com | club_owner | Royal Polo Club (Buenos Aires) |
+| tentpegging@demo.lifeonhorse.com | club_owner | Frontier Tent Pegging (Multan) |
+| trainer@demo.lifeonhorse.com | trainer | Sarah Mitchell (Newmarket) |
+| vet@demo.lifeonhorse.com | member | Dr. James Whitfield |
+| community@demo.lifeonhorse.com | member | Emma Rodriguez (Kentucky) |
 
-Full list: `scripts/demo-constants.mjs`
+## Scripts
 
-## What gets seeded
+| Command | Description |
+|---------|-------------|
+| `npm run seed:users` | Create demo auth users + profiles only |
+| `npm run seed` | Seed content (requires users to exist) |
+| `npm run seed:all` | Users then content |
+| `npm run seed:cleanup` | Remove all demo data and users |
 
-| Section | Count |
-|---------|-------|
-| Countries | 20 global markets |
-| Demo users | 13 personas |
-| Horses | 8 listings |
-| Sellers | 5 profiles |
-| Products | 8 |
-| Services | 6 |
-| Clubs | 6 |
-| Trainers | 6 |
-| Experts | 6 |
-| Health requests | 5 |
-| Events | 6 |
-| Courses | 4 (with lessons) |
-| Blog posts | 8 SEO articles |
-| Community | 4 stories + 6 gallery posts |
-| Reviews | 3 |
-| Billing demo | orders, subscriptions, commissions, featured requests |
+## Content seeded
 
-## Demo markers (for safe cleanup)
+- 15 horses across breeders (PK, UK, US, UAE, AR, DE, etc.)
+- 6 clubs (polo, tent pegging, riding school, rescue, sports)
+- 6 trainers with specialties and verified badges
+- 8 products, 6 services distributed across sellers
+- 6 events (polo cup, tent pegging championship, clinic, auction)
+- 8 blog posts with editorial-quality content
+- 6 courses (beginner to advanced, free + paid)
+- 8 community posts
+- 6 experts (vet, farrier, nutritionist, etc.)
+- 3 health requests
 
-- Emails: `*@demo.lifeonhorse.com`
-- Text prefix: `[DEMO]`
-- Profile notes: `admin_notes = 'demo'`
-- Fixed UUID prefixes: `d1111111`, `d2222222`, `d3333333`, etc.
+All content uses fixed UUIDs from `scripts/demo-constants.mjs` for idempotent re-runs.
 
-## Images
+## Environment
 
-Remote Unsplash URLs are used for staging only. **Replace with owned or licensed assets before launch.**
+Required in `.env.local`:
 
-## Cleanup (required before production)
+```
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
+
+## Cleanup
 
 ```bash
 npm run seed:cleanup
 ```
 
-Or run `scripts/cleanup-demo.sql` in the Supabase SQL Editor.
-
-Cleanup removes demo users and fixed demo entity IDs only. Real user content is not deleted.
-
-## SQL-only fallback
-
-`scripts/seed-demo.sql` seeds countries. Full content needs auth users — use the JS seed (`npm run seed`).
-
-## Re-seeding
-
-The JS seed is idempotent (fixed UUIDs + upsert). Safe to run multiple times on staging.
-
-## Verification checklist
-
-- [ ] Homepage shows horses, clubs, events with images
-- [ ] Marketplace sections non-empty (horses, products, services, sellers)
-- [ ] Health, experts, courses, blog, community populated
-- [ ] Admin analytics / billing show activity
-- [ ] `npm run build` passes
-- [ ] `npm run seed:cleanup` removes demo content
+Removes all demo content and auth users defined in `demo-constants.mjs`.

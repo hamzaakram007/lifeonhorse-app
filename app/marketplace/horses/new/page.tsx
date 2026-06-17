@@ -1,29 +1,32 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { COUNTRIES } from "@/lib/countries";
+import { Button } from "@/components/ui/Button";
+import { Input, Textarea, Label, Select } from "@/components/ui/Input";
+import { CountrySelect } from "@/components/ui/CountrySelect";
+import { MediaUpload } from "@/components/ui/MediaUpload";
+import { STORAGE_BUCKETS } from "@/lib/storage/upload";
 
-export default function CreatePage() {
+export default function NewHorsePage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [photos, setPhotos] = useState<string[]>([]);
-  const [form, setForm] = useState<Record<string, string>>({"title":"","description":"","breed":"","city":"","country_code":"PK","price":"","currency":"USD","listing_type":"sale"});
-
-  async function handlePhotos(files: FileList | null) {
-    if (!files?.length) return;
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { window.location.href = "/auth/login"; return; }
-    const urls: string[] = [];
-    for (const file of Array.from(files)) {
-      const path = `${user.id}/horses/${Date.now()}-${file.name}`;
-      await supabase.storage.from("uploads").upload(path, file);
-      const { data: { publicUrl } } = supabase.storage.from("uploads").getPublicUrl(path);
-      urls.push(publicUrl);
-    }
-    setPhotos((p) => [...p, ...urls]);
-  }
+  const [videoUrl, setVideoUrl] = useState("");
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    breed: "",
+    city: "",
+    country_code: "PK",
+    price: "",
+    currency: "USD",
+    listing_type: "sale",
+    gender: "",
+    age: "",
+  });
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -31,26 +34,98 @@ export default function CreatePage() {
     setError("");
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { window.location.href = "/auth/login"; return; }
-    const payload = { ...form, owner_id: user.id, photos: photos };
-    const { error: err } = await supabase.from("horses").insert(payload);
-    if (err) { setError(err.message); setLoading(false); return; }
-    window.location.href = "/marketplace/horses";
+    if (!user) {
+      router.push("/auth/login?redirect=/marketplace/horses/new");
+      return;
+    }
+    const { data, error: err } = await supabase.from("horses").insert({
+      owner_id: user.id,
+      title: form.title.trim(),
+      description: form.description || null,
+      breed: form.breed || null,
+      city: form.city || null,
+      country_code: form.country_code,
+      price: form.price ? parseFloat(form.price) : null,
+      currency: form.currency,
+      listing_type: form.listing_type,
+      gender: form.gender || null,
+      age: form.age ? parseInt(form.age, 10) : null,
+      photos,
+      video_url: videoUrl || null,
+      status: "published",
+    }).select("id").single();
+    if (err) {
+      setError(err.message);
+      setLoading(false);
+      return;
+    }
+    router.push(`/marketplace/horses/${data.id}`);
   }
 
   return (
-    <form onSubmit={submit} className="mx-auto max-w-xl space-y-4">
-      <h1 className="text-2xl font-bold">List a horse</h1>
-      {error && <p className="text-sm text-[var(--color-danger)]">{error}</p>}
-      <div><label className="label">Title</label><input className="input"  required={true} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
-      <div><label className="label">Description</label><textarea className="input min-h-24" required={true} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
-      <div><label className="label">Breed</label><input className="input"  required={false} value={form.breed} onChange={(e) => setForm({ ...form, breed: e.target.value })} /></div>
-      <div><label className="label">City</label><input className="input"  required={false} value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
-      <div><label className="label">Country</label><select className="input" value={form.country_code} onChange={(e) => setForm({ ...form, country_code: e.target.value })}><option value="PK">Pakistan</option><option value="US">US</option><option value="GB">UK</option></select></div>
-      <div><label className="label">Price</label><input className="input" type="number" required={false} value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} /></div>
-      <div><label className="label">Type</label><select className="input" value={form.listing_type} onChange={(e) => setForm({ ...form, listing_type: e.target.value })}><option value="sale">Sale</option><option value="adoption">Adoption</option><option value="stud">Stud</option></select></div>
-      <div><label className="label">Photos</label><input type="file" accept="image/*" multiple onChange={(e) => handlePhotos(e.target.files)} />{photos.length > 0 && <p className="text-sm">{photos.length} photo(s) uploaded</p>}</div>
-      <button type="submit" className="btn btn-primary" disabled={loading}>{loading ? "Saving..." : "Publish"}</button>
-    </form>
+    <div className="mx-auto max-w-2xl px-4 py-8">
+      <h1 className="font-serif text-2xl font-bold">List a horse</h1>
+      <p className="text-sm text-stone-600">Add multiple photos and an optional video — publishes immediately.</p>
+      <form onSubmit={submit} className="mt-6 space-y-4">
+        {error && <p className="text-sm text-red-600">{error}</p>}
+        <div>
+          <Label required>Title</Label>
+          <Input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+        </div>
+        <MediaUpload
+          imageBucket={STORAGE_BUCKETS.horses}
+          photos={photos}
+          onPhotosChange={setPhotos}
+          videoUrl={videoUrl}
+          onVideoChange={setVideoUrl}
+          maxImages={12}
+          imageLabel="Horse photos"
+        />
+        <div>
+          <Label required>Description</Label>
+          <Textarea rows={4} required value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <Label>Breed</Label>
+            <Input value={form.breed} onChange={(e) => setForm({ ...form, breed: e.target.value })} />
+          </div>
+          <div>
+            <Label>Listing type</Label>
+            <Select value={form.listing_type} onChange={(e) => setForm({ ...form, listing_type: e.target.value })}>
+              <option value="sale">Sale</option>
+              <option value="adoption">Adoption</option>
+              <option value="stud">Stud</option>
+              <option value="lease">Lease</option>
+            </Select>
+          </div>
+          <div>
+            <Label>Gender</Label>
+            <Input value={form.gender} onChange={(e) => setForm({ ...form, gender: e.target.value })} placeholder="Mare, Gelding, Stallion" />
+          </div>
+          <div>
+            <Label>Age</Label>
+            <Input type="number" min={0} value={form.age} onChange={(e) => setForm({ ...form, age: e.target.value })} />
+          </div>
+          <div>
+            <Label required>Country</Label>
+            <CountrySelect required value={form.country_code} onChange={(c) => setForm({ ...form, country_code: c })} />
+          </div>
+          <div>
+            <Label>City</Label>
+            <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
+          </div>
+          <div>
+            <Label>Price</Label>
+            <Input type="number" min={0} step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
+          </div>
+          <div>
+            <Label>Currency</Label>
+            <Input value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })} />
+          </div>
+        </div>
+        <Button type="submit" disabled={loading}>{loading ? "Publishing…" : "Publish listing"}</Button>
+      </form>
+    </div>
   );
 }
