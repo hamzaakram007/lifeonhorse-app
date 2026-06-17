@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { ListingCard, EmptyState, VerifiedBadge, FeaturedBadge } from "@/components/ui";
+import { ListingCard, EmptyState, FeaturedBadge } from "@/components/ui";
 import { SectionHero } from "@/components/layout/SectionHero";
 import { formatLocation } from "@/lib/location";
 import { SECTION_IMAGES } from "@/lib/section-images";
@@ -15,7 +15,7 @@ export default async function Page() {
   const supabase = await createClient();
   const { data } = await supabase
     .from("events")
-    .select("id, title, event_type, country_code, city, photos, is_verified, is_featured")
+    .select("id, title, event_type, country_code, city, photos, is_featured")
     .eq("status", "published")
     .order("is_featured", { ascending: false })
     .limit(24);
@@ -44,12 +44,7 @@ export default async function Page() {
               subtitle={item.event_type ?? undefined}
               image={Array.isArray(item.photos) ? item.photos[0] : null}
               photoCount={Array.isArray(item.photos) ? item.photos.length : undefined}
-              badges={
-                <>
-                  {item.is_verified ? <VerifiedBadge /> : null}
-                  {item.is_featured ? <FeaturedBadge /> : null}
-                </>
-              }
+              badges={<>{item.is_featured ? <FeaturedBadge /> : null}</>}
               meta={formatLocation(item.city, item.country_code)}
             />
           ))}

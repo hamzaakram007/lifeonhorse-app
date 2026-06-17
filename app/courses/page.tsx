@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { ListingCard, EmptyState, VerifiedBadge, FeaturedBadge } from "@/components/ui";
+import { ListingCard, EmptyState, FeaturedBadge } from "@/components/ui";
 import { SectionHero } from "@/components/layout/SectionHero";
-import { formatLocation } from "@/lib/location";
 import { SECTION_IMAGES } from "@/lib/section-images";
 
 export const metadata: Metadata = {
@@ -15,7 +14,7 @@ export default async function Page() {
   const supabase = await createClient();
   const { data } = await supabase
     .from("courses")
-    .select("id, title, category, country_code, city, cover_image, is_verified, is_featured")
+    .select("id, title, category, cover_image, is_featured")
     .eq("status", "published")
     .order("is_featured", { ascending: false })
     .limit(24);
@@ -43,13 +42,7 @@ export default async function Page() {
               title={item.title}
               subtitle={item.category ?? undefined}
               image={item.cover_image}
-              badges={
-                <>
-                  {item.is_verified ? <VerifiedBadge /> : null}
-                  {item.is_featured ? <FeaturedBadge /> : null}
-                </>
-              }
-              meta={formatLocation(item.city, item.country_code)}
+              badges={<>{item.is_featured ? <FeaturedBadge /> : null}</>}
             />
           ))}
         </div>
