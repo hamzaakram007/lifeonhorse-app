@@ -50,6 +50,12 @@ Project ref: `ebgzqmnewtdippegphou`
 
    Or paste each file into the [SQL Editor](https://supabase.com/dashboard/project/ebgzqmnewtdippegphou/sql/new).
 
+   **Important:** Run `006_public_grants.sql` so anonymous visitors can read published listings:
+   ```sql
+   GRANT USAGE ON SCHEMA public TO anon, authenticated;
+   GRANT SELECT ON ALL TABLES IN SCHEMA public TO anon, authenticated;
+   ```
+
 3. Enable Email auth under Authentication → Providers.
 4. Storage bucket `uploads` is created by migration 001.
 5. Create your first admin:
