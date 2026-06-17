@@ -1,0 +1,33 @@
+---
+description: LifeOnHorse rebuild context — read before any work on this project
+alwaysApply: true
+---
+
+# LifeOnHorse Rebuild Context
+
+This is a **rebuild** of a deleted Next.js app. Read `REBUILD.md` at the project root before making changes.
+
+## Critical facts
+
+- Original app at `Downloads\LifeOnHorse_FULL_LAUNCH\lifeonhorse-app` was permanently deleted during disk cleanup on 2026-06-17.
+- Live Supabase project: `ebgzqmnewtdippegphou` (schema may partially exist remotely).
+- Recovery sources: `REBUILD.md`, `docs/lifeonhorse_ecosystem_plan.md`, Cursor transcripts at `~/.cursor/projects/c-Users-MULTILAPTOP-Downloads-LifeOnHorse-FULL-LAUNCH/agent-transcripts/`.
+- Build transcript with full SQL and route details: `...\subagents\bd728bf6-754d-4f1b-a5bc-02e0afe7901c.jsonl`.
+
+## Stack to use
+
+Next.js 16, React 19, TypeScript, Tailwind CSS 4, `@supabase/ssr`, Zod.
+
+## Rebuild priorities
+
+1. Inspect remote Supabase schema before applying migrations.
+2. Recreate auth + profiles + `handle_new_user` trigger (must use `public.profiles`, `SET search_path = ''`).
+3. Rebuild marketplace, clubs, trainers, admin in that order.
+4. Never delete `node_modules`, `.next`, or project source during cleanup.
+5. After first working build, push to GitHub immediately.
+
+## Do not
+
+- Assume this is a new product idea — follow the existing plan and transcript.
+- Put secrets in committed files.
+- Use `user_metadata` for authorization (use `profiles.role`).

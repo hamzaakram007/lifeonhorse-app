@@ -1,0 +1,8 @@
+# Supabase local dev config (optional — use with `supabase start`)
+project_id = "lifeonhorse"
+
+[api]
+enabled = true
+
+[db]
+major_version = 15
