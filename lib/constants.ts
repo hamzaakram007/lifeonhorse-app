@@ -191,8 +191,8 @@ export const HEALTH_PROBLEM_TYPES = [
   { value: "other", label: "Other" },
 ] as const;
 
+/** Aligns with health_requests.urgency default (`normal`) on 001 schema. */
 export const URGENCY_LEVELS = [
-  { value: "routine", label: "Routine — not urgent" },
-  { value: "soon", label: "Needs attention soon" },
-  { value: "urgent", label: "Urgent — contact vet if emergency" },
+  { value: "normal", label: "Normal" },
+  { value: "urgent", label: "Urgent (non-emergency)" },
 ] as const;
