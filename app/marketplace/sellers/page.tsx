@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { ListingCard, EmptyState, VerifiedBadge, FeaturedBadge } from "@/components/ui";
+import { SectionHero } from "@/components/layout/SectionHero";
 import { getCountryName } from "@/lib/countries";
+import { SECTION_IMAGES } from "@/lib/section-images";
 
 export const metadata: Metadata = {
   title: "Seller Directory",
@@ -15,13 +17,12 @@ export default async function Page() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-bold">Seller Directory</h1>
-          <p className="text-[var(--color-muted)]">Find trusted sellers in your region</p>
-        </div>
-        <Link href="/dashboard/seller" className="btn btn-primary">+ Create</Link>
-      </div>
+      <SectionHero
+        title="Seller Directory"
+        subtitle="Find trusted sellers in your region"
+        image={SECTION_IMAGES.sellers}
+        action={{ href: "/dashboard/seller", label: "Create seller profile" }}
+      />
       {!data?.length ? (
         <EmptyState title="No listings yet" description="Be the first to add one." action={<Link href="/dashboard/seller" className="btn btn-primary">Create</Link>} />
       ) : (

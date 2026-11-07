@@ -1,4 +1,5 @@
 import { firstPhoto, parsePhotoList } from "@/lib/storage/upload";
+import { SITE_IMAGES } from "@/lib/section-images";
 import { cn } from "@/lib/utils";
 
 type PhotoCoverProps = {
@@ -6,25 +7,20 @@ type PhotoCoverProps = {
   imageUrl?: string | null;
   alt?: string;
   className?: string;
+  /** @deprecated Prefer photographic fallback; ignored when a photo or default image is available. */
   fallback?: React.ReactNode;
 };
 
-export function PhotoCover({ photos, imageUrl, alt = "", className, fallback }: PhotoCoverProps) {
-  const src = imageUrl ?? firstPhoto(photos);
-  if (src) {
-    return (
-      <div
-        className={cn("bg-cover bg-center bg-stone-100", className)}
-        style={{ backgroundImage: `url("${src}")` }}
-        role="img"
-        aria-label={alt}
-      />
-    );
-  }
+export function PhotoCover({ photos, imageUrl, alt = "", className }: PhotoCoverProps) {
+  const src = imageUrl ?? firstPhoto(photos) ?? SITE_IMAGES.fallbackEmpty;
+
   return (
-    <div className={cn("flex items-center justify-center bg-amber-50 text-5xl text-stone-400", className)}>
-      {fallback ?? "🐴"}
-    </div>
+    <div
+      className={cn("bg-cover bg-center bg-stone-100", className)}
+      style={{ backgroundImage: `url("${src}")` }}
+      role="img"
+      aria-label={alt}
+    />
   );
 }
 

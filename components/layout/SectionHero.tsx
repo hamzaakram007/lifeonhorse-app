@@ -15,7 +15,7 @@ export function SectionHero({ title, subtitle, image, action, children }: Sectio
       style={
         image
           ? {
-              backgroundImage: `linear-gradient(135deg, rgb(44 24 16 / 0.82), rgb(196 92 38 / 0.55)), url(${image})`,
+              backgroundImage: `linear-gradient(135deg, rgb(44 24 16 / 0.82), rgb(196 92 38 / 0.55)), url("${image}")`,
               backgroundSize: "cover",
               backgroundPosition: "center",
             }

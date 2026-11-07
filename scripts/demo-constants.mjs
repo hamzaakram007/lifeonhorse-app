@@ -1,4 +1,4 @@
-/** Fixed demo UUIDs and curated Unsplash image URLs for staging only. */
+/** Fixed demo UUIDs and owned local image paths for staging only. */
 
 export const DEMO_DOMAIN = "demo.lifeonhorse.com";
 export const DEMO_PASSWORD = "DemoLifeOnHorse2026!";
@@ -17,19 +17,19 @@ export const USERS = {
 };
 
 export const IMG = {
-  horse1: "https://images.unsplash.com/photo-1553284965-83fd3e82fa5f?w=1200&q=80",
-  horse2: "https://images.unsplash.com/photo-1509780119416-da3e42614916?w=1200&q=80",
-  horse3: "https://images.unsplash.com/photo-1534303073046-fe4d962fe047?w=1200&q=80",
-  horse4: "https://images.unsplash.com/photo-1568761982337-b269a64e8b44?w=1200&q=80",
-  horse5: "https://images.unsplash.com/photo-1596272879289-2a0c9f0a0b0e?w=1200&q=80",
-  polo: "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=1200&q=80",
-  stable: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=1200&q=80",
-  saddle: "https://images.unsplash.com/photo-1599059813005-11265ba93b20?w=1200&q=80",
-  grooming: "https://images.unsplash.com/photo-1516734212186-a967f81ad0d8?w=1200&q=80",
-  riding: "https://images.unsplash.com/photo-1594751704318-1be2b8b8b8b8?w=1200&q=80",
-  vet: "https://images.unsplash.com/photo-1628009368231-7bb7cfc4baf3?w=1200&q=80",
-  event: "https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=1200&q=80",
-  landscape: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=80",
+  horse1: "/images/demo/horse-1.jpg",
+  horse2: "/images/demo/horse-2.jpg",
+  horse3: "/images/demo/horse-3.jpg",
+  horse4: "/images/demo/horse-4.jpg",
+  horse5: "/images/demo/horse-5.jpg",
+  polo: "/images/demo/event-1.jpg",
+  stable: "/images/demo/club-1.jpg",
+  saddle: "/images/demo/product-1.jpg",
+  grooming: "/images/sections/services.jpg",
+  riding: "/images/demo/course-1.jpg",
+  vet: "/images/demo/expert-1.jpg",
+  event: "/images/demo/event-1.jpg",
+  landscape: "/images/sections/countries.jpg",
 };
 
 export const SELLERS = {

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SITE_IMAGES } from "@/lib/section-images";
 
 type BlogPost = {
   id: string;
@@ -11,22 +12,24 @@ const FALLBACK_POSTS = [
   {
     id: "1",
     title: "Essential Tips for First-Time Horse Buyers",
-    cover_image: "https://images.unsplash.com/photo-1551884831-bbf3cdc6469e?w=600&h=400&fit=crop&q=80",
+    cover_image: SITE_IMAGES.blog.buyers,
     excerpt: "What to check before you buy.",
   },
   {
     id: "2",
     title: "Training Techniques for Young Riders",
-    cover_image: "https://images.unsplash.com/photo-1503876466838-947ae2095810?w=600&h=400&fit=crop&q=80",
+    cover_image: SITE_IMAGES.blog.training,
     excerpt: "Building confidence in the saddle.",
   },
   {
     id: "3",
     title: "A Guide to Common Hoof Problems",
-    cover_image: "https://images.unsplash.com/photo-1509783230216-0b724a2771ec?w=600&h=400&fit=crop&q=80",
+    cover_image: SITE_IMAGES.blog.hoof,
     excerpt: "When to call a farrier or vet.",
   },
 ];
+
+const FALLBACK_COVER = SITE_IMAGES.home.hero;
 
 export function BlogSection({ posts }: { posts: BlogPost[] }) {
   const items = posts.length > 0 ? posts.slice(0, 3) : FALLBACK_POSTS;
@@ -49,7 +52,7 @@ export function BlogSection({ posts }: { posts: BlogPost[] }) {
             <div
               className="aspect-[3/2] overflow-hidden rounded-xl bg-stone-100 bg-cover bg-center transition group-hover:opacity-95"
               style={{
-                backgroundImage: `url("${post.cover_image ?? "https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?w=600&h=400&fit=crop"}")`,
+                backgroundImage: `url("${post.cover_image ?? FALLBACK_COVER}")`,
               }}
             />
             <h3 className="mt-4 font-serif text-lg font-bold text-stone-900 group-hover:text-[var(--color-primary)]">

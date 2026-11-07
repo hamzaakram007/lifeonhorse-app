@@ -1,6 +1,8 @@
+import Image from "next/image";
 import Link from "next/link";
 import { BRAND_NAME, NAV_LINKS } from "@/lib/constants";
 import { getCurrentProfile } from "@/lib/auth";
+import { SITE_IMAGES } from "@/lib/section-images";
 import { isAdminRole } from "@/lib/utils";
 
 export async function Header() {
@@ -9,9 +11,16 @@ export async function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-stone-200 bg-white/95 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="text-2xl">🐴</span>
-          <span className="text-xl font-bold text-amber-900">{BRAND_NAME}</span>
+        <Link href="/" className="flex items-center gap-2 no-underline">
+          <Image
+            src={SITE_IMAGES.brandMark}
+            alt=""
+            width={36}
+            height={36}
+            className="h-9 w-9 rounded-full object-cover"
+            priority
+          />
+          <span className="font-serif text-xl font-bold text-[var(--color-text)]">{BRAND_NAME}</span>
         </Link>
         <nav className="hidden items-center gap-5 md:flex">
           {NAV_LINKS.map((link) => (
