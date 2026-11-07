@@ -1,7 +1,4 @@
-/** Escape `%` / `_` so user input is treated literally in PostgREST `ilike`. */
-export function escapeIlike(value: string): string {
-  return value.replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_");
-}
+export { escapeIlike } from "@/lib/filters/escape-ilike";
 
 export type HorseSearchParams = {
   country?: string;
