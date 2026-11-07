@@ -16,7 +16,7 @@ export default async function Page() {
     .from("community_posts")
     .select("id, title, content, photos")
     .eq("status", "published")
-    .order("is_featured", { ascending: false })
+    .order("created_at", { ascending: false })
     .limit(24);
 
   return (

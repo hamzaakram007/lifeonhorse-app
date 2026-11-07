@@ -6,13 +6,21 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const profile = await requireAdmin();
   if (!profile) redirect("/auth/login?redirect=/admin");
 
+  // Events / Courses / Blog / Community admin pages are not shipped yet — omit until they exist.
   const links = [
     { href: "/admin", label: "Overview" },
     { href: "/admin/horses", label: "Horses" },
+    { href: "/admin/products", label: "Products" },
+    { href: "/admin/services", label: "Services" },
+    { href: "/admin/sellers", label: "Sellers" },
     { href: "/admin/clubs", label: "Clubs" },
     { href: "/admin/trainers", label: "Trainers" },
+    { href: "/admin/experts", label: "Experts" },
+    { href: "/admin/health", label: "Health requests" },
     { href: "/admin/reports", label: "Reports" },
     { href: "/admin/commissions", label: "Commissions" },
+    { href: "/admin/billing", label: "Billing" },
+    { href: "/admin/analytics", label: "Analytics" },
     { href: "/admin/users", label: "Users" },
   ];
 

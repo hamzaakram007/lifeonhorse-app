@@ -6,7 +6,7 @@ export default async function AdminProductsPage() {
   const supabase = await createClient();
   const { data: products } = await supabase
     .from("products")
-    .select("*, sellers(business_name)")
+    .select("*, seller_profiles(business_name)")
     .order("created_at", { ascending: false })
     .limit(50);
 
@@ -19,13 +19,14 @@ export default async function AdminProductsPage() {
             <div className="flex justify-between gap-2">
               <div>
                 <p className="font-medium">{p.title}</p>
-                <p className="text-sm text-stone-500">{p.sellers?.business_name} · {p.category} · {p.status}</p>
+                <p className="text-sm text-stone-500">
+                  {p.seller_profiles?.business_name} · {p.category} · {p.status}
+                </p>
                 <div className="mt-1 flex gap-1">
                   {p.is_featured && <Badge variant="featured">Featured</Badge>}
-                  {p.is_verified && <Badge variant="verified">Verified</Badge>}
                 </div>
               </div>
-              <AdminActions table="products" id={p.id} isFeatured={p.is_featured} isVerified={p.is_verified} status={p.status} />
+              <AdminActions table="products" id={p.id} isFeatured={p.is_featured} status={p.status} />
             </div>
           </div>
         ))}

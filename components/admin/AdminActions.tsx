@@ -30,12 +30,16 @@ export function AdminActions({
 
   return (
     <div className="flex flex-wrap gap-1">
-      <Button size="sm" variant="outline" onClick={() => update({ is_featured: !isFeatured })}>
-        {isFeatured ? "Unfeature" : "Feature"}
-      </Button>
-      <Button size="sm" variant="outline" onClick={() => update({ is_verified: !isVerified })}>
-        {isVerified ? "Unverify" : "Verify"}
-      </Button>
+      {isFeatured !== undefined && (
+        <Button size="sm" variant="outline" onClick={() => update({ is_featured: !isFeatured })}>
+          {isFeatured ? "Unfeature" : "Feature"}
+        </Button>
+      )}
+      {isVerified !== undefined && (
+        <Button size="sm" variant="outline" onClick={() => update({ is_verified: !isVerified })}>
+          {isVerified ? "Unverify" : "Verify"}
+        </Button>
+      )}
       {status === "published" && (
         <Button size="sm" variant="danger" onClick={() => update({ status: "hidden" })}>Hide</Button>
       )}

@@ -3,7 +3,6 @@ import { createClient } from "@/lib/supabase/server";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { ListingCard } from "@/components/ui";
 import { BlogCover } from "@/components/ui/BlogCover";
-import { formatLocation } from "@/lib/location";
 import { BLOG_CATEGORIES } from "@/lib/constants";
 import { labelFromOptions } from "@/lib/labels";
 import { resolveBlogCover } from "@/lib/blog-covers";
@@ -79,9 +78,6 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ id:
             </time>
           )}
           <span>{minutes} min read</span>
-          {formatLocation(post.city, post.country_code) && (
-            <span>{formatLocation(post.city, post.country_code)}</span>
-          )}
         </div>
       </header>
       <div className="prose-legal max-w-none whitespace-pre-wrap text-base leading-relaxed">
