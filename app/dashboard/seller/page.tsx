@@ -27,6 +27,20 @@ export default async function SellerDashboardPage() {
           <section>
             <h3 className="font-semibold">Your horses ({horses?.length ?? 0})</h3>
             <Link href="/marketplace/horses/new" className="btn btn-primary mt-2 inline-flex">+ New horse</Link>
+            {horses?.length ? (
+              <ul className="mt-3 space-y-2">
+                {horses.map((h) => (
+                  <li key={h.id} className="flex flex-wrap items-center justify-between gap-2 text-sm">
+                    <Link href={`/marketplace/horses/${h.id}`} className="font-medium hover:underline">
+                      {h.title}
+                    </Link>
+                    <Link href={`/marketplace/horses/${h.id}/edit`} className="text-[var(--color-primary)] hover:underline">
+                      Edit
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
           </section>
           <section>
             <h3 className="font-semibold">Products ({products?.length ?? 0})</h3>

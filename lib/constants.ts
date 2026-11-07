@@ -28,6 +28,35 @@ export const LISTING_TYPES = [
   { value: "wanted", label: "Wanted" },
 ] as const;
 
+export const HORSE_GENDERS = [
+  { value: "mare", label: "Mare" },
+  { value: "gelding", label: "Gelding" },
+  { value: "stallion", label: "Stallion" },
+  { value: "filly", label: "Filly" },
+  { value: "colt", label: "Colt" },
+] as const;
+
+export const HORSE_DISCIPLINES = [
+  { value: "polo", label: "Polo" },
+  { value: "tent_pegging", label: "Tent Pegging" },
+  { value: "dressage", label: "Dressage" },
+  { value: "jumping", label: "Show Jumping" },
+  { value: "racing", label: "Racing" },
+  { value: "endurance", label: "Endurance" },
+  { value: "trail", label: "Trail / Pleasure" },
+  { value: "breeding", label: "Breeding" },
+  { value: "other", label: "Other" },
+] as const;
+
+export const HORSE_PURPOSES = [
+  { value: "sport", label: "Sport" },
+  { value: "breeding", label: "Breeding" },
+  { value: "leisure", label: "Leisure" },
+  { value: "companion", label: "Companion" },
+  { value: "work", label: "Work" },
+  { value: "other", label: "Other" },
+] as const;
+
 export const CLUB_TYPES = [
   { value: "polo", label: "Polo Club" },
   { value: "tent_pegging", label: "Tent Pegging" },
