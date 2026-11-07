@@ -8,6 +8,7 @@ import { Input, Textarea, Label } from "@/components/ui/Input";
 import { CountrySelect } from "@/components/ui/CountrySelect";
 import { MediaUpload } from "@/components/ui/MediaUpload";
 import { STORAGE_BUCKETS } from "@/lib/storage/upload";
+import { claimProfileRole } from "@/lib/profiles/claim-role";
 
 export default function NewTrainerPage() {
   const router = useRouter();
@@ -44,6 +45,12 @@ export default function NewTrainerPage() {
 
     if (err) {
       setError(err.message);
+      setLoading(false);
+      return;
+    }
+    const { error: roleError } = await claimProfileRole(supabase, "trainer");
+    if (roleError) {
+      setError(roleError);
       setLoading(false);
       return;
     }

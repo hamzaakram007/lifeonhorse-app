@@ -66,6 +66,8 @@ Migration `004_marketplace_and_health.sql` (alternate `sellers` / `marketplace_s
 | 004_mobile_growth | Applied (newsletter, PWA-related tables) |
 | 004_marketplace_and_health | **Skipped** — conflicts with live schema; app aligned instead |
 | 005_enterprise_scale | Already applied (analytics_counts, rate_limits, subscriptions) |
+| 006_public_grants | Confirm on remote; required for public listing reads |
+| 007_profiles_role_guard | **Apply on live before/at deploy** — freezes `role`/`is_suspended`/`admin_notes`; adds `claim_profile_role` RPC |
 
 ## Known fixes (still valid)
 
@@ -82,7 +84,16 @@ supabase/migrations/
   002_trust_safety.sql
   003_monetization.sql
   003_storage_buckets_policies.sql
-  004_marketplace_and_health.sql   # alternate schema — do not apply on live DB
+  004_marketplace_and_health.sql   # alternate schema — DO_NOT_APPLY on live DB
   004_mobile_growth.sql
   005_enterprise_scale.sql
+  006_public_grants.sql
+  007_profiles_role_guard.sql      # apply on live — role/suspension freeze + claim_profile_role
 ```
+
+## Profiles role hardening (007)
+
+- Trigger `profiles_protect_privileged` blocks non-admin clients from changing `role`, `is_suspended`, `admin_notes`.
+- Moderators may still suspend/annotate; only admins may change roles directly.
+- Self-service upgrades use RPC `claim_profile_role(target_role)` for `seller` | `trainer` | `club_owner` | `course_creator` only (never `admin`/`moderator`).
+- Break-glass admin promotion remains SQL-only / service_role (`auth.uid()` null).
