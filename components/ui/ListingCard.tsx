@@ -1,6 +1,12 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { SITE_IMAGES } from "@/lib/section-images";
+import { distinctSubtitle } from "@/lib/labels";
+
+const FALLBACK = SITE_IMAGES.fallbackEmpty;
 
 export function ListingCard({
   href,
@@ -19,18 +25,32 @@ export function ListingCard({
   meta?: string;
   photoCount?: number;
 }) {
-  const cover = image || SITE_IMAGES.fallbackEmpty;
+  const initial = image?.trim() || null;
+  const [src, setSrc] = useState<string | null>(initial);
+  const displaySubtitle = distinctSubtitle(title, subtitle);
+  const showImage = Boolean(src);
 
   return (
     <Link href={href} className="group card card-hover block overflow-hidden rounded-xl no-underline">
       <div className="relative aspect-[4/3] overflow-hidden bg-[var(--color-bg)]">
-        <Image
-          src={cover}
-          alt={title}
-          fill
-          className="object-cover transition duration-300 group-hover:scale-105"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-        />
+        {showImage ? (
+          <Image
+            src={src!}
+            alt={title}
+            fill
+            className="object-cover transition duration-300 group-hover:scale-105"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            onError={() => setSrc((prev) => (prev === FALLBACK ? null : FALLBACK))}
+          />
+        ) : (
+          <Image
+            src={FALLBACK}
+            alt=""
+            fill
+            className="object-cover opacity-90"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          />
+        )}
         {photoCount && photoCount > 1 && (
           <span className="absolute left-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-xs font-medium text-white">
             +{photoCount - 1} photos
@@ -45,7 +65,7 @@ export function ListingCard({
       <div className="p-4">
         <div className="flex flex-wrap gap-2">{badges}</div>
         <h3 className="mt-1 font-semibold text-[var(--color-text)] group-hover:text-[var(--color-primary)]">{title}</h3>
-        {subtitle && <p className="text-sm text-[var(--color-muted)]">{subtitle}</p>}
+        {displaySubtitle ? <p className="text-sm text-[var(--color-muted)]">{displaySubtitle}</p> : null}
       </div>
     </Link>
   );

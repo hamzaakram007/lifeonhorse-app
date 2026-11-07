@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { ListingCard, EmptyState, FeaturedBadge } from "@/components/ui";
 import { SectionHero } from "@/components/layout/SectionHero";
 import { SECTION_IMAGES } from "@/lib/section-images";
+import { COURSE_CATEGORIES } from "@/lib/constants";
+import { labelFromOptions } from "@/lib/labels";
 
 export const metadata: Metadata = {
   title: "Courses",
@@ -40,7 +42,7 @@ export default async function Page() {
               key={item.id}
               href={`/courses/${item.id}`}
               title={item.title}
-              subtitle={item.category ?? undefined}
+              subtitle={labelFromOptions(COURSE_CATEGORIES, item.category) || undefined}
               image={item.cover_image}
               badges={<>{item.is_featured ? <FeaturedBadge /> : null}</>}
             />

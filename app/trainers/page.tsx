@@ -5,6 +5,8 @@ import { ListingCard, EmptyState, VerifiedBadge, FeaturedBadge } from "@/compone
 import { SectionHero } from "@/components/layout/SectionHero";
 import { formatLocation } from "@/lib/location";
 import { SECTION_IMAGES } from "@/lib/section-images";
+import { humanizeSlug } from "@/lib/labels";
+import { firstPhoto, parsePhotoList } from "@/lib/storage/upload";
 
 export const metadata: Metadata = {
   title: "Trainers",
@@ -36,23 +38,26 @@ export default async function Page() {
         />
       ) : (
         <div className="listing-grid">
-          {data.map((item) => (
-            <ListingCard
-              key={item.id}
-              href={`/trainers/${item.id}`}
-              title={item.display_name}
-              subtitle={item.specialty ?? undefined}
-              image={Array.isArray(item.photos) ? item.photos[0] : null}
-              photoCount={Array.isArray(item.photos) ? item.photos.length : undefined}
-              badges={
-                <>
-                  {item.is_verified ? <VerifiedBadge /> : null}
-                  {item.is_featured ? <FeaturedBadge /> : null}
-                </>
-              }
-              meta={formatLocation(item.city, item.country_code)}
-            />
-          ))}
+          {data.map((item) => {
+            const photos = parsePhotoList(item.photos);
+            return (
+              <ListingCard
+                key={item.id}
+                href={`/trainers/${item.id}`}
+                title={item.display_name}
+                subtitle={humanizeSlug(item.specialty) || undefined}
+                image={firstPhoto(item.photos)}
+                photoCount={photos.length || undefined}
+                badges={
+                  <>
+                    {item.is_verified ? <VerifiedBadge /> : null}
+                    {item.is_featured ? <FeaturedBadge /> : null}
+                  </>
+                }
+                meta={formatLocation(item.city, item.country_code)}
+              />
+            );
+          })}
         </div>
       )}
     </div>

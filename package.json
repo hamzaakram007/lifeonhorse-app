@@ -10,7 +10,8 @@
     "seed": "node --env-file=.env.local scripts/seed-demo.mjs",
     "seed:users": "node --env-file=.env.local scripts/seed-users.mjs",
     "seed:all": "node --env-file=.env.local scripts/seed-users.mjs && node --env-file=.env.local scripts/seed-demo.mjs",
-    "seed:cleanup": "node --env-file=.env.local scripts/cleanup-demo.mjs"
+    "seed:cleanup": "node --env-file=.env.local scripts/cleanup-demo.mjs",
+    "seed:photos": "node --env-file=.env.local scripts/update-demo-photos.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.6.1",

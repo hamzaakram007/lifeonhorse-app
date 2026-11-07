@@ -44,7 +44,13 @@ export default async function CountryPage({ params }: { params: Promise<{ code: 
         <h2 className="text-xl font-semibold">Clubs</h2>
         <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {clubs?.map((c) => (
-            <ListingCard key={c.id} href={`/clubs/${c.id}`} title={c.name} subtitle={c.club_type} image={c.logo_url} />
+            <ListingCard
+              key={c.id}
+              href={`/clubs/${c.id}`}
+              title={c.name}
+              subtitle={c.club_type ? c.club_type.replace(/_/g, " ").replace(/\b\w/g, (ch: string) => ch.toUpperCase()) : undefined}
+              image={c.logo_url}
+            />
           ))}
         </div>
       </section>

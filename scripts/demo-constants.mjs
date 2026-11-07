@@ -22,14 +22,49 @@ export const IMG = {
   horse3: "/images/demo/horse-3.jpg",
   horse4: "/images/demo/horse-4.jpg",
   horse5: "/images/demo/horse-5.jpg",
-  polo: "/images/demo/event-1.jpg",
-  stable: "/images/demo/club-1.jpg",
   saddle: "/images/demo/product-1.jpg",
   grooming: "/images/sections/services.jpg",
-  riding: "/images/demo/course-1.jpg",
-  vet: "/images/demo/expert-1.jpg",
+  service: "/images/demo/service-1.jpg",
+  expert: "/images/demo/expert-1.jpg",
+  // Clubs — unique covers
+  clubPolo: "/images/demo/club-polo.jpg",
+  clubTent: "/images/demo/club-tent.jpg",
+  clubRiding: "/images/demo/club-riding.jpg",
+  clubSports: "/images/demo/club-sports.jpg",
+  clubCommunity: "/images/demo/club-community.jpg",
+  clubRescue: "/images/demo/club-rescue.jpg",
+  club1: "/images/demo/club-1.jpg",
+  // Trainers — unique covers
+  trainerDressage: "/images/demo/trainer-dressage.jpg",
+  trainerPolo: "/images/demo/trainer-polo.jpg",
+  trainerTent: "/images/demo/trainer-tent.jpg",
+  trainerVet: "/images/demo/trainer-vet.jpg",
+  trainerArabian: "/images/demo/trainer-arabian.jpg",
+  trainerEventing: "/images/demo/trainer-eventing.jpg",
+  trainer1: "/images/demo/trainer-1.jpg",
+  // Events — unique covers
+  eventPolo: "/images/demo/event-polo.jpg",
+  eventTent: "/images/demo/event-tent.jpg",
+  eventClinic: "/images/demo/event-clinic.jpg",
+  eventAuction: "/images/demo/event-auction.jpg",
+  eventTrail: "/images/demo/event-trail.jpg",
+  eventHealth: "/images/demo/event-health.jpg",
+  event1: "/images/demo/event-1.jpg",
+  // Courses — unique covers
+  courseDressage: "/images/demo/course-dressage.jpg",
+  courseArabian: "/images/demo/course-arabian.jpg",
+  courseFirstaid: "/images/demo/course-firstaid.jpg",
+  coursePolo: "/images/demo/course-polo.jpg",
+  courseNutrition: "/images/demo/course-nutrition.jpg",
+  courseTent: "/images/demo/course-tent.jpg",
+  course1: "/images/demo/course-1.jpg",
+  // Legacy aliases (prefer unique keys above for new rows)
+  polo: "/images/demo/event-polo.jpg",
+  stable: "/images/demo/club-1.jpg",
+  riding: "/images/demo/trainer-dressage.jpg",
+  vet: "/images/demo/trainer-vet.jpg",
   event: "/images/demo/event-1.jpg",
-  landscape: "/images/sections/countries.jpg",
+  landscape: "/images/demo/club-community.jpg",
 };
 
 export const SELLERS = {
@@ -59,21 +94,21 @@ export const HORSES = [
 ];
 
 export const CLUBS = [
-  { id: "d4444444-4444-4444-8444-444444444401", owner: "poloClub", name: "Royal Polo Club Buenos Aires", description: "Argentina's most prestigious polo club with 80+ ponies and international tournaments.", club_type: "polo", country: "AR", city: "Buenos Aires", logo_url: IMG.polo, photos: [IMG.polo, IMG.stable], member_count: 200, featured: true, verified: true },
-  { id: "d4444444-4444-4444-8444-444444444402", owner: "tentPegging", name: "Frontier Tent Pegging Club", description: "Home of Pakistan's finest tent pegging riders and national champions.", club_type: "equestrian_sports", country: "PK", city: "Multan", logo_url: IMG.horse1, photos: [IMG.horse1, IMG.event], member_count: 150, featured: true, verified: true },
-  { id: "d4444444-4444-4444-8444-444444444403", owner: "trainer", name: "Newmarket Riding Academy", description: "Elite dressage and eventing training on the historic Newmarket gallops.", club_type: "riding_school", country: "GB", city: "Newmarket", logo_url: IMG.stable, photos: [IMG.stable], member_count: 95, featured: true, verified: true },
-  { id: "d4444444-4444-4444-8444-444444444404", owner: "breeder", name: "Lahore Equestrian Centre", description: "Premier riding school and livery in Punjab with indoor arena.", club_type: "riding_school", country: "PK", city: "Lahore", logo_url: IMG.stable, photos: [IMG.stable, IMG.horse2], member_count: 120, featured: false, verified: true },
-  { id: "d4444444-4444-4444-8444-444444444405", owner: "community", name: "Kentucky Horse Park Community", description: "Trail riding, clinics, and community events in the heart of horse country.", club_type: "general", country: "US", city: "Lexington", logo_url: IMG.landscape, photos: [IMG.landscape], member_count: 300, featured: true, verified: false },
-  { id: "d4444444-4444-4444-8444-444444444406", owner: "vet", name: "Cape Equine Rescue", description: "Non-profit rescue and rehabilitation for horses in need across the Western Cape.", club_type: "rescue", country: "ZA", city: "Cape Town", logo_url: IMG.horse2, photos: [IMG.horse2, IMG.stable], member_count: 45, featured: false, verified: true },
+  { id: "d4444444-4444-4444-8444-444444444401", owner: "poloClub", name: "Royal Polo Club Buenos Aires", description: "Argentina's most prestigious polo club with 80+ ponies and international tournaments.", club_type: "polo", country: "AR", city: "Buenos Aires", logo_url: IMG.clubPolo, photos: [IMG.clubPolo, IMG.club1], member_count: 200, featured: true, verified: true },
+  { id: "d4444444-4444-4444-8444-444444444402", owner: "tentPegging", name: "Frontier Tent Pegging Club", description: "Home of Pakistan's finest tent pegging riders and national champions.", club_type: "equestrian_sports", country: "PK", city: "Multan", logo_url: IMG.clubTent, photos: [IMG.clubTent, IMG.eventTent], member_count: 150, featured: true, verified: true },
+  { id: "d4444444-4444-4444-8444-444444444403", owner: "trainer", name: "Newmarket Riding Academy", description: "Elite dressage and eventing training on the historic Newmarket gallops.", club_type: "riding_school", country: "GB", city: "Newmarket", logo_url: IMG.clubRiding, photos: [IMG.clubRiding], member_count: 95, featured: true, verified: true },
+  { id: "d4444444-4444-4444-8444-444444444404", owner: "breeder", name: "Lahore Equestrian Centre", description: "Premier riding school and livery in Punjab with indoor arena.", club_type: "riding_school", country: "PK", city: "Lahore", logo_url: IMG.clubSports, photos: [IMG.clubSports, IMG.horse2], member_count: 120, featured: false, verified: true },
+  { id: "d4444444-4444-4444-8444-444444444405", owner: "community", name: "Kentucky Horse Park Community", description: "Trail riding, clinics, and community events in the heart of horse country.", club_type: "general", country: "US", city: "Lexington", logo_url: IMG.clubCommunity, photos: [IMG.clubCommunity], member_count: 300, featured: true, verified: false },
+  { id: "d4444444-4444-4444-8444-444444444406", owner: "vet", name: "Cape Equine Rescue", description: "Non-profit rescue and rehabilitation for horses in need across the Western Cape.", club_type: "rescue", country: "ZA", city: "Cape Town", logo_url: IMG.clubRescue, photos: [IMG.clubRescue, IMG.horse2], member_count: 45, featured: false, verified: true },
 ];
 
 export const TRAINERS = [
-  { id: "d5555555-5555-4555-8555-555555555501", user: "trainer", display_name: "Sarah Mitchell — Dressage", specialty: "Dressage", description: "FEI-level dressage coach with 20 years experience training to Grand Prix.", country: "GB", city: "Newmarket", experience_years: 20, photos: [IMG.riding], featured: true, verified: true },
-  { id: "d5555555-5555-4555-8555-555555555502", user: "poloClub", display_name: "Carlos Mendez — Polo", specialty: "Polo", description: "Former Argentine Open player coaching high-goal polo worldwide.", country: "AR", city: "Buenos Aires", experience_years: 18, photos: [IMG.polo], featured: true, verified: true },
-  { id: "d5555555-5555-4555-8555-555555555503", user: "tentPegging", display_name: "Hassan Raza — Tent Pegging", specialty: "Tent Pegging", description: "National tent pegging champion coaching precision and speed.", country: "PK", city: "Multan", experience_years: 15, photos: [IMG.event], featured: true, verified: true },
-  { id: "d5555555-5555-4555-8555-555555555504", user: "vet", display_name: "Dr. James Whitfield — Equine Vet", specialty: "Veterinary", description: "Specialist in sport horse lameness and pre-purchase exams.", country: "GB", city: "London", experience_years: 22, photos: [IMG.vet], featured: true, verified: true },
-  { id: "d5555555-5555-4555-8555-555555555505", user: "breeder", display_name: "Aisha Khan — Arabian Training", specialty: "Arabian", description: "Arabian horse training and showing across South Asia.", country: "PK", city: "Lahore", experience_years: 12, photos: [IMG.horse1], featured: false, verified: true },
-  { id: "d5555555-5555-4555-8555-555555555506", user: "community", display_name: "Emma Rodriguez — Eventing", specialty: "Eventing", description: "CCI4* event rider coaching amateur and professional combinations.", country: "US", city: "Kentucky", experience_years: 16, photos: [IMG.riding], featured: true, verified: false },
+  { id: "d5555555-5555-4555-8555-555555555501", user: "trainer", display_name: "Sarah Mitchell", specialty: "Dressage", description: "FEI-level dressage coach with 20 years experience training to Grand Prix.", country: "GB", city: "Newmarket", experience_years: 20, photos: [IMG.trainerDressage], featured: true, verified: true },
+  { id: "d5555555-5555-4555-8555-555555555502", user: "poloClub", display_name: "Carlos Mendez", specialty: "Polo", description: "Former Argentine Open player coaching high-goal polo worldwide.", country: "AR", city: "Buenos Aires", experience_years: 18, photos: [IMG.trainerPolo], featured: true, verified: true },
+  { id: "d5555555-5555-4555-8555-555555555503", user: "tentPegging", display_name: "Hassan Raza", specialty: "Tent Pegging", description: "National tent pegging champion coaching precision and speed.", country: "PK", city: "Multan", experience_years: 15, photos: [IMG.trainerTent], featured: true, verified: true },
+  { id: "d5555555-5555-4555-8555-555555555504", user: "vet", display_name: "Dr. James Whitfield", specialty: "Veterinary", description: "Specialist in sport horse lameness and pre-purchase exams.", country: "GB", city: "London", experience_years: 22, photos: [IMG.trainerVet], featured: true, verified: true },
+  { id: "d5555555-5555-4555-8555-555555555505", user: "breeder", display_name: "Aisha Khan", specialty: "Arabian", description: "Arabian horse training and showing across South Asia.", country: "PK", city: "Lahore", experience_years: 12, photos: [IMG.trainerArabian], featured: false, verified: true },
+  { id: "d5555555-5555-4555-8555-555555555506", user: "community", display_name: "Emma Rodriguez", specialty: "Eventing", description: "CCI4* event rider coaching amateur and professional combinations.", country: "US", city: "Kentucky", experience_years: 16, photos: [IMG.trainerEventing], featured: true, verified: false },
 ];
 
 export const PRODUCTS = [
@@ -97,12 +132,12 @@ export const SERVICES = [
 ];
 
 export const EVENTS = [
-  { id: "d8888888-8888-4888-8888-888888888801", host: "poloClub", title: "Argentine Open Polo Cup 2026", description: "The world's most prestigious polo tournament.", event_type: "polo_match", country: "AR", city: "Buenos Aires", daysFromNow: 45, photos: [IMG.polo], featured: true },
-  { id: "d8888888-8888-4888-8888-888888888802", host: "tentPegging", title: "National Tent Pegging Championship", description: "Pakistan's premier tent pegging competition.", event_type: "competition", country: "PK", city: "Multan", daysFromNow: 30, photos: [IMG.event], featured: true },
-  { id: "d8888888-8888-4888-8888-888888888803", host: "trainer", title: "Dressage Masterclass — Newmarket", description: "Two-day clinic with international dressage judges.", event_type: "clinic", country: "GB", city: "Newmarket", daysFromNow: 60, photos: [IMG.riding], featured: true },
-  { id: "d8888888-8888-4888-8888-888888888804", host: "breeder", title: "Arabian Horse Auction — Lahore", description: "Premier Arabian horse auction with live bidding.", event_type: "auction", country: "PK", city: "Lahore", daysFromNow: 21, photos: [IMG.horse1], featured: true },
-  { id: "d8888888-8888-4888-8888-888888888805", host: "community", title: "Kentucky Derby Week Trail Ride", description: "Scenic trail rides during Derby week festivities.", event_type: "trail_ride", country: "US", city: "Lexington", daysFromNow: 90, photos: [IMG.landscape], featured: false },
-  { id: "d8888888-8888-4888-8888-888888888806", host: "vet", title: "Equine Health Symposium — London", description: "Leading vets discuss sport horse welfare and medicine.", event_type: "conference", country: "GB", city: "London", daysFromNow: 75, photos: [IMG.vet], featured: false },
+  { id: "d8888888-8888-4888-8888-888888888801", host: "poloClub", title: "Argentine Open Polo Cup 2026", description: "The world's most prestigious polo tournament.", event_type: "polo_match", country: "AR", city: "Buenos Aires", daysFromNow: 45, photos: [IMG.eventPolo], featured: true },
+  { id: "d8888888-8888-4888-8888-888888888802", host: "tentPegging", title: "National Tent Pegging Championship", description: "Pakistan's premier tent pegging competition.", event_type: "competition", country: "PK", city: "Multan", daysFromNow: 30, photos: [IMG.eventTent], featured: true },
+  { id: "d8888888-8888-4888-8888-888888888803", host: "trainer", title: "Dressage Masterclass — Newmarket", description: "Two-day clinic with international dressage judges.", event_type: "clinic", country: "GB", city: "Newmarket", daysFromNow: 60, photos: [IMG.eventClinic], featured: true },
+  { id: "d8888888-8888-4888-8888-888888888804", host: "breeder", title: "Arabian Horse Auction — Lahore", description: "Premier Arabian horse auction with live bidding.", event_type: "auction", country: "PK", city: "Lahore", daysFromNow: 21, photos: [IMG.eventAuction], featured: true },
+  { id: "d8888888-8888-4888-8888-888888888805", host: "community", title: "Kentucky Derby Week Trail Ride", description: "Scenic trail rides during Derby week festivities.", event_type: "trail_ride", country: "US", city: "Lexington", daysFromNow: 90, photos: [IMG.eventTrail], featured: false },
+  { id: "d8888888-8888-4888-8888-888888888806", host: "vet", title: "Equine Health Symposium — London", description: "Leading vets discuss sport horse welfare and medicine.", event_type: "conference", country: "GB", city: "London", daysFromNow: 75, photos: [IMG.eventHealth], featured: false },
 ];
 
 export const BLOG_POSTS = [
@@ -117,12 +152,12 @@ export const BLOG_POSTS = [
 ];
 
 export const COURSES = [
-  { id: "d9999999-9999-4999-8999-999999999901", creator: "trainer", title: "Dressage Fundamentals", description: "Master the basics of classical dressage training.", category: "training", cover: IMG.riding, free: false, price: 199, currency: "USD", featured: true },
-  { id: "d9999999-9999-4999-8999-999999999902", creator: "breeder", title: "Arabian Horse Conformation", description: "Evaluate Arabian horses for breeding and showing.", category: "breeding", cover: IMG.horse1, free: true, featured: true },
-  { id: "d9999999-9999-4999-8999-999999999903", creator: "vet", title: "Equine First Aid Essentials", description: "Recognize emergencies and provide immediate care.", category: "health", cover: IMG.vet, free: true, featured: false },
-  { id: "d9999999-9999-4999-8999-999999999904", creator: "poloClub", title: "Introduction to Polo", description: "Rules, equipment, and beginner stick-and-ball drills.", category: "polo", cover: IMG.polo, free: false, price: 149, currency: "USD", featured: true },
-  { id: "d9999999-9999-4999-8999-999999999905", creator: "feed", title: "Equine Nutrition Masterclass", description: "Science-based feeding for performance horses.", category: "nutrition", cover: IMG.stable, free: false, price: 89, currency: "USD", featured: false },
-  { id: "d9999999-9999-4999-8999-999999999906", creator: "tentPegging", title: "Tent Pegging Techniques", description: "Precision riding at speed — from basics to competition.", category: "training", cover: IMG.event, free: false, price: 79, currency: "USD", featured: true },
+  { id: "d9999999-9999-4999-8999-999999999901", creator: "trainer", title: "Dressage Fundamentals", description: "Master the basics of classical dressage training.", category: "training", cover: IMG.courseDressage, free: false, price: 199, currency: "USD", featured: true },
+  { id: "d9999999-9999-4999-8999-999999999902", creator: "breeder", title: "Arabian Horse Conformation", description: "Evaluate Arabian horses for breeding and showing.", category: "breeding", cover: IMG.courseArabian, free: true, featured: true },
+  { id: "d9999999-9999-4999-8999-999999999903", creator: "vet", title: "Equine First Aid Essentials", description: "Recognize emergencies and provide immediate care.", category: "health", cover: IMG.courseFirstaid, free: true, featured: false },
+  { id: "d9999999-9999-4999-8999-999999999904", creator: "poloClub", title: "Introduction to Polo", description: "Rules, equipment, and beginner stick-and-ball drills.", category: "polo", cover: IMG.coursePolo, free: false, price: 149, currency: "USD", featured: true },
+  { id: "d9999999-9999-4999-8999-999999999905", creator: "feed", title: "Equine Nutrition Masterclass", description: "Science-based feeding for performance horses.", category: "nutrition", cover: IMG.courseNutrition, free: false, price: 89, currency: "USD", featured: false },
+  { id: "d9999999-9999-4999-8999-999999999906", creator: "tentPegging", title: "Tent Pegging Techniques", description: "Precision riding at speed — from basics to competition.", category: "training", cover: IMG.courseTent, free: false, price: 79, currency: "USD", featured: true },
 ];
 
 export const COMMUNITY_POSTS = [
