@@ -16,6 +16,7 @@ const nextConfig: NextConfig = {
       { source: "/health/request", destination: "/horse-health/requests/new", permanent: true },
       { source: "/health/experts", destination: "/horse-health/experts", permanent: true },
       { source: "/health/experts/new", destination: "/horse-health/experts/apply", permanent: true },
+      { source: "/health/experts/:id", destination: "/horse-health/experts/:id", permanent: true },
     ];
   },
 };
