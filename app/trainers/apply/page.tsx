@@ -10,6 +10,7 @@ import { ImageUpload } from "@/components/ui/ImageUpload";
 import { TRAINER_TYPES } from "@/lib/constants";
 import { STORAGE_BUCKETS } from "@/lib/storage/upload";
 import { slugify } from "@/lib/utils";
+import { claimProfileRole } from "@/lib/profiles/claim-role";
 
 export default function ApplyTrainerPage() {
   const router = useRouter();
@@ -76,7 +77,12 @@ export default function ApplyTrainerPage() {
     }
 
     if (data) {
-      await supabase.from("profiles").update({ role: "trainer" }).eq("id", user.id);
+      const { error: roleError } = await claimProfileRole(supabase, "trainer");
+      if (roleError) {
+        setError(roleError);
+        setLoading(false);
+        return;
+      }
       router.push(`/trainers/${data.slug}`);
     }
     setLoading(false);

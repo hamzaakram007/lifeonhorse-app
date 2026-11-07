@@ -10,6 +10,7 @@ import { ImageUpload } from "@/components/ui/ImageUpload";
 import { MarketplaceNav } from "@/components/marketplace/MarketplaceNav";
 import { SELLER_TYPES, PRODUCT_CATEGORIES, PAYMENT_METHODS } from "@/lib/constants";
 import { STORAGE_BUCKETS } from "@/lib/storage/upload";
+import { claimProfileRole } from "@/lib/profiles/claim-role";
 
 function buildDescription(
   base: string,
@@ -143,7 +144,12 @@ export default function SellerRegisterPage() {
         setLoading(false);
         return;
       }
-      await supabase.from("profiles").update({ role: "seller" }).eq("id", user.id);
+      const { error: roleError } = await claimProfileRole(supabase, "seller");
+      if (roleError) {
+        setError(roleError);
+        setLoading(false);
+        return;
+      }
       router.push(redirect ?? `/marketplace/sellers/${data.id}`);
     }
     setLoading(false);

@@ -10,6 +10,7 @@ import { ImageUpload } from "@/components/ui/ImageUpload";
 import { MediaUpload } from "@/components/ui/MediaUpload";
 import { CLUB_TYPES } from "@/lib/constants";
 import { STORAGE_BUCKETS } from "@/lib/storage/upload";
+import { claimProfileRole } from "@/lib/profiles/claim-role";
 
 export default function RegisterClubPage() {
   const router = useRouter();
@@ -77,7 +78,12 @@ export default function RegisterClubPage() {
     }
 
     if (data) {
-      await supabase.from("profiles").update({ role: "club_owner" }).eq("id", user.id);
+      const { error: roleError } = await claimProfileRole(supabase, "club_owner");
+      if (roleError) {
+        setError(roleError);
+        setLoading(false);
+        return;
+      }
       router.push(`/clubs/${data.id}`);
     }
     setLoading(false);
