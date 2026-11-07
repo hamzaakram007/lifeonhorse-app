@@ -15,7 +15,7 @@ export default async function AdminHorsesPage() {
             <div className="flex justify-between gap-2">
               <div>
                 <p className="font-medium">{h.title}</p>
-                <p className="text-sm text-stone-500">{h.status} · {h.country}</p>
+                <p className="text-sm text-stone-500">{h.status} · {h.country_code}</p>
                 <div className="mt-1 flex gap-1">
                   {h.is_featured && <Badge variant="featured">Featured</Badge>}
                   {h.is_verified && <Badge variant="verified">Verified</Badge>}

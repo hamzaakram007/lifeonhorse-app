@@ -22,10 +22,14 @@ export default async function AdminPage() {
 
   const links = [
     { href: "/admin/reports", label: "Reports queue" },
+    { href: "/admin/health", label: "Health requests" },
+    { href: "/admin/products", label: "Products" },
+    { href: "/admin/services", label: "Services" },
+    { href: "/admin/sellers", label: "Sellers" },
+    { href: "/admin/experts", label: "Experts" },
     { href: "/admin/billing", label: "Billing & orders" },
     { href: "/admin/analytics", label: "Analytics" },
     { href: "/admin/users", label: "Users" },
-    { href: "/admin/health", label: "Health requests" },
   ];
 
   return (
