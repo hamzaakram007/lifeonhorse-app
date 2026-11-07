@@ -79,6 +79,23 @@ export const COURSE_CATEGORIES = [
   { value: "other", label: "Other" },
 ] as const;
 
+export const BLOG_CATEGORIES = [
+  { value: "guides", label: "Guides" },
+  { value: "training", label: "Training" },
+  { value: "health", label: "Health" },
+  { value: "culture", label: "Culture" },
+  { value: "events", label: "Events" },
+  { value: "polo", label: "Polo" },
+  { value: "tent_pegging", label: "Tent Pegging" },
+  { value: "tack", label: "Tack" },
+  { value: "nutrition", label: "Nutrition" },
+  { value: "buying_guide", label: "Buying Guide" },
+  { value: "marketplace-safety", label: "Marketplace Safety" },
+  { value: "country-culture", label: "Country Culture" },
+  { value: "breeds-care", label: "Breeds & Care" },
+  { value: "club-guides", label: "Club Guides" },
+] as const;
+
 export const NAV_LINKS = [
   { href: "/marketplace", label: "Marketplace" },
   { href: "/clubs", label: "Clubs" },
