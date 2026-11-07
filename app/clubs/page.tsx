@@ -3,27 +3,60 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { ListingCard, EmptyState, VerifiedBadge, FeaturedBadge } from "@/components/ui";
 import { SectionHero } from "@/components/layout/SectionHero";
+import { FilterBar } from "@/components/filters/FilterBar";
 import { formatLocation } from "@/lib/location";
 import { SECTION_IMAGES } from "@/lib/section-images";
 import { CLUB_TYPES } from "@/lib/constants";
 import { labelFromOptions } from "@/lib/labels";
 import { DUPLICATE_CLUB_IDS, resolveClubCover, resolveClubPhotos } from "@/lib/club-covers";
+import { getCountryName } from "@/lib/countries";
 
 export const metadata: Metadata = {
   title: "Clubs",
   description: "Elite polo clubs, riding schools, and equestrian communities worldwide",
 };
 
-export default async function Page() {
+type ClubSearchParams = {
+  country?: string;
+  q?: string;
+};
+
+function normalizeClubParams(
+  raw: Record<string, string | string[] | undefined>
+): ClubSearchParams {
+  const pick = (key: keyof ClubSearchParams) => {
+    const v = raw[key];
+    const s = Array.isArray(v) ? v[0] : v;
+    return s?.trim() || undefined;
+  };
+  return { country: pick("country"), q: pick("q") };
+}
+
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const filters = normalizeClubParams(await searchParams);
   const supabase = await createClient();
-  const { data } = await supabase
+
+  let query = supabase
     .from("clubs")
     .select("id, name, club_type, country_code, city, logo_url, photos, is_verified, is_featured")
     .eq("status", "published")
     .order("is_featured", { ascending: false })
     .limit(48);
 
+  if (filters.country) query = query.eq("country_code", filters.country);
+  if (filters.q) {
+    const q = filters.q.replace(/,/g, " ").replace(/[%_\\]/g, "");
+    query = query.or(`name.ilike.%${q}%,city.ilike.%${q}%`);
+  }
+
+  const { data } = await query;
   const clubs = (data ?? []).filter((item) => !DUPLICATE_CLUB_IDS.has(item.id));
+  const active = Boolean(filters.country || filters.q);
+  const countryLabel = filters.country ? getCountryName(filters.country) : null;
 
   return (
     <div className="space-y-8">
@@ -33,11 +66,42 @@ export default async function Page() {
         image={SECTION_IMAGES.clubs}
         action={{ href: "/clubs/register", label: "+ Register club" }}
       />
+
+      <FilterBar
+        action="/clubs"
+        clearHref="/clubs"
+        values={{ country: filters.country, q: filters.q }}
+        fields={[
+          { kind: "country", name: "country" },
+          { kind: "text", name: "q", placeholder: "Search clubs…" },
+        ]}
+      />
+
       {!clubs.length ? (
         <EmptyState
-          title="No clubs listed yet"
-          description="Be the first to showcase your club to a global audience of riders and enthusiasts."
-          action={<Link href="/clubs/register" className="btn btn-primary">Register club</Link>}
+          title={
+            active
+              ? countryLabel
+                ? `No clubs in ${countryLabel}`
+                : "No clubs match these filters"
+              : "No clubs listed yet"
+          }
+          description={
+            active
+              ? "Try clearing filters or browse another country."
+              : "Be the first to showcase your club to a global audience of riders and enthusiasts."
+          }
+          action={
+            active ? (
+              <Link href="/clubs" className="btn btn-secondary">
+                Clear filters
+              </Link>
+            ) : (
+              <Link href="/clubs/register" className="btn btn-primary">
+                Register club
+              </Link>
+            )
+          }
         />
       ) : (
         <div className="listing-grid">
