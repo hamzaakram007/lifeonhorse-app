@@ -38,21 +38,26 @@ export function LoadingSpinner() {
 }
 
 export function PhotoGallery({ photos }: { photos: string[] }) {
-  if (!photos?.length) {
+  const unique = [...new Set((photos ?? []).map((p) => p?.trim()).filter(Boolean))];
+  if (!unique.length) {
     return (
-      <div className="flex h-48 items-center justify-center rounded-lg bg-[var(--color-bg)] text-[var(--color-muted)]">
+      <div
+        className="flex h-48 items-center justify-center rounded-lg bg-cover bg-center text-[var(--color-muted)]"
+        style={{ backgroundImage: 'url("/images/fallback-empty.jpg")' }}
+      >
         No photos
       </div>
     );
   }
   return (
     <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-      {photos.map((url, i) => (
+      {unique.map((url, i) => (
+        // eslint-disable-next-line @next/next/no-img-element
         <img
           key={url + i}
           src={url}
           alt={`Photo ${i + 1}`}
-          className="h-48 w-full rounded-lg object-cover"
+          className="aspect-[4/3] h-auto w-full rounded-lg object-cover"
         />
       ))}
     </div>

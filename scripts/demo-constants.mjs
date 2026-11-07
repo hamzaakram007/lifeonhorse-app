@@ -34,6 +34,11 @@ export const IMG = {
   clubCommunity: "/images/demo/club-community.jpg",
   clubRescue: "/images/demo/club-rescue.jpg",
   club1: "/images/demo/club-1.jpg",
+  clubCape: "/images/demo/club-cape.jpg",
+  clubBreeding: "/images/demo/club-breeding.jpg",
+  clubHanover: "/images/demo/club-hanover.jpg",
+  clubMumbai: "/images/demo/club-mumbai.jpg",
+  clubCapePark: "/images/demo/club-cape-park.jpg",
   // Trainers — unique covers
   trainerDressage: "/images/demo/trainer-dressage.jpg",
   trainerPolo: "/images/demo/trainer-polo.jpg",
@@ -95,11 +100,11 @@ export const HORSES = [
 
 export const CLUBS = [
   { id: "d4444444-4444-4444-8444-444444444401", owner: "poloClub", name: "Royal Polo Club Buenos Aires", description: "Argentina's most prestigious polo club with 80+ ponies and international tournaments.", club_type: "polo", country: "AR", city: "Buenos Aires", logo_url: IMG.clubPolo, photos: [IMG.clubPolo, IMG.club1], member_count: 200, featured: true, verified: true },
-  { id: "d4444444-4444-4444-8444-444444444402", owner: "tentPegging", name: "Frontier Tent Pegging Club", description: "Home of Pakistan's finest tent pegging riders and national champions.", club_type: "equestrian_sports", country: "PK", city: "Multan", logo_url: IMG.clubTent, photos: [IMG.clubTent, IMG.eventTent], member_count: 150, featured: true, verified: true },
+  { id: "d4444444-4444-4444-8444-444444444402", owner: "tentPegging", name: "Frontier Tent Pegging Club", description: "Home of Pakistan's finest tent pegging riders and national champions.", club_type: "tent_pegging", country: "PK", city: "Multan", logo_url: IMG.clubTent, photos: [IMG.clubTent], member_count: 150, featured: true, verified: true },
   { id: "d4444444-4444-4444-8444-444444444403", owner: "trainer", name: "Newmarket Riding Academy", description: "Elite dressage and eventing training on the historic Newmarket gallops.", club_type: "riding_school", country: "GB", city: "Newmarket", logo_url: IMG.clubRiding, photos: [IMG.clubRiding], member_count: 95, featured: true, verified: true },
-  { id: "d4444444-4444-4444-8444-444444444404", owner: "breeder", name: "Lahore Equestrian Centre", description: "Premier riding school and livery in Punjab with indoor arena.", club_type: "riding_school", country: "PK", city: "Lahore", logo_url: IMG.clubSports, photos: [IMG.clubSports, IMG.horse2], member_count: 120, featured: false, verified: true },
+  { id: "d4444444-4444-4444-8444-444444444404", owner: "breeder", name: "Lahore Equestrian Centre", description: "Premier riding school and livery in Punjab with indoor arena.", club_type: "riding_school", country: "PK", city: "Lahore", logo_url: IMG.clubSports, photos: [IMG.clubSports], member_count: 120, featured: false, verified: true },
   { id: "d4444444-4444-4444-8444-444444444405", owner: "community", name: "Kentucky Horse Park Community", description: "Trail riding, clinics, and community events in the heart of horse country.", club_type: "general", country: "US", city: "Lexington", logo_url: IMG.clubCommunity, photos: [IMG.clubCommunity], member_count: 300, featured: true, verified: false },
-  { id: "d4444444-4444-4444-8444-444444444406", owner: "vet", name: "Cape Equine Rescue", description: "Non-profit rescue and rehabilitation for horses in need across the Western Cape.", club_type: "rescue", country: "ZA", city: "Cape Town", logo_url: IMG.clubRescue, photos: [IMG.clubRescue, IMG.horse2], member_count: 45, featured: false, verified: true },
+  { id: "d4444444-4444-4444-8444-444444444406", owner: "vet", name: "Cape Equine Rescue", description: "Non-profit rescue and rehabilitation for horses in need across the Western Cape.", club_type: "rescue", country: "ZA", city: "Cape Town", logo_url: IMG.clubRescue, photos: [IMG.clubRescue], member_count: 45, featured: false, verified: true },
 ];
 
 export const TRAINERS = [

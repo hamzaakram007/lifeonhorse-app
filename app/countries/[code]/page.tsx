@@ -6,6 +6,9 @@ import { createClient } from "@/lib/supabase/server";
 import { ListingCard } from "@/components/ui";
 import { SectionHero } from "@/components/layout/SectionHero";
 import { SECTION_IMAGES } from "@/lib/section-images";
+import { CLUB_TYPES } from "@/lib/constants";
+import { labelFromOptions } from "@/lib/labels";
+import { DUPLICATE_CLUB_IDS, resolveClubCover } from "@/lib/club-covers";
 
 export async function generateMetadata({ params }: { params: Promise<{ code: string }> }): Promise<Metadata> {
   const { code } = await params;
@@ -21,7 +24,7 @@ export default async function CountryPage({ params }: { params: Promise<{ code: 
   const cc = country.code;
   const [{ data: horses }, { data: clubs }, { data: trainers }] = await Promise.all([
     supabase.from("horses").select("id, title, photos, price, currency, city").eq("country_code", cc).eq("status", "published").limit(8),
-    supabase.from("clubs").select("id, name, club_type, logo_url").eq("country_code", cc).eq("status", "published").limit(8),
+    supabase.from("clubs").select("id, name, club_type, logo_url, photos").eq("country_code", cc).eq("status", "published").limit(16),
     supabase.from("trainers").select("id, display_name, specialty, photos").eq("country_code", cc).eq("status", "published").limit(8),
   ]);
 
@@ -43,13 +46,16 @@ export default async function CountryPage({ params }: { params: Promise<{ code: 
       <section>
         <h2 className="text-xl font-semibold">Clubs</h2>
         <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {clubs?.map((c) => (
+          {clubs
+            ?.filter((c) => !DUPLICATE_CLUB_IDS.has(c.id))
+            .slice(0, 8)
+            .map((c) => (
             <ListingCard
               key={c.id}
               href={`/clubs/${c.id}`}
               title={c.name}
-              subtitle={c.club_type ? c.club_type.replace(/_/g, " ").replace(/\b\w/g, (ch: string) => ch.toUpperCase()) : undefined}
-              image={c.logo_url}
+              subtitle={labelFromOptions(CLUB_TYPES, c.club_type) || undefined}
+              image={resolveClubCover(c.id, c.name, c.photos, c.logo_url)}
             />
           ))}
         </div>

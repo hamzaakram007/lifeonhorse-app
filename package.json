@@ -12,7 +12,8 @@
     "seed:all": "node --env-file=.env.local scripts/seed-users.mjs && node --env-file=.env.local scripts/seed-demo.mjs",
     "seed:cleanup": "node --env-file=.env.local scripts/cleanup-demo.mjs",
     "seed:photos": "node --env-file=.env.local scripts/update-demo-photos.mjs",
-    "seed:blog-photos": "node --env-file=.env.local scripts/update-blog-photos.mjs"
+    "seed:blog-photos": "node --env-file=.env.local scripts/update-blog-photos.mjs",
+    "seed:club-photos": "node --env-file=.env.local scripts/update-demo-photos.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.6.1",

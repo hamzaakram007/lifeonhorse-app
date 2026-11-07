@@ -7,7 +7,7 @@ import { formatLocation } from "@/lib/location";
 import { SECTION_IMAGES } from "@/lib/section-images";
 import { CLUB_TYPES } from "@/lib/constants";
 import { labelFromOptions } from "@/lib/labels";
-import { firstPhoto } from "@/lib/storage/upload";
+import { DUPLICATE_CLUB_IDS, resolveClubCover, resolveClubPhotos } from "@/lib/club-covers";
 
 export const metadata: Metadata = {
   title: "Clubs",
@@ -21,7 +21,9 @@ export default async function Page() {
     .select("id, name, club_type, country_code, city, logo_url, photos, is_verified, is_featured")
     .eq("status", "published")
     .order("is_featured", { ascending: false })
-    .limit(24);
+    .limit(48);
+
+  const clubs = (data ?? []).filter((item) => !DUPLICATE_CLUB_IDS.has(item.id));
 
   return (
     <div className="space-y-8">
@@ -31,7 +33,7 @@ export default async function Page() {
         image={SECTION_IMAGES.clubs}
         action={{ href: "/clubs/register", label: "+ Register club" }}
       />
-      {!data?.length ? (
+      {!clubs.length ? (
         <EmptyState
           title="No clubs listed yet"
           description="Be the first to showcase your club to a global audience of riders and enthusiasts."
@@ -39,23 +41,26 @@ export default async function Page() {
         />
       ) : (
         <div className="listing-grid">
-          {data.map((item) => (
-            <ListingCard
-              key={item.id}
-              href={`/clubs/${item.id}`}
-              title={item.name}
-              subtitle={labelFromOptions(CLUB_TYPES, item.club_type) || undefined}
-              image={firstPhoto(item.photos) ?? item.logo_url}
-              photoCount={Array.isArray(item.photos) ? item.photos.length : undefined}
-              badges={
-                <>
-                  {item.is_verified ? <VerifiedBadge /> : null}
-                  {item.is_featured ? <FeaturedBadge /> : null}
-                </>
-              }
-              meta={formatLocation(item.city, item.country_code)}
-            />
-          ))}
+          {clubs.map((item) => {
+            const photos = resolveClubPhotos(item.id, item.name, item.photos, item.logo_url);
+            return (
+              <ListingCard
+                key={item.id}
+                href={`/clubs/${item.id}`}
+                title={item.name}
+                subtitle={labelFromOptions(CLUB_TYPES, item.club_type) || undefined}
+                image={resolveClubCover(item.id, item.name, item.photos, item.logo_url)}
+                photoCount={photos.length > 1 ? photos.length : undefined}
+                badges={
+                  <>
+                    {item.is_verified ? <VerifiedBadge /> : null}
+                    {item.is_featured ? <FeaturedBadge /> : null}
+                  </>
+                }
+                meta={formatLocation(item.city, item.country_code)}
+              />
+            );
+          })}
         </div>
       )}
     </div>

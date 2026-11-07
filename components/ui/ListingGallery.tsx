@@ -34,7 +34,17 @@ export function ListingGallery({ photos, videoUrl, alt = "Listing photo", classN
       <div className="relative aspect-[16/10] overflow-hidden rounded-xl bg-stone-100">
         {mainSrc ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={mainSrc} alt={alt} className="h-full w-full object-cover transition-opacity duration-300" />
+          <img
+            src={mainSrc}
+            alt={alt}
+            className="h-full w-full object-cover transition-opacity duration-300"
+            onError={(e) => {
+              const img = e.currentTarget;
+              if (!img.src.includes("fallback-empty")) {
+                img.src = SITE_IMAGES.fallbackEmpty;
+              }
+            }}
+          />
         ) : videoUrl ? (
           <video src={videoUrl} controls className="h-full w-full object-cover" />
         ) : null}
