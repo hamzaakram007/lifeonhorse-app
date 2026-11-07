@@ -10,18 +10,27 @@ export default async function ClubOwnerDashboardPage() {
   if (!profile) redirect("/auth/login?redirect=/dashboard/club");
 
   const supabase = await createClient();
-  const [{ data: clubs }, { data: events }] = await Promise.all([
+  const [{ data: clubs }, { data: events }, { data: pendingFeatured }] = await Promise.all([
     supabase
       .from("clubs")
-      .select("id, name, status, city, country_code, is_verified")
+      .select("id, name, status, city, country_code, is_verified, is_featured")
       .eq("owner_id", profile.id)
       .order("created_at", { ascending: false }),
     supabase
       .from("events")
-      .select("id, title, status, start_date, city")
+      .select("id, title, status, start_date, city, is_featured")
       .eq("host_id", profile.id)
       .order("start_date", { ascending: false }),
+    supabase
+      .from("featured_listing_requests")
+      .select("entity_type, entity_id")
+      .eq("user_id", profile.id)
+      .eq("status", "pending"),
   ]);
+
+  const pendingKey = new Set(
+    (pendingFeatured ?? []).map((r) => `${r.entity_type}:${r.entity_id}`)
+  );
 
   const clubItems =
     clubs?.map((c) => ({
@@ -29,7 +38,13 @@ export default async function ClubOwnerDashboardPage() {
       title: c.name,
       status: c.status,
       href: `/clubs/${c.id}`,
-      meta: [c.city, c.country_code, c.is_verified ? "verified" : null].filter(Boolean).join(" · ") || null,
+      meta:
+        [c.city, c.country_code, c.is_verified ? "verified" : null, c.is_featured ? "featured" : null]
+          .filter(Boolean)
+          .join(" · ") || null,
+      featureEntityType: "club",
+      isFeatured: Boolean(c.is_featured),
+      featurePending: pendingKey.has(`club:${c.id}`),
     })) ?? [];
 
   const eventItems =
@@ -41,6 +56,9 @@ export default async function ClubOwnerDashboardPage() {
       meta: [e.city, e.start_date ? new Date(e.start_date).toLocaleDateString() : null]
         .filter(Boolean)
         .join(" · ") || null,
+      featureEntityType: "event",
+      isFeatured: Boolean(e.is_featured),
+      featurePending: pendingKey.has(`event:${e.id}`),
     })) ?? [];
 
   return (
@@ -51,7 +69,10 @@ export default async function ClubOwnerDashboardPage() {
         </Link>
         <h1 className="mt-2 text-2xl font-bold">Club owner dashboard</h1>
         <p className="text-sm text-[var(--color-muted)]">
-          Manage clubs you own and events you host.
+          Manage clubs you own and events you host.{" "}
+          <Link href="/payments" className="text-[var(--color-primary)] hover:underline">
+            Featured listing pricing
+          </Link>
         </p>
       </div>
 

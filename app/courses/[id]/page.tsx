@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ListingGallery, FeaturedBadge } from "@/components/ui";
@@ -23,6 +24,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
   const categoryLabel = labelFromOptions(COURSE_CATEGORIES, course.category);
   const levelLabel = labelFromOptions(COURSE_LEVELS, course.level);
   const lessons = normalizeLessons(course.lessons);
+  const isPaid = !course.is_free;
   const pricing = course.is_free
     ? "Free"
     : course.price != null
@@ -36,12 +38,27 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
         {course.is_featured ? <FeaturedBadge /> : null}
         {categoryLabel ? <span className="badge">{categoryLabel}</span> : null}
         {levelLabel ? <span className="badge">{levelLabel}</span> : null}
-        <span className="badge">{pricing}</span>
+        <span className="badge">{isPaid ? "Paid" : "Free"}</span>
+        {isPaid && course.price != null ? <span className="badge">{pricing}</span> : null}
       </div>
       <h1 className="font-serif text-3xl font-bold">{course.title}</h1>
       <ListingGallery photos={photos} alt={course.title} />
       {course.description ? (
         <p className="leading-relaxed whitespace-pre-wrap">{course.description}</p>
+      ) : null}
+
+      {isPaid ? (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm">
+          <p className="font-semibold text-amber-950">Paid course — payments later</p>
+          <p className="mt-1 text-amber-900/80">
+            Online checkout is not integrated yet. You can preview the first lesson below; full access
+            will unlock after enrollment payments ship. Until then, see{" "}
+            <Link href="/payments" className="font-medium underline underline-offset-2">
+              Payments
+            </Link>{" "}
+            for manual guidance by country.
+          </p>
+        </div>
       ) : null}
 
       <dl className="grid grid-cols-2 gap-3 text-sm">
@@ -54,7 +71,11 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           <dd>{levelLabel || "—"}</dd>
         </div>
         <div>
-          <dt className="font-semibold">Pricing</dt>
+          <dt className="font-semibold">Access</dt>
+          <dd>{isPaid ? "Paid" : "Free"}</dd>
+        </div>
+        <div>
+          <dt className="font-semibold">Price</dt>
           <dd>{pricing}</dd>
         </div>
         <div>
@@ -106,8 +127,11 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                     </>
                   ) : (
                     <p className="mt-2 text-sm text-[var(--color-muted)]">
-                      Full lesson unlocks after enrollment. Checkout arrives in a later release —
-                      see Payments for current guidance.
+                      Locked until paid enrollment. Checkout is deferred — see{" "}
+                      <Link href="/payments" className="underline underline-offset-2">
+                        Payments
+                      </Link>{" "}
+                      for manual options.
                     </p>
                   )}
                 </li>

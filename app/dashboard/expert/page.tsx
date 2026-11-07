@@ -4,20 +4,32 @@ import { createClient } from "@/lib/supabase/server";
 import { requireAuth } from "@/lib/auth";
 import { VerifiedBadge, EmptyState } from "@/components/ui";
 import { VerificationUpload } from "@/components/VerificationUpload";
+import { FeaturedRequestButton } from "@/components/FeaturedRequestButton";
 
 export default async function ExpertDashboardPage() {
   const profile = await requireAuth();
   if (!profile) redirect("/auth/login?redirect=/dashboard/expert");
   const supabase = await createClient();
   const { data: expert } = await supabase.from("experts").select("*").eq("user_id", profile.id).maybeSingle();
-  const { data: requests } = expert
-    ? await supabase
-        .from("health_requests")
-        .select("id, horse_name, urgency, status, created_at")
-        .eq("expert_id", expert.id)
-        .order("created_at", { ascending: false })
-        .limit(20)
-    : { data: [] };
+  const [{ data: requests }, { data: pendingFeatured }] = expert
+    ? await Promise.all([
+        supabase
+          .from("health_requests")
+          .select("id, horse_name, urgency, status, created_at")
+          .eq("expert_id", expert.id)
+          .order("created_at", { ascending: false })
+          .limit(20),
+        supabase
+          .from("featured_listing_requests")
+          .select("entity_type, entity_id")
+          .eq("user_id", profile.id)
+          .eq("status", "pending"),
+      ])
+    : [{ data: [] }, { data: [] }];
+
+  const pendingKey = new Set(
+    (pendingFeatured ?? []).map((r) => `${r.entity_type}:${r.entity_id}`)
+  );
 
   return (
     <div className="space-y-6">
@@ -31,7 +43,15 @@ export default async function ExpertDashboardPage() {
       {expert ? (
         <>
           <div className="card space-y-1 p-4">
-            {expert.is_verified ? <VerifiedBadge /> : null}
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div>{expert.is_verified ? <VerifiedBadge /> : null}</div>
+              <FeaturedRequestButton
+                entityType="expert"
+                entityId={expert.id}
+                isFeatured={Boolean(expert.is_featured)}
+                hasPending={pendingKey.has(`expert:${expert.id}`)}
+              />
+            </div>
             <h2 className="text-xl font-semibold">{expert.display_name}</h2>
             <p className="text-sm text-[var(--color-muted)]">{expert.specialty}</p>
             <Link

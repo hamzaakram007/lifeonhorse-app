@@ -51,8 +51,13 @@ export default async function Page() {
                 title={item.title}
                 subtitle={[category, level].filter(Boolean).join(" · ") || undefined}
                 image={item.cover_image}
-                badges={<>{item.is_featured ? <FeaturedBadge /> : null}</>}
-                meta={item.is_free ? "Free" : "Paid"}
+                badges={
+                  <>
+                    {item.is_featured ? <FeaturedBadge /> : null}
+                    <span className="badge">{item.is_free ? "Free" : "Paid"}</span>
+                  </>
+                }
+                meta={item.is_free ? "Open access" : "Checkout later"}
               />
             );
           })}
