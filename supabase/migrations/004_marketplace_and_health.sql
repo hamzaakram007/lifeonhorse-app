@@ -1,3 +1,8 @@
+-- DO_NOT_APPLY on live project ebgzqmnewtdippegphou.
+-- Alternate schema (sellers / marketplace_services) conflicts with the applied
+-- 001_initial_schema lineage (seller_profiles / services). Kept for reference only.
+-- See docs/SUPABASE_STATE.md.
+
 -- Marketplace expansion + Horse Health & Expert Help
 
 -- Extend entity_kind for inquiries, reports, favorites
