@@ -5,6 +5,9 @@ import { ListingCard, EmptyState, FeaturedBadge } from "@/components/ui";
 import { SectionHero } from "@/components/layout/SectionHero";
 import { formatLocation } from "@/lib/location";
 import { SECTION_IMAGES } from "@/lib/section-images";
+import { EVENT_TYPES } from "@/lib/constants";
+import { labelFromOptions } from "@/lib/labels";
+import { firstPhoto, parsePhotoList } from "@/lib/storage/upload";
 
 export const metadata: Metadata = {
   title: "Events",
@@ -36,18 +39,21 @@ export default async function Page() {
         />
       ) : (
         <div className="listing-grid">
-          {data.map((item) => (
-            <ListingCard
-              key={item.id}
-              href={`/events/${item.id}`}
-              title={item.title}
-              subtitle={item.event_type ?? undefined}
-              image={Array.isArray(item.photos) ? item.photos[0] : null}
-              photoCount={Array.isArray(item.photos) ? item.photos.length : undefined}
-              badges={<>{item.is_featured ? <FeaturedBadge /> : null}</>}
-              meta={formatLocation(item.city, item.country_code)}
-            />
-          ))}
+          {data.map((item) => {
+            const photos = parsePhotoList(item.photos);
+            return (
+              <ListingCard
+                key={item.id}
+                href={`/events/${item.id}`}
+                title={item.title}
+                subtitle={labelFromOptions(EVENT_TYPES, item.event_type) || undefined}
+                image={firstPhoto(item.photos)}
+                photoCount={photos.length || undefined}
+                badges={<>{item.is_featured ? <FeaturedBadge /> : null}</>}
+                meta={formatLocation(item.city, item.country_code)}
+              />
+            );
+          })}
         </div>
       )}
     </div>

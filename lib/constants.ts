@@ -60,10 +60,23 @@ export const EVENT_TYPES = [
   { value: "horse_show", label: "Horse Show" },
   { value: "riding_camp", label: "Riding Camp" },
   { value: "workshop", label: "Workshop" },
+  { value: "clinic", label: "Clinic" },
+  { value: "competition", label: "Competition" },
   { value: "auction", label: "Auction" },
+  { value: "trail_ride", label: "Trail Ride" },
+  { value: "conference", label: "Conference" },
   { value: "club_meetup", label: "Club Meetup" },
   { value: "rescue_campaign", label: "Rescue Campaign" },
   { value: "other", label: "Other Event" },
+] as const;
+
+export const COURSE_CATEGORIES = [
+  { value: "training", label: "Training" },
+  { value: "breeding", label: "Breeding" },
+  { value: "health", label: "Health" },
+  { value: "polo", label: "Polo" },
+  { value: "nutrition", label: "Nutrition" },
+  { value: "other", label: "Other" },
 ] as const;
 
 export const NAV_LINKS = [

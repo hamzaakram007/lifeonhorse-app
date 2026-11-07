@@ -30,25 +30,25 @@ BEGIN
 
   INSERT INTO clubs (owner_id, name, slug, description, club_type, country, city, logo_url, photos, member_count, horse_count, status, is_featured, is_verified, training_available, membership_available)
   VALUES
-    (owner_id, 'Lahore Polo & Equestrian Club', 'lahore-polo-club', 'Demo club profile.', 'polo', 'PK', 'Lahore', '/images/demo/club-1.jpg', '["/images/demo/club-1.jpg"]', 120, 45, 'published', true, true, true, false),
-    (owner_id, 'Istanbul Riding Academy', 'istanbul-riding-academy', 'Demo riding school.', 'riding_school', 'TR', 'Istanbul', '/images/sections/clubs.jpg', '["/images/sections/clubs.jpg"]', 85, 20, 'published', true, false, true, true),
-    (owner_id, 'Baku Cultural Horse Society', 'baku-cultural-horse', 'Cultural heritage and riding.', 'cultural', 'AZ', 'Baku', NULL, '["/images/demo/club-1.jpg"]', 40, 10, 'published', false, false, false, false),
-    (owner_id, 'Mumbai Equestrian Centre', 'mumbai-equestrian-centre', 'Sports and training centre.', 'equestrian_sports', 'IN', 'Mumbai', NULL, '["/images/sections/clubs.jpg"]', 60, 30, 'published', false, false, true, false)
-  ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name, status = 'published';
+    (owner_id, 'Lahore Polo & Equestrian Club', 'lahore-polo-club', 'Demo club profile.', 'polo', 'PK', 'Lahore', '/images/demo/club-polo.jpg', '["/images/demo/club-polo.jpg"]', 120, 45, 'published', true, true, true, false),
+    (owner_id, 'Istanbul Riding Academy', 'istanbul-riding-academy', 'Demo riding school.', 'riding_school', 'TR', 'Istanbul', '/images/demo/club-riding.jpg', '["/images/demo/club-riding.jpg"]', 85, 20, 'published', true, false, true, true),
+    (owner_id, 'Baku Cultural Horse Society', 'baku-cultural-horse', 'Cultural heritage and riding.', 'cultural', 'AZ', 'Baku', '/images/demo/club-community.jpg', '["/images/demo/club-community.jpg"]', 40, 10, 'published', false, false, false, false),
+    (owner_id, 'Mumbai Equestrian Centre', 'mumbai-equestrian-centre', 'Sports and training centre.', 'equestrian_sports', 'IN', 'Mumbai', '/images/demo/club-sports.jpg', '["/images/demo/club-sports.jpg"]', 60, 30, 'published', false, false, true, false)
+  ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name, logo_url = EXCLUDED.logo_url, photos = EXCLUDED.photos, status = 'published';
 
   INSERT INTO trainers (user_id, display_name, slug, trainer_type, country, city, experience_years, bio, photos, status, is_verified, is_featured)
   VALUES
-    (owner_id, 'Ahmed Khan — Polo Coach', 'ahmed-polo-coach', 'polo', 'PK', 'Lahore', 15, 'Polo coach with national team experience.', '["/images/demo/trainer-1.jpg"]', 'published', true, true),
-    (owner_id, 'Priya Sharma — Riding Instructor', 'priya-riding-instructor', 'riding', 'IN', 'Mumbai', 10, 'Beginner to advanced riding lessons.', '["/images/home/feature-trainers.jpg"]', 'published', false, false),
-    (owner_id, 'Mehmet Demir — Farrier', 'mehmet-demir-farrier', 'farrier', 'TR', 'Ankara', 12, 'Mobile farrier across central Turkey.', '["/images/sections/services.jpg"]', 'published', true, false)
-  ON CONFLICT (slug) DO UPDATE SET display_name = EXCLUDED.display_name, status = 'published';
+    (owner_id, 'Ahmed Khan', 'ahmed-polo-coach', 'polo', 'PK', 'Lahore', 15, 'Polo coach with national team experience.', '["/images/demo/trainer-polo.jpg"]', 'published', true, true),
+    (owner_id, 'Priya Sharma', 'priya-riding-instructor', 'riding', 'IN', 'Mumbai', 10, 'Beginner to advanced riding lessons.', '["/images/demo/trainer-dressage.jpg"]', 'published', false, false),
+    (owner_id, 'Mehmet Demir', 'mehmet-demir-farrier', 'farrier', 'TR', 'Ankara', 12, 'Mobile farrier across central Turkey.', '["/images/demo/trainer-vet.jpg"]', 'published', true, false)
+  ON CONFLICT (slug) DO UPDATE SET display_name = EXCLUDED.display_name, photos = EXCLUDED.photos, status = 'published';
 
   INSERT INTO events (host_id, title, slug, description, event_type, country, city, start_date, photos, status, is_featured)
   VALUES
-    (owner_id, 'Spring Polo Tournament — Lahore', 'spring-polo-lahore', 'Annual spring polo event.', 'polo_match', 'PK', 'Lahore', now() + interval '30 days', '["/images/demo/event-1.jpg"]', 'published', true),
-    (owner_id, 'Istanbul Horse Show 2026', 'istanbul-horse-show-2026', 'International show jumping.', 'horse_show', 'TR', 'Istanbul', now() + interval '60 days', '["/images/sections/events.jpg"]', 'published', false),
-    (owner_id, 'Delhi Riding Camp — Beginners', 'delhi-riding-camp', 'Weekend camp for new riders.', 'riding_camp', 'IN', 'Delhi', now() + interval '14 days', '[]', 'published', false)
-  ON CONFLICT (slug) DO UPDATE SET title = EXCLUDED.title, status = 'published';
+    (owner_id, 'Spring Polo Tournament — Lahore', 'spring-polo-lahore', 'Annual spring polo event.', 'polo_match', 'PK', 'Lahore', now() + interval '30 days', '["/images/demo/event-polo.jpg"]', 'published', true),
+    (owner_id, 'Istanbul Horse Show 2026', 'istanbul-horse-show-2026', 'International show jumping.', 'horse_show', 'TR', 'Istanbul', now() + interval '60 days', '["/images/demo/event-clinic.jpg"]', 'published', false),
+    (owner_id, 'Delhi Riding Camp — Beginners', 'delhi-riding-camp', 'Weekend camp for new riders.', 'riding_camp', 'IN', 'Delhi', now() + interval '14 days', '["/images/demo/event-trail.jpg"]', 'published', false)
+  ON CONFLICT (slug) DO UPDATE SET title = EXCLUDED.title, photos = EXCLUDED.photos, status = 'published';
 
   INSERT INTO blog_posts (author_id, category_id, title, slug, excerpt, content, cover_image, status, is_featured)
   VALUES
@@ -57,11 +57,11 @@ BEGIN
     (owner_id, cat_culture, 'Horse Culture in Azerbaijan', 'horse-culture-azerbaijan', 'Traditions and modern clubs.', 'Demo culture article.', '/images/blog/hoof.jpg', 'published', false)
   ON CONFLICT (slug) DO UPDATE SET title = EXCLUDED.title, status = 'published';
 
-  INSERT INTO courses (creator_id, title, slug, description, category, thumbnail_url, is_free, price, currency, status, is_featured)
+  INSERT INTO courses (creator_id, title, slug, description, category, cover_image, is_free, price, currency, status, is_featured)
   VALUES
     (owner_id, 'Horse Care Basics', 'horse-care-basics', 'Feeding, grooming, and stable management.', 'Horse Care', '/images/demo/course-1.jpg', true, NULL, NULL, 'published', true),
-    (owner_id, 'Introduction to Polo', 'introduction-to-polo', 'Rules, equipment, and beginner drills.', 'Training', NULL, false, 2500, 'PKR', 'published', false)
-  ON CONFLICT (slug) DO UPDATE SET title = EXCLUDED.title, status = 'published';
+    (owner_id, 'Introduction to Polo', 'introduction-to-polo', 'Rules, equipment, and beginner drills.', 'Training', '/images/demo/course-polo.jpg', false, 2500, 'PKR', 'published', false)
+  ON CONFLICT (slug) DO UPDATE SET title = EXCLUDED.title, cover_image = EXCLUDED.cover_image, status = 'published';
 
   SELECT id INTO course_id FROM courses WHERE slug = 'horse-care-basics';
   DELETE FROM lessons WHERE course_id = course_id;

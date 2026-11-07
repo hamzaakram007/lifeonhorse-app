@@ -5,6 +5,9 @@ import { ListingCard, EmptyState, VerifiedBadge, FeaturedBadge } from "@/compone
 import { SectionHero } from "@/components/layout/SectionHero";
 import { formatLocation } from "@/lib/location";
 import { SECTION_IMAGES } from "@/lib/section-images";
+import { CLUB_TYPES } from "@/lib/constants";
+import { labelFromOptions } from "@/lib/labels";
+import { firstPhoto } from "@/lib/storage/upload";
 
 export const metadata: Metadata = {
   title: "Clubs",
@@ -15,7 +18,7 @@ export default async function Page() {
   const supabase = await createClient();
   const { data } = await supabase
     .from("clubs")
-    .select("id, name, club_type, country_code, city, logo_url, is_verified, is_featured")
+    .select("id, name, club_type, country_code, city, logo_url, photos, is_verified, is_featured")
     .eq("status", "published")
     .order("is_featured", { ascending: false })
     .limit(24);
@@ -41,8 +44,9 @@ export default async function Page() {
               key={item.id}
               href={`/clubs/${item.id}`}
               title={item.name}
-              subtitle={item.club_type ?? undefined}
-              image={item.logo_url}
+              subtitle={labelFromOptions(CLUB_TYPES, item.club_type) || undefined}
+              image={firstPhoto(item.photos) ?? item.logo_url}
+              photoCount={Array.isArray(item.photos) ? item.photos.length : undefined}
               badges={
                 <>
                   {item.is_verified ? <VerifiedBadge /> : null}
