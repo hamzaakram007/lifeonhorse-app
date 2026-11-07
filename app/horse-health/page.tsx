@@ -40,8 +40,13 @@ export default function HorseHealthPage() {
       <div className="mt-10 rounded-xl border border-amber-200 bg-amber-50 p-6">
         <h3 className="font-semibold text-amber-900">Important safety notice</h3>
         <p className="mt-2 text-sm text-amber-800">
-          LifeOnHorse does not replace a licensed veterinarian. The information and expert listings on this platform are for guidance and coordination only.
-          For emergencies — colic, severe injury, difficulty breathing, or any life-threatening condition — contact a local vet or emergency equine clinic immediately.
+          <strong>Emergency:</strong> LifeOnHorse is NOT for emergencies and does not replace a licensed veterinarian.
+          The information and expert listings on this platform are for guidance and coordination only.
+          For emergencies — colic, severe bleeding, inability to stand, difficulty breathing, or any life-threatening condition —
+          contact a local vet or emergency equine clinic immediately.{" "}
+          <Link href="/legal/health-disclaimer" className="underline">
+            Full disclaimer
+          </Link>
         </p>
       </div>
     </div>

@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea, Label } from "@/components/ui/Input";
-import { CountrySelect } from "@/components/ui/CountrySelect";
 import { ImageUpload } from "@/components/ui/ImageUpload";
 import { STORAGE_BUCKETS } from "@/lib/storage/upload";
 
@@ -14,7 +13,7 @@ export default function NewStoryPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [photos, setPhotos] = useState<string[]>([]);
-  const [form, setForm] = useState({ title: "", content: "", country: "PK" });
+  const [form, setForm] = useState({ title: "", content: "" });
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -33,11 +32,10 @@ export default function NewStoryPage() {
       return;
     }
 
-    const { error: insertError } = await supabase.from("user_stories").insert({
+    const { error: insertError } = await supabase.from("community_posts").insert({
       author_id: user.id,
       title: form.title.trim(),
       content: form.content,
-      country: form.country,
       photos,
       status: "published",
     });
@@ -62,10 +60,6 @@ export default function NewStoryPage() {
         <div>
           <Label required>Story</Label>
           <Textarea required rows={8} value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} />
-        </div>
-        <div>
-          <Label>Country</Label>
-          <CountrySelect value={form.country} onChange={(country) => setForm({ ...form, country })} />
         </div>
         <ImageUpload bucket={STORAGE_BUCKETS.gallery} label="Story photos" multiple maxFiles={4} value={photos} onChange={setPhotos} />
         {error && <p className="text-sm text-red-600">{error}</p>}
