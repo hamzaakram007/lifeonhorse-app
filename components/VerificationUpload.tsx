@@ -23,9 +23,12 @@ export function VerificationUpload({ entityType, entityId }: { entityType: strin
   return (
     <div className="card p-4">
       <h3 className="font-semibold">Verification documents</h3>
-      <p className="text-sm text-[var(--color-muted)]">Upload business license or credentials for verified badge.</p>
+      <p className="text-sm text-[var(--color-muted)]">
+        Upload a business license, certification, or credential. Admins review submissions before
+        granting a verified badge.
+      </p>
       <input type="file" accept="image/*,.pdf" className="mt-2 text-sm" onChange={upload} />
-      {status && <p className="mt-2 text-sm">{status}</p>}
+      {status ? <p className="mt-2 text-sm">{status}</p> : null}
     </div>
   );
 }

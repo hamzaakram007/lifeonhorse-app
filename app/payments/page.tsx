@@ -24,9 +24,40 @@ export default function PaymentsPage() {
       <div>
         <h1 className="text-3xl font-bold">Payments & Billing</h1>
         <p className="mt-2 text-[var(--color-muted)]">
-          LifeOnHorse supports manual payments and proof upload while full automated checkout rolls out by region.
+          Automated checkout is not live yet. Featured placements, seller plans, and course enrollments
+          are confirmed manually after payment proof.
         </p>
       </div>
+
+      <div className="card space-y-3 p-6">
+        <h2 className="text-xl font-semibold">For sellers & listing owners</h2>
+        <ul className="list-disc space-y-2 pl-5 text-sm text-[var(--color-muted)]">
+          <li>
+            Request featured placement from your{" "}
+            <Link href="/dashboard/seller" className="text-[var(--color-primary)] hover:underline">
+              seller
+            </Link>
+            ,{" "}
+            <Link href="/dashboard/club" className="text-[var(--color-primary)] hover:underline">
+              club
+            </Link>
+            , or{" "}
+            <Link href="/dashboard/trainer" className="text-[var(--color-primary)] hover:underline">
+              trainer
+            </Link>{" "}
+            dashboard — admins approve and set the featured flag.
+          </li>
+          <li>
+            Marketplace deals may include a platform commission (typically ~5%). Admins record these
+            manually; you will be contacted with transfer instructions when a deal closes.
+          </li>
+          <li>
+            Paid courses show price and lock non-preview lessons until enrollment checkout ships. See
+            the course page for current “payments later” messaging.
+          </li>
+        </ul>
+      </div>
+
       <div className="card p-6">
         <h2 className="text-xl font-semibold">Available plans</h2>
         <ul className="mt-4 space-y-2 text-sm">
@@ -35,10 +66,16 @@ export default function PaymentsPage() {
           <li>Club premium — from $39 / month</li>
           <li>Expert premium — from $49 / month</li>
         </ul>
-        <Link href="/dashboard" className="btn btn-primary mt-4 inline-flex">
-          Request featured placement
-        </Link>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <Link href="/dashboard" className="btn btn-primary inline-flex">
+            Go to dashboard
+          </Link>
+          <Link href="/dashboard/seller" className="btn btn-secondary inline-flex">
+            Seller listings
+          </Link>
+        </div>
       </div>
+
       <div>
         <h2 className="text-xl font-semibold">Country payment guidance</h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">

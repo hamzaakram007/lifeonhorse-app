@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FeaturedRequestButton } from "@/components/FeaturedRequestButton";
 
 export type OwnedListItem = {
   id: string;
@@ -7,6 +8,10 @@ export type OwnedListItem = {
   href: string;
   editHref?: string | null;
   meta?: string | null;
+  /** When set, show featured request CTA for this listing. */
+  featureEntityType?: string | null;
+  isFeatured?: boolean;
+  featurePending?: boolean;
 };
 
 export function OwnedList({
@@ -53,7 +58,7 @@ export function OwnedList({
                   {[item.status, item.meta].filter(Boolean).join(" · ")}
                 </p>
               </div>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 <Link href={item.href} className="text-[var(--color-primary)] hover:underline">
                   View
                 </Link>
@@ -61,6 +66,14 @@ export function OwnedList({
                   <Link href={item.editHref} className="text-[var(--color-primary)] hover:underline">
                     Edit
                   </Link>
+                ) : null}
+                {item.featureEntityType ? (
+                  <FeaturedRequestButton
+                    entityType={item.featureEntityType}
+                    entityId={item.id}
+                    isFeatured={item.isFeatured}
+                    hasPending={item.featurePending}
+                  />
                 ) : null}
               </div>
             </li>

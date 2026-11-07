@@ -17,25 +17,35 @@ export default async function SellerDashboardPage() {
     .eq("user_id", profile.id)
     .maybeSingle();
 
-  const [{ data: horses }, { data: products }, { data: services }] = seller
-    ? await Promise.all([
-        supabase
-          .from("horses")
-          .select("id, title, status, is_featured, listing_type")
-          .eq("owner_id", profile.id)
-          .order("created_at", { ascending: false }),
-        supabase
-          .from("products")
-          .select("id, title, status, category")
-          .eq("seller_id", seller.id)
-          .order("created_at", { ascending: false }),
-        supabase
-          .from("services")
-          .select("id, title, status, category")
-          .eq("seller_id", seller.id)
-          .order("created_at", { ascending: false }),
-      ])
-    : [{ data: [] }, { data: [] }, { data: [] }];
+  const [{ data: horses }, { data: products }, { data: services }, { data: pendingFeatured }] =
+    seller
+      ? await Promise.all([
+          supabase
+            .from("horses")
+            .select("id, title, status, is_featured, listing_type")
+            .eq("owner_id", profile.id)
+            .order("created_at", { ascending: false }),
+          supabase
+            .from("products")
+            .select("id, title, status, category, is_featured")
+            .eq("seller_id", seller.id)
+            .order("created_at", { ascending: false }),
+          supabase
+            .from("services")
+            .select("id, title, status, category, is_featured")
+            .eq("seller_id", seller.id)
+            .order("created_at", { ascending: false }),
+          supabase
+            .from("featured_listing_requests")
+            .select("entity_type, entity_id")
+            .eq("user_id", profile.id)
+            .eq("status", "pending"),
+        ])
+      : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }];
+
+  const pendingKey = new Set(
+    (pendingFeatured ?? []).map((r) => `${r.entity_type}:${r.entity_id}`)
+  );
 
   const horseItems =
     horses?.map((h) => ({
@@ -45,6 +55,9 @@ export default async function SellerDashboardPage() {
       href: `/marketplace/horses/${h.id}`,
       editHref: `/marketplace/horses/${h.id}/edit`,
       meta: [h.listing_type, h.is_featured ? "featured" : null].filter(Boolean).join(" · ") || null,
+      featureEntityType: "horse",
+      isFeatured: Boolean(h.is_featured),
+      featurePending: pendingKey.has(`horse:${h.id}`),
     })) ?? [];
 
   const productItems =
@@ -54,6 +67,9 @@ export default async function SellerDashboardPage() {
       status: p.status,
       href: `/marketplace/products/${p.id}`,
       meta: p.category,
+      featureEntityType: "product",
+      isFeatured: Boolean(p.is_featured),
+      featurePending: pendingKey.has(`product:${p.id}`),
     })) ?? [];
 
   const serviceItems =
@@ -63,6 +79,9 @@ export default async function SellerDashboardPage() {
       status: s.status,
       href: `/marketplace/services/${s.id}`,
       meta: s.category,
+      featureEntityType: "service",
+      isFeatured: Boolean(s.is_featured),
+      featurePending: pendingKey.has(`service:${s.id}`),
     })) ?? [];
 
   return (
@@ -73,7 +92,10 @@ export default async function SellerDashboardPage() {
         </Link>
         <h1 className="mt-2 text-2xl font-bold">Seller dashboard</h1>
         <p className="text-sm text-[var(--color-muted)]">
-          Horses, products, and services you list.
+          Horses, products, and services you list.{" "}
+          <Link href="/payments" className="text-[var(--color-primary)] hover:underline">
+            Payments & commissions
+          </Link>
         </p>
       </div>
 

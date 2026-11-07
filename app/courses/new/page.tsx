@@ -193,6 +193,10 @@ export default function NewCoursePage() {
                 onChange={(e) => setForm({ ...form, currency: e.target.value })}
               />
             </div>
+            <p className="sm:col-span-2 text-sm text-[var(--color-muted)]">
+              Paid flag is stored now; Stripe/checkout is not integrated yet. Learners see a
+              “payments later” notice and can preview the first lesson only.
+            </p>
           </>
         )}
       </div>
