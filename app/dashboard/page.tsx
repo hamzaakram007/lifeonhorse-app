@@ -24,7 +24,7 @@ const roleLinks: Record<string, { href: string; label: string }[]> = {
   member: [
     { href: "/dashboard/favorites", label: "Saved listings" },
     { href: "/community/new", label: "Share a story" },
-    { href: "/health", label: "Horse health" },
+    { href: "/horse-health", label: "Horse health" },
   ],
 };
 

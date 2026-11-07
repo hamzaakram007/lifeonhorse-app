@@ -9,7 +9,14 @@ import { ImageUpload } from "@/components/ui/ImageUpload";
 import { STORAGE_BUCKETS } from "@/lib/storage/upload";
 
 export default function ProfileEditPage() {
-  const [form, setForm] = useState({ full_name: "", phone: "", country: "", city: "", bio: "", avatar_url: "" });
+  const [form, setForm] = useState({
+    full_name: "",
+    phone: "",
+    country_code: "",
+    city: "",
+    bio: "",
+    avatar_url: "",
+  });
   const [avatar, setAvatar] = useState<string[]>([]);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -29,7 +36,7 @@ export default function ProfileEditPage() {
             setForm({
               full_name: data.full_name ?? "",
               phone: data.phone ?? "",
-              country: data.country ?? "",
+              country_code: data.country_code ?? "",
               city: data.city ?? "",
               bio: data.bio ?? "",
               avatar_url: data.avatar_url ?? "",
@@ -52,7 +59,14 @@ export default function ProfileEditPage() {
 
     const { error: updateError } = await supabase
       .from("profiles")
-      .update({ ...form, avatar_url: avatar[0] ?? form.avatar_url ?? null })
+      .update({
+        full_name: form.full_name || null,
+        phone: form.phone || null,
+        country_code: form.country_code || null,
+        city: form.city || null,
+        bio: form.bio || null,
+        avatar_url: avatar[0] ?? form.avatar_url ?? null,
+      })
       .eq("id", user.id);
 
     if (updateError) {
@@ -79,7 +93,11 @@ export default function ProfileEditPage() {
         </div>
         <div>
           <Label>Country</Label>
-          <CountrySelect value={form.country} onChange={(country) => setForm({ ...form, country })} placeholder="—" />
+          <CountrySelect
+            value={form.country_code}
+            onChange={(country_code) => setForm({ ...form, country_code })}
+            placeholder="—"
+          />
         </div>
         <div>
           <Label>City</Label>

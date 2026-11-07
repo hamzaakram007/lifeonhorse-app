@@ -15,7 +15,7 @@ const staticRoutes = [
   "/courses",
   "/blog",
   "/community",
-  "/health",
+  "/horse-health",
   "/payments",
   "/support",
 ];
