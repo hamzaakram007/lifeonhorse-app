@@ -1,39 +1,58 @@
 import Link from "next/link";
+import { SectionHero } from "@/components/layout/SectionHero";
+import { SECTION_IMAGES } from "@/lib/section-images";
 
 export const metadata = { title: "Horse Health & Expert Help" };
 
 export default function HorseHealthPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
-      <div className="rounded-xl bg-gradient-to-br from-emerald-800 to-emerald-950 px-8 py-12 text-white">
-        <h1 className="text-4xl font-bold">Horse Health & Expert Help</h1>
-        <p className="mt-4 max-w-2xl text-lg text-emerald-100">
-          Connect with verified equine experts and get guidance on horse health issues. For emergencies, contact a local veterinarian immediately.
-        </p>
-        <div className="mt-6 flex flex-wrap gap-3">
-          <Link href="/horse-health/experts" className="rounded-lg bg-white px-5 py-2.5 font-medium text-emerald-900 hover:bg-emerald-50">
-            Find an expert
-          </Link>
-          <Link href="/horse-health/requests/new" className="rounded-lg border border-white/40 px-5 py-2.5 font-medium text-white hover:bg-white/10">
-            Submit a health request
-          </Link>
-        </div>
-      </div>
+      <SectionHero
+        title="Horse Health & Expert Help"
+        subtitle="Connect with verified equine experts and get guidance on horse health issues. For emergencies, contact a local veterinarian immediately."
+        image={SECTION_IMAGES.health}
+        action={{ href: "/horse-health/experts", label: "Find an expert" }}
+      >
+        <Link
+          href="/horse-health/requests/new"
+          className="mt-4 inline-flex rounded-lg border border-white/40 px-5 py-2.5 text-sm font-medium text-white no-underline hover:bg-white/10"
+        >
+          Submit a health request
+        </Link>
+      </SectionHero>
 
       <div className="mt-10 grid gap-6 md:grid-cols-2">
-        <Link href="/horse-health/experts" className="rounded-xl border border-stone-200 bg-white p-6 transition hover:shadow-md">
-          <span className="text-3xl">🩺</span>
-          <h2 className="mt-3 text-xl font-semibold">Expert Directory</h2>
-          <p className="mt-2 text-stone-600">
-            Browse vets, farriers, nutrition experts, and other equine specialists. Filter by category and location.
-          </p>
+        <Link
+          href="/horse-health/experts"
+          className="group relative overflow-hidden rounded-xl no-underline"
+        >
+          <div
+            className="absolute inset-0 bg-cover bg-center transition duration-500 group-hover:scale-105"
+            style={{ backgroundImage: 'url("/images/demo/expert-1.jpg")' }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/40 to-black/15" />
+          <div className="relative z-10 flex min-h-[220px] flex-col justify-end p-6 text-white">
+            <h2 className="font-serif text-xl font-semibold">Expert Directory</h2>
+            <p className="mt-2 text-sm text-white/85">
+              Browse vets, farriers, nutrition experts, and other equine specialists. Filter by category and location.
+            </p>
+          </div>
         </Link>
-        <Link href="/horse-health/requests/new" className="rounded-xl border border-stone-200 bg-white p-6 transition hover:shadow-md">
-          <span className="text-3xl">🐴</span>
-          <h2 className="mt-3 text-xl font-semibold">Ask for Help</h2>
-          <p className="mt-2 text-stone-600">
-            Describe your horse&apos;s symptoms, upload photos, and get connected with the right expert.
-          </p>
+        <Link
+          href="/horse-health/requests/new"
+          className="group relative overflow-hidden rounded-xl no-underline"
+        >
+          <div
+            className="absolute inset-0 bg-cover bg-center transition duration-500 group-hover:scale-105"
+            style={{ backgroundImage: 'url("/images/sections/health.jpg")' }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/40 to-black/15" />
+          <div className="relative z-10 flex min-h-[220px] flex-col justify-end p-6 text-white">
+            <h2 className="font-serif text-xl font-semibold">Ask for Help</h2>
+            <p className="mt-2 text-sm text-white/85">
+              Describe your horse&apos;s symptoms, upload photos, and get connected with the right expert.
+            </p>
+          </div>
         </Link>
       </div>
 

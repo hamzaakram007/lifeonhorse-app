@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { parsePhotoList } from "@/lib/storage/upload";
+import { SITE_IMAGES } from "@/lib/section-images";
 import { cn } from "@/lib/utils";
 
 type ListingGalleryProps = {
@@ -17,9 +18,12 @@ export function ListingGallery({ photos, videoUrl, alt = "Listing photo", classN
 
   if (!list.length && !videoUrl) {
     return (
-      <div className={cn("flex aspect-[16/10] items-center justify-center rounded-xl bg-stone-100 text-5xl text-stone-400", className)}>
-        🐴
-      </div>
+      <div
+        className={cn("aspect-[16/10] rounded-xl bg-stone-100 bg-cover bg-center", className)}
+        style={{ backgroundImage: `url("${SITE_IMAGES.fallbackEmpty}")` }}
+        role="img"
+        aria-label={alt}
+      />
     );
   }
 

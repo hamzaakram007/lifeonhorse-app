@@ -55,7 +55,7 @@ export default async function ExpertsPage({
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {experts?.map((e) => (
           <Card key={e.id} href={`/horse-health/experts/${e.slug}`}>
-            <PhotoCover photos={e.avatar_url ? [e.avatar_url] : e.photos} alt={e.name} className="aspect-square rounded-lg" fallback={<span className="text-6xl">👨‍⚕️</span>} />
+            <PhotoCover photos={e.avatar_url ? [e.avatar_url] : e.photos} alt={e.name} className="aspect-square rounded-lg" />
             <div className="mt-2 flex flex-wrap gap-1">
               <Badge>{e.category.replace(/_/g, " ")}</Badge>
               {e.is_verified && <Badge variant="verified">Verified</Badge>}

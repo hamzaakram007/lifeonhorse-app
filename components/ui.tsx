@@ -17,9 +17,11 @@ export function EmptyState({
 }) {
   return (
     <div className="empty-state card p-10">
-      <div className="mx-auto mb-4 text-5xl opacity-60" aria-hidden>
-        🐴
-      </div>
+      <div
+        className="mx-auto mb-4 h-28 w-full max-w-xs rounded-xl bg-cover bg-center opacity-90"
+        style={{ backgroundImage: 'url("/images/fallback-empty.jpg")' }}
+        aria-hidden
+      />
       <h3 className="font-serif text-xl font-semibold text-[var(--color-text)]">{title}</h3>
       {description && <p className="mt-2 max-w-md mx-auto">{description}</p>}
       {action && <div className="mt-6">{action}</div>}

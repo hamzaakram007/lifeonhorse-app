@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { ListingCard, EmptyState, VerifiedBadge } from "@/components/ui";
+import { SectionHero } from "@/components/layout/SectionHero";
+import { SECTION_IMAGES } from "@/lib/section-images";
 
 export const metadata: Metadata = {
   title: "Horse Health & Expert Help",
@@ -18,15 +20,14 @@ export default async function HealthPage() {
         <strong>Emergency:</strong> LifeOnHorse is NOT for emergencies. Contact a licensed veterinarian immediately for colic, severe bleeding, or inability to stand.
         <Link href="/legal/health-disclaimer" className="ml-2 underline">Full disclaimer</Link>
       </div>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-bold">Horse Health & Expert Help</h1>
-          <p className="text-[var(--color-muted)]">Vets, nutritionists, farriers, and specialists</p>
-        </div>
-        <div className="flex gap-2">
-          <Link href="/health/request" className="btn btn-primary">Submit health request</Link>
-          <Link href="/health/experts/new" className="btn btn-secondary">Become an expert</Link>
-        </div>
+      <SectionHero
+        title="Horse Health & Expert Help"
+        subtitle="Vets, nutritionists, farriers, and specialists"
+        image={SECTION_IMAGES.health}
+        action={{ href: "/health/request", label: "Submit health request" }}
+      />
+      <div className="flex flex-wrap gap-2">
+        <Link href="/health/experts/new" className="btn btn-secondary">Become an expert</Link>
       </div>
       {!experts?.length ? (
         <EmptyState title="No experts yet" action={<Link href="/health/experts/new" className="btn btn-primary">Register as expert</Link>} />

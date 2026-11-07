@@ -1,5 +1,6 @@
-const ABOUT_IMAGE =
-  "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=900&h=600&fit=crop&q=80";
+import { SITE_IMAGES } from "@/lib/section-images";
+
+const ABOUT_IMAGE = SITE_IMAGES.home.about;
 
 export function AboutSection() {
   return (

@@ -1,23 +1,24 @@
 import Link from "next/link";
+import { SITE_IMAGES } from "@/lib/section-images";
 
 const cards = [
   {
     title: "Horses for Sale",
     cta: "Browse Listings",
     href: "/marketplace/horses",
-    image: "https://images.unsplash.com/photo-1551884831-bbf3cdc6469e?w=800&h=600&fit=crop&q=80",
+    image: SITE_IMAGES.home.featureHorses,
   },
   {
     title: "Find Trainers and Services",
     cta: "Search Directory",
     href: "/trainers",
-    image: "https://images.unsplash.com/photo-1503876466838-947ae2095810?w=800&h=600&fit=crop&fp-y=0.45&q=80",
+    image: SITE_IMAGES.home.featureTrainers,
   },
   {
     title: "Share Your Horse Life",
     cta: "Upload Content",
     href: "/community/gallery/new",
-    image: "https://images.unsplash.com/photo-1509783230216-0b724a2771ec?w=800&h=600&fit=crop&q=80",
+    image: SITE_IMAGES.home.featureCommunity,
   },
 ];
 

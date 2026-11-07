@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { ListingCard, EmptyState, FeaturedBadge } from "@/components/ui";
+import { SectionHero } from "@/components/layout/SectionHero";
 import { parsePhotoList } from "@/lib/storage/upload";
+import { SECTION_IMAGES } from "@/lib/section-images";
 
 export const metadata: Metadata = {
   title: "Products",
@@ -15,13 +17,12 @@ export default async function Page() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-bold">Product Marketplace</h1>
-          <p className="text-[var(--color-muted)]">Tack, feed, equipment and more</p>
-        </div>
-        <Link href="/marketplace/products/new" className="btn btn-primary">+ List product</Link>
-      </div>
+      <SectionHero
+        title="Product Marketplace"
+        subtitle="Tack, feed, equipment and more"
+        image={SECTION_IMAGES.products}
+        action={{ href: "/marketplace/products/new", label: "List product" }}
+      />
       {!data?.length ? (
         <EmptyState title="No listings yet" description="Be the first to add one." action={<Link href="/marketplace/products/new" className="btn btn-primary">List product</Link>} />
       ) : (

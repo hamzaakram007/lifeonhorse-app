@@ -21,45 +21,45 @@ BEGIN
 
   INSERT INTO horses (owner_id, title, slug, description, listing_type, breed, age, gender, price, currency, country, city, photos, status, is_featured, is_verified)
   VALUES
-    (owner_id, 'Majestic Arabian — Lahore', 'majestic-arabian-lahore', 'Registered Arabian mare, excellent temperament.', 'sale', 'Arabian', 6, 'Mare', 850000, 'PKR', 'PK', 'Lahore', '["https://picsum.photos/seed/loh-horse-1/800/600"]', 'published', true, true),
-    (owner_id, 'Thoroughbred Gelding — Cape Town', 'thoroughbred-cape-town', 'Sound gelding for polo and leisure riding.', 'sale', 'Thoroughbred', 8, 'Gelding', 120000, 'ZAR', 'ZA', 'Cape Town', '["https://picsum.photos/seed/loh-horse-2/800/600"]', 'published', true, false),
-    (owner_id, 'Rescue Pony — Adoption', 'rescue-pony-adoption', 'Gentle pony seeking a caring home.', 'adoption', 'Pony', 4, NULL, NULL, NULL, 'IN', 'Delhi', '["https://picsum.photos/seed/loh-horse-3/800/600"]', 'published', false, false),
-    (owner_id, 'Akhal-Teke Stallion — Ashgabat', 'akhal-teke-stallion', 'Premium stud service.', 'stud', 'Akhal-Teke', 9, 'Stallion', 45000, 'USD', 'TM', 'Ashgabat', '["https://picsum.photos/seed/loh-horse-4/800/600"]', 'published', true, true),
-    (owner_id, 'Warmblood Mare — Istanbul', 'warmblood-istanbul', 'Monthly lease for show jumping.', 'lease', 'Warmblood', 7, 'Mare', 15000, 'TRY', 'TR', 'Istanbul', '["https://picsum.photos/seed/loh-horse-5/800/600"]', 'published', false, false)
+    (owner_id, 'Majestic Arabian — Lahore', 'majestic-arabian-lahore', 'Registered Arabian mare, excellent temperament.', 'sale', 'Arabian', 6, 'Mare', 850000, 'PKR', 'PK', 'Lahore', '["/images/demo/horse-1.jpg"]', 'published', true, true),
+    (owner_id, 'Thoroughbred Gelding — Cape Town', 'thoroughbred-cape-town', 'Sound gelding for polo and leisure riding.', 'sale', 'Thoroughbred', 8, 'Gelding', 120000, 'ZAR', 'ZA', 'Cape Town', '["/images/demo/horse-2.jpg"]', 'published', true, false),
+    (owner_id, 'Rescue Pony — Adoption', 'rescue-pony-adoption', 'Gentle pony seeking a caring home.', 'adoption', 'Pony', 4, NULL, NULL, NULL, 'IN', 'Delhi', '["/images/demo/horse-3.jpg"]', 'published', false, false),
+    (owner_id, 'Akhal-Teke Stallion — Ashgabat', 'akhal-teke-stallion', 'Premium stud service.', 'stud', 'Akhal-Teke', 9, 'Stallion', 45000, 'USD', 'TM', 'Ashgabat', '["/images/demo/horse-4.jpg"]', 'published', true, true),
+    (owner_id, 'Warmblood Mare — Istanbul', 'warmblood-istanbul', 'Monthly lease for show jumping.', 'lease', 'Warmblood', 7, 'Mare', 15000, 'TRY', 'TR', 'Istanbul', '["/images/demo/horse-5.jpg"]', 'published', false, false)
   ON CONFLICT (slug) DO UPDATE SET title = EXCLUDED.title, description = EXCLUDED.description, photos = EXCLUDED.photos, status = 'published';
 
   INSERT INTO clubs (owner_id, name, slug, description, club_type, country, city, logo_url, photos, member_count, horse_count, status, is_featured, is_verified, training_available, membership_available)
   VALUES
-    (owner_id, 'Lahore Polo & Equestrian Club', 'lahore-polo-club', 'Demo club profile.', 'polo', 'PK', 'Lahore', 'https://picsum.photos/seed/loh-club-1/400/400', '["https://picsum.photos/seed/loh-club-1/800/600"]', 120, 45, 'published', true, true, true, false),
-    (owner_id, 'Istanbul Riding Academy', 'istanbul-riding-academy', 'Demo riding school.', 'riding_school', 'TR', 'Istanbul', 'https://picsum.photos/seed/loh-club-2/400/400', '["https://picsum.photos/seed/loh-club-2/800/600"]', 85, 20, 'published', true, false, true, true),
-    (owner_id, 'Baku Cultural Horse Society', 'baku-cultural-horse', 'Cultural heritage and riding.', 'cultural', 'AZ', 'Baku', NULL, '["https://picsum.photos/seed/loh-club-3/800/600"]', 40, 10, 'published', false, false, false, false),
-    (owner_id, 'Mumbai Equestrian Centre', 'mumbai-equestrian-centre', 'Sports and training centre.', 'equestrian_sports', 'IN', 'Mumbai', NULL, '["https://picsum.photos/seed/loh-club-4/800/600"]', 60, 30, 'published', false, false, true, false)
+    (owner_id, 'Lahore Polo & Equestrian Club', 'lahore-polo-club', 'Demo club profile.', 'polo', 'PK', 'Lahore', '/images/demo/club-1.jpg', '["/images/demo/club-1.jpg"]', 120, 45, 'published', true, true, true, false),
+    (owner_id, 'Istanbul Riding Academy', 'istanbul-riding-academy', 'Demo riding school.', 'riding_school', 'TR', 'Istanbul', '/images/sections/clubs.jpg', '["/images/sections/clubs.jpg"]', 85, 20, 'published', true, false, true, true),
+    (owner_id, 'Baku Cultural Horse Society', 'baku-cultural-horse', 'Cultural heritage and riding.', 'cultural', 'AZ', 'Baku', NULL, '["/images/demo/club-1.jpg"]', 40, 10, 'published', false, false, false, false),
+    (owner_id, 'Mumbai Equestrian Centre', 'mumbai-equestrian-centre', 'Sports and training centre.', 'equestrian_sports', 'IN', 'Mumbai', NULL, '["/images/sections/clubs.jpg"]', 60, 30, 'published', false, false, true, false)
   ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name, status = 'published';
 
   INSERT INTO trainers (user_id, display_name, slug, trainer_type, country, city, experience_years, bio, photos, status, is_verified, is_featured)
   VALUES
-    (owner_id, 'Ahmed Khan — Polo Coach', 'ahmed-polo-coach', 'polo', 'PK', 'Lahore', 15, 'Polo coach with national team experience.', '["https://picsum.photos/seed/loh-trainer-1/800/600"]', 'published', true, true),
-    (owner_id, 'Priya Sharma — Riding Instructor', 'priya-riding-instructor', 'riding', 'IN', 'Mumbai', 10, 'Beginner to advanced riding lessons.', '["https://picsum.photos/seed/loh-trainer-2/800/600"]', 'published', false, false),
-    (owner_id, 'Mehmet Demir — Farrier', 'mehmet-demir-farrier', 'farrier', 'TR', 'Ankara', 12, 'Mobile farrier across central Turkey.', '["https://picsum.photos/seed/loh-trainer-3/800/600"]', 'published', true, false)
+    (owner_id, 'Ahmed Khan — Polo Coach', 'ahmed-polo-coach', 'polo', 'PK', 'Lahore', 15, 'Polo coach with national team experience.', '["/images/demo/trainer-1.jpg"]', 'published', true, true),
+    (owner_id, 'Priya Sharma — Riding Instructor', 'priya-riding-instructor', 'riding', 'IN', 'Mumbai', 10, 'Beginner to advanced riding lessons.', '["/images/home/feature-trainers.jpg"]', 'published', false, false),
+    (owner_id, 'Mehmet Demir — Farrier', 'mehmet-demir-farrier', 'farrier', 'TR', 'Ankara', 12, 'Mobile farrier across central Turkey.', '["/images/sections/services.jpg"]', 'published', true, false)
   ON CONFLICT (slug) DO UPDATE SET display_name = EXCLUDED.display_name, status = 'published';
 
   INSERT INTO events (host_id, title, slug, description, event_type, country, city, start_date, photos, status, is_featured)
   VALUES
-    (owner_id, 'Spring Polo Tournament — Lahore', 'spring-polo-lahore', 'Annual spring polo event.', 'polo_match', 'PK', 'Lahore', now() + interval '30 days', '["https://picsum.photos/seed/loh-event-1/800/600"]', 'published', true),
-    (owner_id, 'Istanbul Horse Show 2026', 'istanbul-horse-show-2026', 'International show jumping.', 'horse_show', 'TR', 'Istanbul', now() + interval '60 days', '["https://picsum.photos/seed/loh-event-2/800/600"]', 'published', false),
+    (owner_id, 'Spring Polo Tournament — Lahore', 'spring-polo-lahore', 'Annual spring polo event.', 'polo_match', 'PK', 'Lahore', now() + interval '30 days', '["/images/demo/event-1.jpg"]', 'published', true),
+    (owner_id, 'Istanbul Horse Show 2026', 'istanbul-horse-show-2026', 'International show jumping.', 'horse_show', 'TR', 'Istanbul', now() + interval '60 days', '["/images/sections/events.jpg"]', 'published', false),
     (owner_id, 'Delhi Riding Camp — Beginners', 'delhi-riding-camp', 'Weekend camp for new riders.', 'riding_camp', 'IN', 'Delhi', now() + interval '14 days', '[]', 'published', false)
   ON CONFLICT (slug) DO UPDATE SET title = EXCLUDED.title, status = 'published';
 
   INSERT INTO blog_posts (author_id, category_id, title, slug, excerpt, content, cover_image, status, is_featured)
   VALUES
-    (owner_id, cat_safety, 'Buying Horses Safely in South Asia', 'buying-horses-safely-south-asia', 'Essential tips for first-time buyers.', 'Always verify health records and meet in person.', 'https://picsum.photos/seed/loh-blog-1/1200/630', 'published', true),
-    (owner_id, cat_training, 'Polo Training Basics for New Riders', 'polo-training-basics', 'Stick work, rules, and fitness.', 'Demo training article content.', 'https://picsum.photos/seed/loh-blog-2/1200/630', 'published', false),
-    (owner_id, cat_culture, 'Horse Culture in Azerbaijan', 'horse-culture-azerbaijan', 'Traditions and modern clubs.', 'Demo culture article.', 'https://picsum.photos/seed/loh-blog-3/1200/630', 'published', false)
+    (owner_id, cat_safety, 'Buying Horses Safely in South Asia', 'buying-horses-safely-south-asia', 'Essential tips for first-time buyers.', 'Always verify health records and meet in person.', '/images/blog/buyers.jpg', 'published', true),
+    (owner_id, cat_training, 'Polo Training Basics for New Riders', 'polo-training-basics', 'Stick work, rules, and fitness.', 'Demo training article content.', '/images/blog/training.jpg', 'published', false),
+    (owner_id, cat_culture, 'Horse Culture in Azerbaijan', 'horse-culture-azerbaijan', 'Traditions and modern clubs.', 'Demo culture article.', '/images/blog/hoof.jpg', 'published', false)
   ON CONFLICT (slug) DO UPDATE SET title = EXCLUDED.title, status = 'published';
 
   INSERT INTO courses (creator_id, title, slug, description, category, thumbnail_url, is_free, price, currency, status, is_featured)
   VALUES
-    (owner_id, 'Horse Care Basics', 'horse-care-basics', 'Feeding, grooming, and stable management.', 'Horse Care', 'https://picsum.photos/seed/loh-course-1/800/600', true, NULL, NULL, 'published', true),
+    (owner_id, 'Horse Care Basics', 'horse-care-basics', 'Feeding, grooming, and stable management.', 'Horse Care', '/images/demo/course-1.jpg', true, NULL, NULL, 'published', true),
     (owner_id, 'Introduction to Polo', 'introduction-to-polo', 'Rules, equipment, and beginner drills.', 'Training', NULL, false, 2500, 'PKR', 'published', false)
   ON CONFLICT (slug) DO UPDATE SET title = EXCLUDED.title, status = 'published';
 
@@ -71,7 +71,7 @@ BEGIN
     (course_id, 'Stable safety checklist', 'Fire safety and turnout.', 2);
 
   INSERT INTO sellers (user_id, slug, seller_type, business_name, country, city, logo_url, description, status, is_verified, is_featured)
-  VALUES (owner_id, 'lahore-premier-tack', 'tack_shop', 'Lahore Premier Tack', 'PK', 'Lahore', 'https://picsum.photos/seed/loh-seller-1/400/400', 'Quality tack since 1998.', 'published', true, true)
+  VALUES (owner_id, 'lahore-premier-tack', 'tack_shop', 'Lahore Premier Tack', 'PK', 'Lahore', '/images/sections/sellers.jpg', 'Quality tack since 1998.', 'published', true, true)
   ON CONFLICT (slug) DO UPDATE SET business_name = EXCLUDED.business_name, status = 'published'
   RETURNING id INTO seller_id;
 
@@ -81,24 +81,24 @@ BEGIN
 
   INSERT INTO products (seller_id, title, slug, category, price, currency, country, photos, description, stock_status, status, is_featured)
   VALUES
-    (seller_id, 'English All-Purpose Saddle', 'english-ap-saddle', 'saddles', 45000, 'PKR', 'PK', '["https://picsum.photos/seed/loh-prod-1/800/600"]', 'Demo saddle listing.', 'in_stock', 'published', true),
-    (seller_id, 'Leather Bridle Set', 'leather-bridle-set', 'bridles', 12000, 'PKR', 'PK', '["https://picsum.photos/seed/loh-prod-2/800/600"]', 'Full bridle with reins.', 'in_stock', 'published', false),
-    (seller_id, 'Riding Helmet — ASTM', 'riding-helmet-astm', 'helmets', 8500, 'PKR', 'PK', '["https://picsum.photos/seed/loh-prod-3/800/600"]', 'Safety certified helmet.', 'in_stock', 'published', false),
-    (seller_id, 'Equine Mineral Salt Block', 'mineral-salt-block', 'salt_blocks', 350, 'ZAR', 'ZA', '["https://picsum.photos/seed/loh-prod-4/800/600"]', '25kg mineral block.', 'in_stock', 'published', true)
+    (seller_id, 'English All-Purpose Saddle', 'english-ap-saddle', 'saddles', 45000, 'PKR', 'PK', '["/images/demo/product-1.jpg"]', 'Demo saddle listing.', 'in_stock', 'published', true),
+    (seller_id, 'Leather Bridle Set', 'leather-bridle-set', 'bridles', 12000, 'PKR', 'PK', '["/images/sections/products.jpg"]', 'Full bridle with reins.', 'in_stock', 'published', false),
+    (seller_id, 'Riding Helmet — ASTM', 'riding-helmet-astm', 'helmets', 8500, 'PKR', 'PK', '["/images/sections/products.jpg"]', 'Safety certified helmet.', 'in_stock', 'published', false),
+    (seller_id, 'Equine Mineral Salt Block', 'mineral-salt-block', 'salt_blocks', 350, 'ZAR', 'ZA', '["/images/sections/products.jpg"]', '25kg mineral block.', 'in_stock', 'published', true)
   ON CONFLICT (slug) DO UPDATE SET title = EXCLUDED.title, status = 'published';
 
   INSERT INTO marketplace_services (seller_id, title, slug, category, country, city, photos, description, pricing_model, pricing_details, status, is_featured)
   VALUES
-    (seller_id, 'Horse Transport — Punjab', 'horse-transport-punjab', 'transport', 'PK', 'Lahore', '["https://picsum.photos/seed/loh-svc-1/800/600"]', 'Safe horse transport.', 'quote', 'From PKR 8,000', 'published', true),
-    (seller_id, 'Mobile Farrier — Lahore', 'mobile-farrier-lahore', 'farrier', 'PK', 'Lahore', '["https://picsum.photos/seed/loh-svc-2/800/600"]', 'On-site shoeing.', 'per_visit', 'PKR 4,500 per horse', 'published', false),
-    (seller_id, 'Stable Management Consultation', 'stable-management-consult', 'stable_management', 'PK', 'Lahore', '["https://picsum.photos/seed/loh-svc-3/800/600"]', 'Operational advice for yards.', 'hourly', 'PKR 5,000/hour', 'published', false)
+    (seller_id, 'Horse Transport — Punjab', 'horse-transport-punjab', 'transport', 'PK', 'Lahore', '["/images/demo/service-1.jpg"]', 'Safe horse transport.', 'quote', 'From PKR 8,000', 'published', true),
+    (seller_id, 'Mobile Farrier — Lahore', 'mobile-farrier-lahore', 'farrier', 'PK', 'Lahore', '["/images/sections/services.jpg"]', 'On-site shoeing.', 'per_visit', 'PKR 4,500 per horse', 'published', false),
+    (seller_id, 'Stable Management Consultation', 'stable-management-consult', 'stable_management', 'PK', 'Lahore', '["/images/demo/club-1.jpg"]', 'Operational advice for yards.', 'hourly', 'PKR 5,000/hour', 'published', false)
   ON CONFLICT (slug) DO UPDATE SET title = EXCLUDED.title, status = 'published';
 
   INSERT INTO experts (user_id, slug, name, category, country, city, clinic_name, avatar_url, specialization, online_consultation, emergency_available, bio, status, is_verified, is_featured)
   VALUES
-    (owner_id, 'dr-sana-equine-vet-lahore', 'Dr. Sana Malik', 'vet', 'PK', 'Lahore', 'Equine Care Lahore', 'https://picsum.photos/seed/loh-expert-1/400/400', 'Lameness, vaccinations', true, false, '15 years sport horse medicine.', 'published', true, true),
-    (owner_id, 'dr-ayse-yilmaz-vet', 'Dr. Ayşe Yılmaz', 'vet', 'TR', 'Istanbul', 'Bosphorus Equine Clinic', 'https://picsum.photos/seed/loh-expert-2/400/400', 'Emergency medicine', false, true, '24/7 emergency coverage.', 'published', true, false),
-    (owner_id, 'james-ndlovu-farrier', 'James Ndlovu', 'farrier', 'ZA', 'Johannesburg', NULL, 'https://picsum.photos/seed/loh-expert-3/400/400', 'Hot shoeing', false, false, 'Polo and racing yards.', 'published', false, true)
+    (owner_id, 'dr-sana-equine-vet-lahore', 'Dr. Sana Malik', 'vet', 'PK', 'Lahore', 'Equine Care Lahore', '/images/demo/expert-1.jpg', 'Lameness, vaccinations', true, false, '15 years sport horse medicine.', 'published', true, true),
+    (owner_id, 'dr-ayse-yilmaz-vet', 'Dr. Ayşe Yılmaz', 'vet', 'TR', 'Istanbul', 'Bosphorus Equine Clinic', '/images/sections/health.jpg', 'Emergency medicine', false, true, '24/7 emergency coverage.', 'published', true, false),
+    (owner_id, 'james-ndlovu-farrier', 'James Ndlovu', 'farrier', 'ZA', 'Johannesburg', NULL, '/images/sections/services.jpg', 'Hot shoeing', false, false, 'Polo and racing yards.', 'published', false, true)
   ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name, status = 'published';
 
   IF NOT EXISTS (SELECT 1 FROM health_requests WHERE contact_email = 'demo-health@lifeonhorse.internal') THEN
@@ -112,14 +112,14 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM user_stories WHERE title = 'My First Polo Season in Lahore') THEN
     INSERT INTO user_stories (author_id, title, content, photos, country, status, is_featured)
     VALUES
-      (owner_id, 'My First Polo Season in Lahore', 'Joining Lahore Polo Club changed how I see teamwork on horseback.', '["https://picsum.photos/seed/loh-story-1/800/600"]', 'PK', 'published', true),
-      (owner_id, 'Rescuing a Pony in Delhi', 'We worked with a local NGO to rehome a market pony.', '["https://picsum.photos/seed/loh-story-2/800/600"]', 'IN', 'published', false);
+      (owner_id, 'My First Polo Season in Lahore', 'Joining Lahore Polo Club changed how I see teamwork on horseback.', '["/images/home/feature-community.jpg"]', 'PK', 'published', true),
+      (owner_id, 'Rescuing a Pony in Delhi', 'We worked with a local NGO to rehome a market pony.', '["/images/demo/horse-3.jpg"]', 'IN', 'published', false);
   END IF;
 
   IF (SELECT count(*) FROM horse_gallery WHERE uploader_id = owner_id) < 4 THEN
     INSERT INTO horse_gallery (uploader_id, horse_name, breed, country, caption, image_url, status)
     SELECT owner_id, 'Demo Horse ' || n, CASE WHEN n % 2 = 0 THEN 'Arabian' ELSE 'Thoroughbred' END,
-      (ARRAY['PK','IN','TR','ZA'])[n], 'Gallery demo ' || n, 'https://picsum.photos/seed/loh-gallery-' || n || '/600/600', 'published'
+      (ARRAY['PK','IN','TR','ZA'])[n], 'Gallery demo ' || n, '/images/demo/horse-' || ((n - 1) % 5 + 1) || '.jpg', 'published'
     FROM generate_series(1,4) n;
   END IF;
 
