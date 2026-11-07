@@ -4,6 +4,9 @@ import { createClient } from "@/lib/supabase/server";
 import { ListingCard, EmptyState, FeaturedBadge } from "@/components/ui";
 import { SectionHero } from "@/components/layout/SectionHero";
 import { SECTION_IMAGES } from "@/lib/section-images";
+import { BLOG_CATEGORIES } from "@/lib/constants";
+import { labelFromOptions } from "@/lib/labels";
+import { resolveBlogCover } from "@/lib/blog-covers";
 
 export const metadata: Metadata = {
   title: "Blog",
@@ -35,17 +38,19 @@ export default async function Page() {
         />
       ) : (
         <div className="listing-grid">
-          {data.map((item) => (
-            <ListingCard
-              key={item.id}
-              href={`/blog/${item.id}`}
-              title={item.title}
-              subtitle={item.category ?? undefined}
-              image={item.cover_image}
-              badges={<>{item.is_featured ? <FeaturedBadge /> : null}</>}
-              meta={item.category ?? undefined}
-            />
-          ))}
+          {data.map((item) => {
+            const categoryLabel = labelFromOptions(BLOG_CATEGORIES, item.category) || undefined;
+            return (
+              <ListingCard
+                key={item.id}
+                href={`/blog/${item.id}`}
+                title={item.title}
+                subtitle={categoryLabel}
+                image={resolveBlogCover(item.title, item.cover_image)}
+                badges={<>{item.is_featured ? <FeaturedBadge /> : null}</>}
+              />
+            );
+          })}
         </div>
       )}
     </div>

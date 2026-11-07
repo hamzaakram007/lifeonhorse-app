@@ -52,10 +52,10 @@ BEGIN
 
   INSERT INTO blog_posts (author_id, category_id, title, slug, excerpt, content, cover_image, status, is_featured)
   VALUES
-    (owner_id, cat_safety, 'Buying Horses Safely in South Asia', 'buying-horses-safely-south-asia', 'Essential tips for first-time buyers.', 'Always verify health records and meet in person.', '/images/blog/buyers.jpg', 'published', true),
-    (owner_id, cat_training, 'Polo Training Basics for New Riders', 'polo-training-basics', 'Stick work, rules, and fitness.', 'Demo training article content.', '/images/blog/training.jpg', 'published', false),
-    (owner_id, cat_culture, 'Horse Culture in Azerbaijan', 'horse-culture-azerbaijan', 'Traditions and modern clubs.', 'Demo culture article.', '/images/blog/hoof.jpg', 'published', false)
-  ON CONFLICT (slug) DO UPDATE SET title = EXCLUDED.title, status = 'published';
+    (owner_id, cat_safety, 'Buying Horses Safely in South Asia', 'buying-horses-safely-south-asia', 'Essential tips for first-time buyers.', 'Always verify health records and meet in person.', '/images/blog/blog-buy-south-asia.jpg', 'published', true),
+    (owner_id, cat_training, 'Polo Training Basics for New Riders', 'polo-training-basics', 'Stick work, rules, and fitness.', 'Demo training article content.', '/images/blog/blog-polo-training.jpg', 'published', false),
+    (owner_id, cat_culture, 'Horse Culture in Azerbaijan', 'horse-culture-azerbaijan', 'Traditions and modern clubs.', 'Demo culture article.', '/images/blog/blog-azerbaijan-culture.jpg', 'published', false)
+  ON CONFLICT (slug) DO UPDATE SET title = EXCLUDED.title, cover_image = EXCLUDED.cover_image, status = 'published';
 
   INSERT INTO courses (creator_id, title, slug, description, category, cover_image, is_free, price, currency, status, is_featured)
   VALUES

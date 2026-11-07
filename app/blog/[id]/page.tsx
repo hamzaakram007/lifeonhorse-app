@@ -1,10 +1,12 @@
-import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { ListingCard } from "@/components/ui";
+import { BlogCover } from "@/components/ui/BlogCover";
 import { formatLocation } from "@/lib/location";
+import { BLOG_CATEGORIES } from "@/lib/constants";
+import { labelFromOptions } from "@/lib/labels";
+import { resolveBlogCover } from "@/lib/blog-covers";
 
 function readingTime(text: string) {
   const words = text.trim().split(/\s+/).length;
@@ -47,6 +49,8 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ id:
 
   const minutes = readingTime(post.content ?? "");
   const published = post.published_at ?? post.created_at;
+  const categoryLabel = labelFromOptions(BLOG_CATEGORIES, post.category) || undefined;
+  const cover = resolveBlogCover(post.title, post.cover_image);
 
   return (
     <article className="mx-auto max-w-4xl">
@@ -56,21 +60,12 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ id:
           { label: post.title },
         ]}
       />
-      {post.cover_image && (
-        <div className="relative mb-8 aspect-[21/9] overflow-hidden rounded-2xl">
-          <Image
-            src={post.cover_image}
-            alt={post.title}
-            fill
-            className="object-cover"
-            priority
-            sizes="(max-width: 896px) 100vw, 896px"
-          />
-        </div>
-      )}
+      <div className="relative mb-8 aspect-[21/9] overflow-hidden rounded-2xl bg-[var(--color-bg)]">
+        <BlogCover src={cover} alt={post.title} priority />
+      </div>
       <header className="mb-8 space-y-3">
-        {post.category && (
-          <span className="badge badge-featured">{post.category}</span>
+        {categoryLabel && (
+          <span className="badge badge-featured">{categoryLabel}</span>
         )}
         <h1 className="font-serif text-3xl font-bold sm:text-4xl">{post.title}</h1>
         <div className="flex flex-wrap gap-4 text-sm text-[var(--color-muted)]">
@@ -101,8 +96,8 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ id:
                 key={r.id}
                 href={`/blog/${r.id}`}
                 title={r.title}
-                subtitle={r.category ?? undefined}
-                image={r.cover_image}
+                subtitle={labelFromOptions(BLOG_CATEGORIES, r.category) || undefined}
+                image={resolveBlogCover(r.title, r.cover_image)}
               />
             ))}
           </div>

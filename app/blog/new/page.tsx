@@ -66,6 +66,12 @@ export default function NewBlogPage() {
           <option value="training">Training</option>
           <option value="health">Health</option>
           <option value="culture">Culture</option>
+          <option value="events">Events</option>
+          <option value="polo">Polo</option>
+          <option value="tent_pegging">Tent Pegging</option>
+          <option value="tack">Tack</option>
+          <option value="nutrition">Nutrition</option>
+          <option value="buying_guide">Buying Guide</option>
         </Select>
       </div>
       <div>

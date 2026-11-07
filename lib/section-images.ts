@@ -11,9 +11,9 @@ export const SITE_IMAGES = {
     featureCommunity: "/images/home/feature-community.jpg",
   },
   blog: {
-    buyers: "/images/blog/buyers.jpg",
-    training: "/images/blog/training.jpg",
-    hoof: "/images/blog/hoof.jpg",
+    buyers: "/images/blog/blog-first-time-buyers.jpg",
+    training: "/images/blog/blog-young-riders.jpg",
+    hoof: "/images/blog/blog-hoof-problems.jpg",
   },
   demo: {
     horse1: "/images/demo/horse-1.jpg",

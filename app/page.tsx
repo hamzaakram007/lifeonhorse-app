@@ -6,6 +6,7 @@ import { AboutSection } from "@/components/home/AboutSection";
 import { BlogSection } from "@/components/home/BlogSection";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { absoluteUrl, buildMetadata } from "@/lib/seo";
+import { resolveBlogCover } from "@/lib/blog-covers";
 
 export const metadata: Metadata = buildMetadata({
   title: "Global Horse Marketplace & Community",
@@ -44,7 +45,12 @@ export default async function HomePage() {
       <HeroSection />
       <FeatureCards />
       <AboutSection />
-      <BlogSection posts={blogPosts ?? []} />
+      <BlogSection
+        posts={(blogPosts ?? []).map((p) => ({
+          ...p,
+          cover_image: resolveBlogCover(p.title, p.cover_image),
+        }))}
+      />
     </div>
   );
 }
