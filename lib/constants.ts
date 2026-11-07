@@ -108,6 +108,13 @@ export const COURSE_CATEGORIES = [
   { value: "other", label: "Other" },
 ] as const;
 
+export const COURSE_LEVELS = [
+  { value: "beginner", label: "Beginner" },
+  { value: "intermediate", label: "Intermediate" },
+  { value: "advanced", label: "Advanced" },
+  { value: "all_levels", label: "All levels" },
+] as const;
+
 export const BLOG_CATEGORIES = [
   { value: "guides", label: "Guides" },
   { value: "training", label: "Training" },
