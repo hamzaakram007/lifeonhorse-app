@@ -54,7 +54,7 @@ export function Footer() {
             <li><Link href="/clubs">Clubs</Link></li>
             <li><Link href="/trainers">Trainers</Link></li>
             <li><Link href="/events">Events</Link></li>
-            <li><Link href="/health">Horse Health</Link></li>
+            <li><Link href="/horse-health">Horse Health</Link></li>
             <li><Link href="/payments">Payments</Link></li>
             <li><Link href="/support">Support</Link></li>
           </ul>

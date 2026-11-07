@@ -22,7 +22,7 @@ export default async function ExpertDashboardPage() {
           <section><h3 className="font-semibold">Assigned requests</h3>{requests?.map((r) => <div key={r.id} className="card mt-2 p-3 text-sm">{r.horse_name ?? "Horse"} — {r.urgency} — {r.status}</div>)}</section>
         </>
       ) : (
-        <div className="card p-6"><p>Register as a health expert to receive requests.</p><Link href="/health/experts/new" className="btn btn-primary mt-4 inline-flex">Register</Link></div>
+        <div className="card p-6"><p>Register as a health expert to receive requests.</p><Link href="/horse-health/experts/apply" className="btn btn-primary mt-4 inline-flex">Register</Link></div>
       )}
     </div>
   );

@@ -109,11 +109,11 @@ BEGIN
       (NULL, 'Pony', NULL, NULL, 'PK', NULL, 'emergency', 'Colic signs — rolling, pawing.', 'emergency', 'emergency-demo@lifeonhorse.internal', NULL, 'new');
   END IF;
 
-  IF NOT EXISTS (SELECT 1 FROM user_stories WHERE title = 'My First Polo Season in Lahore') THEN
-    INSERT INTO user_stories (author_id, title, content, photos, country, status, is_featured)
+  IF NOT EXISTS (SELECT 1 FROM community_posts WHERE title = 'My First Polo Season in Lahore') THEN
+    INSERT INTO community_posts (author_id, title, content, photos, status)
     VALUES
-      (owner_id, 'My First Polo Season in Lahore', 'Joining Lahore Polo Club changed how I see teamwork on horseback.', '["https://picsum.photos/seed/loh-story-1/800/600"]', 'PK', 'published', true),
-      (owner_id, 'Rescuing a Pony in Delhi', 'We worked with a local NGO to rehome a market pony.', '["https://picsum.photos/seed/loh-story-2/800/600"]', 'IN', 'published', false);
+      (owner_id, 'My First Polo Season in Lahore', 'Joining Lahore Polo Club changed how I see teamwork on horseback.', '["https://picsum.photos/seed/loh-story-1/800/600"]', 'published'),
+      (owner_id, 'Rescuing a Pony in Delhi', 'We worked with a local NGO to rehome a market pony.', '["https://picsum.photos/seed/loh-story-2/800/600"]', 'published');
   END IF;
 
   IF (SELECT count(*) FROM horse_gallery WHERE uploader_id = owner_id) < 4 THEN
