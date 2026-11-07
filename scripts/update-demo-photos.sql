@@ -29,6 +29,11 @@ UPDATE clubs SET
 WHERE id = 'd4444444-4444-4444-8444-444444444405';
 
 UPDATE clubs SET
+  logo_url = '/images/demo/club-cape.jpg',
+  photos = '["/images/demo/club-cape.jpg"]'::jsonb
+WHERE id = 'de6c35f5-ce68-4f27-abd5-c61338ddcc61';
+
+UPDATE clubs SET
   logo_url = '/images/demo/club-rescue.jpg',
   photos = '["/images/demo/club-rescue.jpg"]'::jsonb
 WHERE id = 'd4444444-4444-4444-8444-444444444406';
