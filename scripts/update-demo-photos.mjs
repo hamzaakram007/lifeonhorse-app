@@ -12,22 +12,26 @@ const MGMT = `https://api.supabase.com/v1/projects/${PROJECT_REF}/database/query
 
 const CLUB_IMGS = {
   "d4444444-4444-4444-8444-444444444401": "/images/demo/club-polo.jpg",
-  "d6666666-6666-4666-8666-666666666601": "/images/demo/event-polo.jpg",
   "d4444444-4444-4444-8444-444444444402": "/images/demo/club-tent.jpg",
-  "d6666666-6666-4666-8666-666666666602": "/images/demo/event-tent.jpg",
   "d4444444-4444-4444-8444-444444444403": "/images/demo/club-riding.jpg",
-  "d6666666-6666-4666-8666-666666666603": "/images/demo/course-dressage.jpg",
   "d4444444-4444-4444-8444-444444444404": "/images/demo/club-sports.jpg",
-  "544cb6be-4210-4c81-8427-c6887f13ebbe": "/images/demo/club-1.jpg",
   "d4444444-4444-4444-8444-444444444405": "/images/demo/club-community.jpg",
-  "de6c35f5-ce68-4f27-abd5-c61338ddcc61": "/images/demo/club-cape.jpg",
   "d4444444-4444-4444-8444-444444444406": "/images/demo/club-rescue.jpg",
-  "d6666666-6666-4666-8666-666666666605": "/images/demo/horse-3.jpg",
+  "544cb6be-4210-4c81-8427-c6887f13ebbe": "/images/demo/club-1.jpg",
+  "de6c35f5-ce68-4f27-abd5-c61338ddcc61": "/images/demo/club-cape.jpg",
   "7be1fb42-2b01-4316-84e2-7511f84d4eeb": "/images/sections/clubs.jpg",
-  "633c9b47-ccae-4053-b16d-503923513e20": "/images/home/feature-horses.jpg",
-  "d6666666-6666-4666-8666-666666666604": "/images/sections/events.jpg",
-  "d6666666-6666-4666-8666-666666666606": "/images/demo/horse-1.jpg",
+  "633c9b47-ccae-4053-b16d-503923513e20": "/images/demo/club-mumbai.jpg",
+  "d6666666-6666-4666-8666-666666666604": "/images/demo/club-hanover.jpg",
+  "d6666666-6666-4666-8666-666666666606": "/images/demo/club-breeding.jpg",
 };
+
+/** Near-duplicate orphan club rows (product UUID collisions) — hide from public listing. */
+const DUPLICATE_CLUB_IDS = [
+  "d6666666-6666-4666-8666-666666666601",
+  "d6666666-6666-4666-8666-666666666602",
+  "d6666666-6666-4666-8666-666666666603",
+  "d6666666-6666-4666-8666-666666666605",
+];
 
 const TRAINER_IMGS = {
   "d5555555-5555-4555-8555-555555555501": { img: "/images/demo/trainer-dressage.jpg", name: "Sarah Mitchell" },
@@ -88,6 +92,12 @@ function buildStatements() {
       `UPDATE clubs SET logo_url = ${sqlLit(img)}, photos = ${sqlLit(arr)}::jsonb WHERE id = ${sqlLit(id)}`,
     );
   }
+  for (const id of DUPLICATE_CLUB_IDS) {
+    stmts.push(`UPDATE clubs SET status = 'hidden' WHERE id = ${sqlLit(id)}`);
+  }
+  stmts.push(
+    `UPDATE clubs SET club_type = 'tent_pegging' WHERE id = 'd4444444-4444-4444-8444-444444444402' AND club_type = 'equestrian_sports'`,
+  );
   for (const [id, meta] of Object.entries(TRAINER_IMGS)) {
     const arr = JSON.stringify([meta.img]);
     const name = meta.name ? `, display_name = ${sqlLit(meta.name)}` : "";
@@ -135,6 +145,15 @@ async function viaServiceRole(stmts) {
     const { error } = await supabase.from("clubs").update({ logo_url: img, photos: [img] }).eq("id", id);
     if (error) console.warn("clubs", id, error.message);
   }
+  for (const id of DUPLICATE_CLUB_IDS) {
+    const { error } = await supabase.from("clubs").update({ status: "hidden" }).eq("id", id);
+    if (error) console.warn("hide club", id, error.message);
+  }
+  await supabase
+    .from("clubs")
+    .update({ club_type: "tent_pegging" })
+    .eq("id", "d4444444-4444-4444-8444-444444444402")
+    .eq("club_type", "equestrian_sports");
   for (const [id, meta] of Object.entries(TRAINER_IMGS)) {
     const patch = { photos: [meta.img] };
     if (meta.name) patch.display_name = meta.name;
