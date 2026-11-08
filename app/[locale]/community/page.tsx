@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { ListingCard, EmptyState } from "@/components/ui";
 import { SectionHero } from "@/components/layout/SectionHero";
 import { SECTION_IMAGES } from "@/lib/section-images";
 import { parseCommunityShareMeta } from "@/lib/community/dual-publish";
+import { Link } from "@/i18n/navigation";
 
 export const metadata: Metadata = {
   title: "Community",
@@ -12,6 +13,8 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
+  const heroT = await getTranslations("Heroes.community");
+  const commonT = await getTranslations("Common");
   const supabase = await createClient();
   const { data } = await supabase
     .from("community_posts")
@@ -23,16 +26,20 @@ export default async function Page() {
   return (
     <div className="space-y-8">
       <SectionHero
-        title="Global Community"
-        subtitle="Celebrate the bond between horse and rider — share moments, stories, and inspiration with fellow enthusiasts worldwide."
+        title={heroT("title")}
+        subtitle={heroT("subtitle")}
         image={SECTION_IMAGES.community}
-        action={{ href: "/community/new", label: "+ Share story" }}
+        action={{ href: "/community/new", label: `+ ${commonT("shareStory")}` }}
       />
       {!data?.length ? (
         <EmptyState
           title="No community posts yet"
           description="Be the first to share your equestrian journey with riders across the globe."
-          action={<Link href="/community/new" className="btn btn-primary">Share story</Link>}
+          action={
+            <Link href="/community/new" className="btn btn-primary">
+              {commonT("shareStory")}
+            </Link>
+          }
         />
       ) : (
         <div className="listing-grid">

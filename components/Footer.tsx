@@ -1,21 +1,36 @@
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 
-const legalLinks = [
-  { href: "/legal/terms", label: "Terms" },
-  { href: "/legal/privacy", label: "Privacy" },
-  { href: "/legal/cookies", label: "Cookies" },
-  { href: "/legal/marketplace-safety", label: "Marketplace Safety" },
-  { href: "/legal/health-disclaimer", label: "Health Disclaimer" },
-  { href: "/legal/seller-buyer", label: "Seller/Buyer Policy" },
-];
+export async function Footer() {
+  const t = await getTranslations("Footer");
+  const tNav = await getTranslations("Nav");
+  const year = new Date().getFullYear();
 
-const trustSignals = [
-  { value: "120+", label: "Countries" },
-  { value: "10K+", label: "Verified listings" },
-  { value: "Secure", label: "Payments" },
-];
+  const legalLinks = [
+    { href: "/legal/terms", label: t("terms") },
+    { href: "/legal/privacy", label: t("privacy") },
+    { href: "/legal/cookies", label: t("cookies") },
+    { href: "/legal/marketplace-safety", label: t("marketplaceSafety") },
+    { href: "/legal/health-disclaimer", label: t("healthDisclaimer") },
+    { href: "/legal/seller-buyer", label: t("sellerBuyer") },
+  ] as const;
 
-export function Footer() {
+  const trustSignals = [
+    { value: "120+", label: t("countries") },
+    { value: "10K+", label: t("verifiedListings") },
+    { value: t("secure"), label: t("securePayments") },
+  ] as const;
+
+  const explore = [
+    { href: "/marketplace", label: tNav("marketplace") },
+    { href: "/clubs", label: tNav("clubs") },
+    { href: "/trainers", label: tNav("trainers") },
+    { href: "/events", label: tNav("events") },
+    { href: "/horse-health", label: tNav("horseHealth") },
+    { href: "/payments", label: t("payments") },
+    { href: "/support", label: t("support") },
+  ] as const;
+
   return (
     <footer className="mt-auto border-t border-[var(--color-border)] bg-[var(--color-surface)]">
       <div className="border-b border-[var(--color-border)] bg-[var(--color-bg)]">
@@ -31,36 +46,32 @@ export function Footer() {
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 md:grid-cols-4">
         <div className="md:col-span-2">
           <p className="font-serif text-lg font-bold text-[var(--color-primary)]">LifeOnHorse</p>
-          <p className="mt-2 max-w-sm text-sm text-[var(--color-muted)]">
-            The world&apos;s premier platform for horse marketplace, elite clubs, expert trainers, and equestrian community.
-          </p>
+          <p className="mt-2 max-w-sm text-sm text-[var(--color-muted)]">{t("blurb")}</p>
           <form className="mt-4 flex max-w-sm gap-2" action="/api/newsletter" method="post">
             <input
               type="email"
               name="email"
-              placeholder="Your email"
+              placeholder={t("newsletterEmail")}
               className="input flex-1 text-sm"
-              aria-label="Newsletter email"
+              aria-label={t("newsletterEmail")}
             />
             <button type="submit" className="btn btn-primary text-sm">
-              Subscribe
+              {t("subscribe")}
             </button>
           </form>
         </div>
         <div>
-          <p className="font-semibold">Explore</p>
+          <p className="font-semibold">{t("explore")}</p>
           <ul className="mt-2 space-y-1 text-sm">
-            <li><Link href="/marketplace">Marketplace</Link></li>
-            <li><Link href="/clubs">Clubs</Link></li>
-            <li><Link href="/trainers">Trainers</Link></li>
-            <li><Link href="/events">Events</Link></li>
-            <li><Link href="/horse-health">Horse Health</Link></li>
-            <li><Link href="/payments">Payments</Link></li>
-            <li><Link href="/support">Support</Link></li>
+            {explore.map((link) => (
+              <li key={link.href}>
+                <Link href={link.href}>{link.label}</Link>
+              </li>
+            ))}
           </ul>
         </div>
         <div>
-          <p className="font-semibold">Legal</p>
+          <p className="font-semibold">{t("legal")}</p>
           <ul className="mt-2 space-y-1 text-sm">
             {legalLinks.map((link) => (
               <li key={link.href}>
@@ -71,7 +82,7 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t border-[var(--color-border)] px-4 py-4 text-center text-sm text-[var(--color-muted)]">
-        © {new Date().getFullYear()} LifeOnHorse. All rights reserved.
+        {t("rights", { year })}
       </div>
     </footer>
   );

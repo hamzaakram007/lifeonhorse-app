@@ -1,4 +1,7 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
+
+const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
 const nextConfig: NextConfig = {
   turbopack: {
@@ -17,8 +20,30 @@ const nextConfig: NextConfig = {
       { source: "/health/experts", destination: "/horse-health/experts", permanent: true },
       { source: "/health/experts/new", destination: "/horse-health/experts/apply", permanent: true },
       { source: "/health/experts/:id", destination: "/horse-health/experts/:id", permanent: true },
+      // Locale-prefixed equivalents (as-needed keeps en unprefixed above)
+      { source: "/:locale(ur|ar)/health", destination: "/:locale/horse-health", permanent: true },
+      {
+        source: "/:locale(ur|ar)/health/request",
+        destination: "/:locale/horse-health/requests/new",
+        permanent: true,
+      },
+      {
+        source: "/:locale(ur|ar)/health/experts",
+        destination: "/:locale/horse-health/experts",
+        permanent: true,
+      },
+      {
+        source: "/:locale(ur|ar)/health/experts/new",
+        destination: "/:locale/horse-health/experts/apply",
+        permanent: true,
+      },
+      {
+        source: "/:locale(ur|ar)/health/experts/:id",
+        destination: "/:locale/horse-health/experts/:id",
+        permanent: true,
+      },
     ];
   },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);
