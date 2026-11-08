@@ -99,5 +99,11 @@
       "askHelp": "Ask for Help",
       "askHelpDesc": "Describe your horse's symptoms, upload photos, and get connected with the right expert."
     }
+  },
+  "Offline": {
+    "title": "You’re offline",
+    "body": "This page isn’t available without a connection. Check your network, then try again — or reopen the home screen once you’re back online.",
+    "tryHome": "Try home",
+    "reload": "Reload this page"
   }
 }

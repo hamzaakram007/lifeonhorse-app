@@ -11,5 +11,8 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|api|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|json)$).*)"],
+  // Skip i18n/auth for Next internals, Serwist SW, static icons/manifest, and assets.
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|api|serwist/|icons/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|json|js|map)$).*)",
+  ],
 };
