@@ -1,11 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { ListingGallery, FeaturedBadge } from "@/components/ui";
+import { getCurrentProfile } from "@/lib/auth";
+import { ListingGallery, FeaturedBadge, ListingCard, EmptyState } from "@/components/ui";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { COURSE_CATEGORIES, COURSE_LEVELS } from "@/lib/constants";
 import { labelFromOptions } from "@/lib/labels";
 import { normalizeLessons } from "@/lib/courses/lessons";
+import { resolveBlogCover } from "@/lib/blog-covers";
+import { isMissingLinkedEntityColumn } from "@/lib/blog/query";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -17,6 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
+  const profile = await getCurrentProfile();
   const { data: course } = await supabase.from("courses").select("*").eq("id", id).single();
   if (!course) notFound();
 
@@ -30,18 +34,54 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
     : course.price != null
       ? `${course.currency ?? "USD"} ${course.price}`
       : "Paid";
+  const isCreator = Boolean(profile && profile.id === course.creator_id);
+
+  const [notesResult, { data: trainer }] = await Promise.all([
+    supabase
+      .from("blog_posts")
+      .select("id, title, category, cover_image, published_at, excerpt")
+      .eq("status", "published")
+      .eq("linked_entity_type", "course")
+      .eq("linked_entity_id", id)
+      .order("published_at", { ascending: false })
+      .limit(6),
+    supabase
+      .from("trainers")
+      .select("id, display_name")
+      .eq("user_id", course.creator_id)
+      .maybeSingle(),
+  ]);
+  const notePosts = isMissingLinkedEntityColumn(notesResult.error) ? [] : notesResult.data;
 
   return (
     <div className="space-y-6">
       <Breadcrumbs items={[{ label: "Courses", href: "/courses" }, { label: course.title }]} />
-      <div className="flex flex-wrap gap-2">
-        {course.is_featured ? <FeaturedBadge /> : null}
-        {categoryLabel ? <span className="badge">{categoryLabel}</span> : null}
-        {levelLabel ? <span className="badge">{levelLabel}</span> : null}
-        <span className="badge">{isPaid ? "Paid" : "Free"}</span>
-        {isPaid && course.price != null ? <span className="badge">{pricing}</span> : null}
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex flex-wrap gap-2">
+          {course.is_featured ? <FeaturedBadge /> : null}
+          {categoryLabel ? <span className="badge">{categoryLabel}</span> : null}
+          {levelLabel ? <span className="badge">{levelLabel}</span> : null}
+          <span className="badge">{isPaid ? "Paid" : "Free"}</span>
+          {isPaid && course.price != null ? <span className="badge">{pricing}</span> : null}
+        </div>
+        {isCreator ? (
+          <Link href={`/blog/new?course=${course.id}`} className="btn btn-primary">
+            Announce update
+          </Link>
+        ) : null}
       </div>
       <h1 className="font-serif text-3xl font-bold">{course.title}</h1>
+      {trainer ? (
+        <p className="text-sm text-[var(--color-muted)]">
+          By{" "}
+          <Link
+            href={`/trainers/${trainer.id}`}
+            className="text-[var(--color-primary)] hover:underline"
+          >
+            {trainer.display_name}
+          </Link>
+        </p>
+      ) : null}
       <ListingGallery photos={photos} alt={course.title} />
       {course.description ? (
         <p className="leading-relaxed whitespace-pre-wrap">{course.description}</p>
@@ -83,6 +123,52 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           <dd>{lessons.length}</dd>
         </div>
       </dl>
+
+      <section className="space-y-4 border-t border-[var(--color-border)] pt-6">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <h2 className="font-serif text-2xl font-bold">From this course</h2>
+          <Link
+            href={`/blog?course=${course.id}`}
+            className="text-sm text-[var(--color-primary)] hover:underline"
+          >
+            View all notes
+          </Link>
+        </div>
+        {!notePosts?.length ? (
+          <EmptyState
+            title={isCreator ? "No creator notes yet" : "No course updates yet"}
+            description={
+              isCreator
+                ? "You’re the creator — announce a lesson, schedule change, or tip for enrolled riders."
+                : "Ask the creator to share course notes and announcements."
+            }
+            action={
+              isCreator ? (
+                <Link href={`/blog/new?course=${course.id}`} className="btn btn-primary">
+                  Announce update
+                </Link>
+              ) : null
+            }
+          />
+        ) : (
+          <div className="listing-grid">
+            {notePosts.map((post) => (
+              <ListingCard
+                key={post.id}
+                href={`/blog/${post.id}`}
+                title={post.title}
+                subtitle={
+                  post.published_at
+                    ? new Date(post.published_at).toLocaleDateString()
+                    : undefined
+                }
+                image={resolveBlogCover(post.title, post.cover_image)}
+                badges={<span className="badge">Course update</span>}
+              />
+            ))}
+          </div>
+        )}
+      </section>
 
       {lessons.length > 0 ? (
         <section className="space-y-4">

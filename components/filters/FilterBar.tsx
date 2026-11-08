@@ -55,7 +55,7 @@ export function FilterBar({
     fields.map((field) => (field.kind === "country" ? field.name ?? "country" : field.name))
   );
   const hiddenValues = Object.entries(values).filter(
-    ([name, value]) => !fieldNames.has(name) && Boolean(value && String(value).trim())
+    ([name, value]) => Boolean(value?.trim()) && !fieldNames.has(name)
   );
 
   return (

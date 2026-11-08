@@ -6,6 +6,7 @@ import { OwnedList } from "@/components/dashboard/OwnedList";
 import { VerifiedBadge, EmptyState } from "@/components/ui";
 import { VerificationUpload } from "@/components/VerificationUpload";
 import { FeaturedRequestButton } from "@/components/FeaturedRequestButton";
+import { isMissingLinkedEntityColumn } from "@/lib/blog/query";
 
 export default async function TrainerDashboardPage() {
   const profile = await requireAuth();
@@ -18,18 +19,41 @@ export default async function TrainerDashboardPage() {
     .eq("user_id", profile.id)
     .maybeSingle();
 
-  const [{ data: courses }, { data: pendingFeatured }] = await Promise.all([
-    supabase
-      .from("courses")
-      .select("id, title, status, level, category, is_free, is_featured")
-      .eq("creator_id", profile.id)
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("featured_listing_requests")
-      .select("entity_type, entity_id")
-      .eq("user_id", profile.id)
-      .eq("status", "pending"),
-  ]);
+  const [{ data: courses }, { data: pendingFeatured }, tipsResult, courseNotesResult] =
+    await Promise.all([
+      supabase
+        .from("courses")
+        .select("id, title, status, level, category, is_free, is_featured")
+        .eq("creator_id", profile.id)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("featured_listing_requests")
+        .select("entity_type, entity_id")
+        .eq("user_id", profile.id)
+        .eq("status", "pending"),
+      trainer
+        ? supabase
+            .from("blog_posts")
+            .select("id, title, status, linked_entity_id, published_at")
+            .eq("author_id", profile.id)
+            .eq("linked_entity_type", "trainer")
+            .eq("linked_entity_id", trainer.id)
+            .order("updated_at", { ascending: false })
+            .limit(12)
+        : Promise.resolve({ data: null, error: null }),
+      supabase
+        .from("blog_posts")
+        .select("id, title, status, linked_entity_id, published_at")
+        .eq("author_id", profile.id)
+        .eq("linked_entity_type", "course")
+        .order("updated_at", { ascending: false })
+        .limit(12),
+    ]);
+
+  const tipPosts = isMissingLinkedEntityColumn(tipsResult.error) ? [] : tipsResult.data;
+  const courseNotes = isMissingLinkedEntityColumn(courseNotesResult.error)
+    ? []
+    : courseNotesResult.data;
 
   const pendingKey = new Set(
     (pendingFeatured ?? []).map((r) => `${r.entity_type}:${r.entity_id}`)
@@ -47,6 +71,26 @@ export default async function TrainerDashboardPage() {
       featurePending: pendingKey.has(`course:${c.id}`),
     })) ?? [];
 
+  const tipItems =
+    tipPosts?.map((p) => ({
+      id: p.id,
+      title: p.title,
+      status: p.status,
+      href: `/blog/${p.id}`,
+      editHref: `/blog/${p.id}/edit`,
+      meta: p.published_at ? new Date(p.published_at).toLocaleDateString() : "Trainer tip",
+    })) ?? [];
+
+  const courseNoteItems =
+    courseNotes?.map((p) => ({
+      id: p.id,
+      title: p.title,
+      status: p.status,
+      href: `/blog/${p.id}`,
+      editHref: `/blog/${p.id}/edit`,
+      meta: p.published_at ? new Date(p.published_at).toLocaleDateString() : "Course update",
+    })) ?? [];
+
   return (
     <div className="space-y-6">
       <div>
@@ -55,7 +99,7 @@ export default async function TrainerDashboardPage() {
         </Link>
         <h1 className="mt-2 text-2xl font-bold">Trainer dashboard</h1>
         <p className="text-sm text-[var(--color-muted)]">
-          Your trainer profile and courses you created.
+          Your trainer profile, tips, and courses you created.
         </p>
       </div>
 
@@ -78,8 +122,17 @@ export default async function TrainerDashboardPage() {
               <p className="text-sm text-[var(--color-muted)]">{trainer.specialty}</p>
             ) : null}
             <div className="flex flex-wrap gap-3 text-sm">
-              <Link href={`/trainers/${trainer.id}`} className="text-[var(--color-primary)] hover:underline">
+              <Link
+                href={`/trainers/${trainer.id}`}
+                className="text-[var(--color-primary)] hover:underline"
+              >
                 View public profile
+              </Link>
+              <Link
+                href={`/blog/new?trainer=${trainer.id}`}
+                className="font-medium text-[var(--color-primary)] hover:underline"
+              >
+                Share tip
               </Link>
               <span className="text-[var(--color-muted)]">Status: {trainer.status}</span>
             </div>
@@ -98,13 +151,74 @@ export default async function TrainerDashboardPage() {
         />
       )}
 
-      <OwnedList
-        title="Your courses"
-        items={courseItems}
-        createHref="/courses/new"
-        createLabel="+ New course"
-        emptyDescription="You have not created any courses yet."
-      />
+      {trainer ? (
+        <OwnedList
+          title="Your tips"
+          items={tipItems}
+          createHref={`/blog/new?trainer=${trainer.id}`}
+          createLabel="+ Share tip"
+          emptyDescription="No Journal tips linked to your trainer profile yet."
+        />
+      ) : null}
+
+      <section className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="font-semibold">Your courses ({courseItems.length})</h3>
+          <Link href="/courses/new" className="btn btn-primary inline-flex text-sm">
+            + New course
+          </Link>
+        </div>
+        {!courseItems.length ? (
+          <p className="text-sm text-[var(--color-muted)]">
+            You have not created any courses yet.
+          </p>
+        ) : (
+          <ul className="space-y-2">
+            {courseItems.map((item) => (
+              <li
+                key={item.id}
+                className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 text-sm"
+              >
+                <div className="min-w-0">
+                  <Link href={item.href} className="font-medium hover:underline">
+                    {item.title}
+                  </Link>
+                  <p className="text-xs text-[var(--color-muted)]">
+                    {[item.status, item.meta].filter(Boolean).join(" · ")}
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <Link href={item.href} className="text-[var(--color-primary)] hover:underline">
+                    View
+                  </Link>
+                  <Link
+                    href={`/blog/new?course=${item.id}`}
+                    className="font-medium text-[var(--color-primary)] hover:underline"
+                  >
+                    Post about course
+                  </Link>
+                  <FeaturedRequestButton
+                    entityType="course"
+                    entityId={item.id}
+                    isFeatured={item.isFeatured}
+                    hasPending={item.featurePending}
+                  />
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {courseItems.length ? (
+        <OwnedList
+          title="Your course updates"
+          items={courseNoteItems}
+          createHref={`/blog/new?course=${courseItems[0].id}`}
+          createLabel="+ Post about course"
+          emptyDescription="No Journal notes linked to your courses yet."
+        />
+      ) : null}
     </div>
   );
 }

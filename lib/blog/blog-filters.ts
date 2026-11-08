@@ -1,6 +1,8 @@
 export type BlogSearchParams = {
   category?: string;
   club?: string;
+  trainer?: string;
+  course?: string;
   expert?: string;
   entity_type?: string;
   featured?: string;
@@ -23,6 +25,8 @@ export function normalizeBlogSearchParams(
   return {
     category: pick("category"),
     club: pick("club"),
+    trainer: pick("trainer"),
+    course: pick("course"),
     expert: pick("expert"),
     entity_type: entityType && ENTITY_TYPES.has(entityType) ? entityType : undefined,
     q: pick("q"),

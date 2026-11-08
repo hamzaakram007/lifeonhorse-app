@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireAuth } from "@/lib/auth";
 import { BlogPostForm } from "@/components/blog/BlogPostForm";
+import { isBlogComposerEntityType } from "@/lib/blog/linked-entity";
 
 export default async function EditBlogPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -14,41 +15,70 @@ export default async function EditBlogPage({ params }: { params: Promise<{ id: s
 
   const isAuthor = post.author_id === profile.id;
   const isAdmin = ["admin", "moderator"].includes(profile.role);
-  let ownsClub = false;
-  let ownsExpert = false;
-  if (post.linked_entity_type === "club" && post.linked_entity_id) {
-    const { data: club } = await supabase
-      .from("clubs")
-      .select("id")
-      .eq("id", post.linked_entity_id)
-      .eq("owner_id", profile.id)
-      .maybeSingle();
-    ownsClub = Boolean(club);
-  }
-  if (post.linked_entity_type === "expert" && post.linked_entity_id) {
-    const { data: expert } = await supabase
-      .from("experts")
-      .select("id")
-      .eq("id", post.linked_entity_id)
-      .eq("user_id", profile.id)
-      .maybeSingle();
-    ownsExpert = Boolean(expert);
+  const linkedType = isBlogComposerEntityType(post.linked_entity_type)
+    ? post.linked_entity_type
+    : null;
+  const linkedId = linkedType && post.linked_entity_id ? (post.linked_entity_id as string) : null;
+
+  let ownsLinked = false;
+  if (linkedType && linkedId) {
+    if (linkedType === "club") {
+      const { data } = await supabase
+        .from("clubs")
+        .select("id")
+        .eq("id", linkedId)
+        .eq("owner_id", profile.id)
+        .maybeSingle();
+      ownsLinked = Boolean(data);
+    } else if (linkedType === "trainer") {
+      const { data } = await supabase
+        .from("trainers")
+        .select("id")
+        .eq("id", linkedId)
+        .eq("user_id", profile.id)
+        .maybeSingle();
+      ownsLinked = Boolean(data);
+    } else if (linkedType === "course") {
+      const { data } = await supabase
+        .from("courses")
+        .select("id")
+        .eq("id", linkedId)
+        .eq("creator_id", profile.id)
+        .maybeSingle();
+      ownsLinked = Boolean(data);
+    } else if (linkedType === "expert") {
+      const { data } = await supabase
+        .from("experts")
+        .select("id")
+        .eq("id", linkedId)
+        .eq("user_id", profile.id)
+        .maybeSingle();
+      ownsLinked = Boolean(data);
+    }
   }
 
-  if (!isAuthor && !isAdmin && !ownsClub && !ownsExpert) {
+  if (!isAuthor && !isAdmin && !ownsLinked) {
     redirect(`/blog/${id}`);
   }
 
-  const isClubPost = post.linked_entity_type === "club" && Boolean(post.linked_entity_id);
-  const isExpertPost = post.linked_entity_type === "expert" && Boolean(post.linked_entity_id);
+  const heading =
+    linkedType === "club"
+      ? "Edit club update"
+      : linkedType === "trainer"
+        ? "Edit trainer tip"
+        : linkedType === "course"
+          ? "Edit course update"
+          : linkedType === "expert"
+            ? "Edit health tip"
+            : "Edit article";
 
   return (
     <BlogPostForm
-      heading={
-        isExpertPost ? "Edit health tip" : isClubPost ? "Edit club update" : "Edit article"
-      }
-      presetClubId={isClubPost ? post.linked_entity_id : null}
-      presetExpertId={isExpertPost ? post.linked_entity_id : null}
+      heading={heading}
+      presetClubId={linkedType === "club" ? linkedId : null}
+      presetTrainerId={linkedType === "trainer" ? linkedId : null}
+      presetCourseId={linkedType === "course" ? linkedId : null}
+      presetExpertId={linkedType === "expert" ? linkedId : null}
       initial={{
         id: post.id,
         title: post.title,
@@ -56,8 +86,8 @@ export default async function EditBlogPage({ params }: { params: Promise<{ id: s
         content: post.content ?? "",
         category: post.category ?? "guides",
         cover_image: post.cover_image,
-        linked_entity_type: isExpertPost ? "expert" : isClubPost ? "club" : null,
-        linked_entity_id: post.linked_entity_id,
+        linked_entity_type: linkedType,
+        linked_entity_id: linkedId,
         status: post.status === "draft" ? "draft" : "published",
       }}
     />
