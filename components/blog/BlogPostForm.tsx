@@ -28,15 +28,28 @@ export type BlogPostFormInitial = {
   status?: "draft" | "published";
 };
 
+function resolvePresetType(opts: {
+  presetClubId?: string | null;
+  presetTrainerId?: string | null;
+  presetCourseId?: string | null;
+  presetExpertId?: string | null;
+  initialType?: BlogComposerEntityType | null;
+}): BlogComposerEntityType | null {
+  // Priority when multiple params present: expert > trainer > course > club
+  if (opts.presetExpertId) return "expert";
+  if (opts.presetTrainerId) return "trainer";
+  if (opts.presetCourseId) return "course";
+  if (opts.presetClubId) return "club";
+  return opts.initialType ?? null;
+}
+
 function composerRedirect(opts: {
-  presetType: BlogComposerEntityType | null;
-  presetId: string | null;
+  type: BlogComposerEntityType | null;
+  id: string | null;
   isEdit: boolean;
   editId?: string;
 }) {
-  if (opts.presetType && opts.presetId) {
-    return `/blog/new?${opts.presetType}=${opts.presetId}`;
-  }
+  if (opts.type && opts.id) return `/blog/new?${opts.type}=${opts.id}`;
   if (opts.isEdit && opts.editId) return `/blog/${opts.editId}/edit`;
   return "/blog/new";
 }
@@ -46,38 +59,43 @@ export function BlogPostForm({
   presetClubId,
   presetTrainerId,
   presetCourseId,
+  presetExpertId,
   heading,
 }: {
   initial?: BlogPostFormInitial;
-  /** From `/blog/new?club=` — locks link to this club after ownership check. */
   presetClubId?: string | null;
-  /** From `/blog/new?trainer=` — locks link to this trainer after ownership check. */
   presetTrainerId?: string | null;
-  /** From `/blog/new?course=` — locks link to this course after ownership check. */
   presetCourseId?: string | null;
+  presetExpertId?: string | null;
   heading?: string;
 }) {
   const router = useRouter();
   const isEdit = Boolean(initial?.id);
 
-  const presetType: BlogComposerEntityType | null = presetClubId
-    ? "club"
-    : presetTrainerId
-      ? "trainer"
-      : presetCourseId
-        ? "course"
-        : initial?.linked_entity_type ?? null;
+  const presetType = resolvePresetType({
+    presetClubId,
+    presetTrainerId,
+    presetCourseId,
+    presetExpertId,
+    initialType: initial?.linked_entity_type,
+  });
   const presetId =
-    presetClubId ||
-    presetTrainerId ||
-    presetCourseId ||
+    (presetType === "expert"
+      ? presetExpertId
+      : presetType === "trainer"
+        ? presetTrainerId
+        : presetType === "course"
+          ? presetCourseId
+          : presetType === "club"
+            ? presetClubId
+            : null) ||
     (initial?.linked_entity_type ? initial.linked_entity_id : null) ||
     null;
-  const entityLocked = Boolean(
-    presetClubId || presetTrainerId || presetCourseId || initial?.linked_entity_type
-  );
+
+  const entityLocked = Boolean(presetType && presetId);
 
   const [clubs, setClubs] = useState<EntityOption[]>([]);
+  const [experts, setExperts] = useState<EntityOption[]>([]);
   const [entityName, setEntityName] = useState<string | null>(null);
   const [linkedType, setLinkedType] = useState<BlogComposerEntityType | null>(
     presetType ?? initial?.linked_entity_type ?? null
@@ -107,18 +125,23 @@ export function BlogPostForm({
         data: { user },
       } = await supabase.auth.getUser();
 
-      const targetType: BlogComposerEntityType | null =
-        presetClubId
-          ? "club"
-          : presetTrainerId
-            ? "trainer"
-            : presetCourseId
-              ? "course"
-              : initial?.linked_entity_type ?? null;
+      const targetType = resolvePresetType({
+        presetClubId,
+        presetTrainerId,
+        presetCourseId,
+        presetExpertId,
+        initialType: initial?.linked_entity_type,
+      });
       const targetId =
-        presetClubId ||
-        presetTrainerId ||
-        presetCourseId ||
+        (targetType === "expert"
+          ? presetExpertId
+          : targetType === "trainer"
+            ? presetTrainerId
+            : targetType === "course"
+              ? presetCourseId
+              : targetType === "club"
+                ? presetClubId
+                : null) ||
         initial?.linked_entity_id ||
         null;
 
@@ -129,13 +152,14 @@ export function BlogPostForm({
               ? "club owner"
               : targetType === "trainer"
                 ? "trainer"
-                : "course creator";
+                : targetType === "course"
+                  ? "course creator"
+                  : "expert";
           setOwnershipError(`Sign in as the ${noun} to publish this update.`);
         }
         return;
       }
 
-      // Always load owned clubs for optional linking when not locked to trainer/course.
       const { data: ownedClubs } = await supabase
         .from("clubs")
         .select("id, name")
@@ -144,6 +168,35 @@ export function BlogPostForm({
       if (cancelled) return;
       const clubOptions = ownedClubs ?? [];
       setClubs(clubOptions);
+
+      if (targetType === "expert" && targetId) {
+        const { data: ownedExperts } = await supabase
+          .from("experts")
+          .select("id, display_name")
+          .eq("user_id", user.id)
+          .order("display_name");
+        if (cancelled) return;
+        const expertOptions = (ownedExperts ?? []).map((e) => ({
+          id: e.id,
+          name: e.display_name,
+        }));
+        setExperts(expertOptions);
+        const match = expertOptions.find((e) => e.id === targetId);
+        if (!match) {
+          setOwnershipError("You can only publish health tips for your own expert profile.");
+          setForm((prev) => ({ ...prev, linked_entity_id: "" }));
+          setLinkedType(null);
+        } else {
+          setEntityName(match.name);
+          setLinkedType("expert");
+          setForm((prev) => ({
+            ...prev,
+            linked_entity_id: match.id,
+            category: "health",
+          }));
+        }
+        return;
+      }
 
       if (targetType === "club" && targetId) {
         const match = clubOptions.find((c) => c.id === targetId);
@@ -211,7 +264,6 @@ export function BlogPostForm({
         return;
       }
 
-      // Unlocked compose: optional club link from owned clubs.
       if (initial?.linked_entity_id && initial.linked_entity_type === "club") {
         const match = clubOptions.find((c) => c.id === initial.linked_entity_id);
         if (match) {
@@ -228,6 +280,7 @@ export function BlogPostForm({
     presetClubId,
     presetTrainerId,
     presetCourseId,
+    presetExpertId,
     initial?.linked_entity_id,
     initial?.linked_entity_type,
   ]);
@@ -242,14 +295,8 @@ export function BlogPostForm({
     } = await supabase.auth.getUser();
     if (!user) {
       const redirect = composerRedirect({
-        presetType: presetClubId
-          ? "club"
-          : presetTrainerId
-            ? "trainer"
-            : presetCourseId
-              ? "course"
-              : null,
-        presetId: presetClubId || presetTrainerId || presetCourseId || null,
+        type: presetType,
+        id: presetId,
         isEdit,
         editId: initial?.id,
       });
@@ -264,17 +311,14 @@ export function BlogPostForm({
     }
 
     const entityId = form.linked_entity_id || null;
-    const lockedPresetId = presetClubId || presetTrainerId || presetCourseId || null;
-    if (lockedPresetId && entityId !== lockedPresetId) {
+    if (presetId && entityId !== presetId) {
       setError("This update must stay linked to the selected entity.");
       setLoading(false);
       return;
     }
 
     let resolvedType: BlogComposerEntityType | null = linkedType;
-    if (presetClubId) resolvedType = "club";
-    else if (presetTrainerId) resolvedType = "trainer";
-    else if (presetCourseId) resolvedType = "course";
+    if (presetType) resolvedType = presetType;
     else if (entityId && clubs.some((c) => c.id === entityId)) resolvedType = "club";
     else if (!entityId) resolvedType = null;
 
@@ -283,7 +327,15 @@ export function BlogPostForm({
       setLoading(false);
       return;
     }
-    if ((resolvedType === "trainer" || resolvedType === "course") && !entityId) {
+    if (resolvedType === "expert" && entityId && !experts.some((ex) => ex.id === entityId)) {
+      setError("You can only link tips to your own expert profile.");
+      setLoading(false);
+      return;
+    }
+    if (
+      (resolvedType === "trainer" || resolvedType === "course" || resolvedType === "expert") &&
+      !entityId
+    ) {
       setError("Missing linked entity.");
       setLoading(false);
       return;
@@ -293,7 +345,7 @@ export function BlogPostForm({
       title: form.title.trim(),
       excerpt: form.excerpt.trim() || null,
       content: form.content,
-      category: form.category,
+      category: resolvedType === "expert" ? "health" : form.category,
       cover_image: coverImage[0] ?? null,
       linked_entity_type: entityId && resolvedType ? resolvedType : null,
       linked_entity_id: entityId && resolvedType ? entityId : null,
@@ -336,39 +388,50 @@ export function BlogPostForm({
     router.refresh();
   }
 
+  const activeType = presetType || linkedType;
   const title =
     heading ??
     (isEdit
-      ? linkedType === "club" || presetClubId
+      ? activeType === "club"
         ? "Edit club update"
-        : linkedType === "trainer" || presetTrainerId
+        : activeType === "trainer"
           ? "Edit trainer tip"
-          : linkedType === "course" || presetCourseId
+          : activeType === "course"
             ? "Edit course update"
-            : "Edit article"
-      : presetClubId
+            : activeType === "expert"
+              ? "Edit health tip"
+              : "Edit article"
+      : presetType === "club"
         ? "Write club update"
-        : presetTrainerId
+        : presetType === "trainer"
           ? "Share a tip"
-          : presetCourseId
+          : presetType === "course"
             ? "Post about this course"
-            : "Write article");
+            : presetType === "expert"
+              ? "Write health tip"
+              : "Write article");
 
   const publishingCopy =
-    linkedType === "club"
+    activeType === "club"
       ? "This update appears in the Journal and on the club page."
-      : linkedType === "trainer"
+      : activeType === "trainer"
         ? "This tip appears in the Journal and on your trainer profile."
-        : linkedType === "course"
+        : activeType === "course"
           ? "This note appears in the Journal and on the course page."
-          : null;
+          : activeType === "expert"
+            ? "Tips use the Health category and appear in the Journal and on your expert profile."
+            : null;
 
   const showClubSelect =
     !presetTrainerId &&
     !presetCourseId &&
+    !presetExpertId &&
     linkedType !== "trainer" &&
     linkedType !== "course" &&
+    linkedType !== "expert" &&
     (clubs.length > 0 || Boolean(presetClubId));
+
+  const showExpertSelect = activeType === "expert";
 
   const submitLabel = loading
     ? isEdit
@@ -380,13 +443,15 @@ export function BlogPostForm({
       ? "Save changes"
       : form.status === "draft"
         ? "Save draft"
-        : presetClubId
+        : presetType === "club"
           ? "Publish club update"
-          : presetTrainerId
+          : presetType === "trainer"
             ? "Publish tip"
-            : presetCourseId
+            : presetType === "course"
               ? "Publish course update"
-              : "Publish article";
+              : presetType === "expert"
+                ? "Publish health tip"
+                : "Publish article";
 
   return (
     <form onSubmit={submit} className="mx-auto max-w-2xl space-y-4 px-4 py-8">
@@ -429,7 +494,8 @@ export function BlogPostForm({
         <div>
           <Label>Category</Label>
           <Select
-            value={form.category}
+            value={activeType === "expert" ? "health" : form.category}
+            disabled={activeType === "expert"}
             onChange={(e) => setForm({ ...form, category: e.target.value })}
           >
             {BLOG_CATEGORIES.map((opt) => (
@@ -438,6 +504,11 @@ export function BlogPostForm({
               </option>
             ))}
           </Select>
+          {activeType === "expert" ? (
+            <p className="mt-1 text-xs text-[var(--color-muted)]">
+              Expert tips always use the Health category.
+            </p>
+          ) : null}
         </div>
         <div>
           <Label>Status</Label>
@@ -452,6 +523,34 @@ export function BlogPostForm({
           </Select>
         </div>
       </div>
+
+      {showExpertSelect ? (
+        <div>
+          <Label>{presetExpertId ? "Expert profile" : "Link to expert"}</Label>
+          <Select
+            value={form.linked_entity_id}
+            disabled={Boolean(presetExpertId) || Boolean(ownershipError)}
+            onChange={(e) => {
+              const next = e.target.value;
+              const match = experts.find((ex) => ex.id === next);
+              setEntityName(match?.name ?? null);
+              setLinkedType(next ? "expert" : null);
+              setForm((prev) => ({
+                ...prev,
+                linked_entity_id: next,
+                category: "health",
+              }));
+            }}
+          >
+            {!presetExpertId ? <option value="">No expert linked</option> : null}
+            {experts.map((ex) => (
+              <option key={ex.id} value={ex.id}>
+                {ex.name}
+              </option>
+            ))}
+          </Select>
+        </div>
+      ) : null}
 
       {showClubSelect ? (
         <div>
@@ -506,10 +605,14 @@ export function BlogPostForm({
         />
       </div>
 
-      <Button
-        type="submit"
-        disabled={loading || Boolean(ownershipError && entityLocked)}
-      >
+      {activeType === "expert" ? (
+        <p className="rounded-lg border border-amber-200/80 bg-amber-50/90 p-3 text-xs text-amber-950">
+          Tips are educational only — not a veterinary diagnosis. Readers will see a health
+          disclaimer on the article page.
+        </p>
+      ) : null}
+
+      <Button type="submit" disabled={loading || Boolean(ownershipError && entityLocked)}>
         {submitLabel}
       </Button>
     </form>

@@ -1,7 +1,8 @@
--- Additive: extend blog_posts linked-entity RLS for trainer + course owners.
+-- Additive: extend blog_posts linked-entity RLS for trainer + course owners (slice F).
+-- Depends on 008_blog_entity_links.sql and 009_blog_expert_links.sql.
 -- Keeps polymorphic linked_entity_type / linked_entity_id (no new entity columns).
--- Depends on 008_blog_entity_links.sql. Do NOT apply 004.
--- Authz uses trainers.user_id and courses.creator_id (+ admin/moderator helpers). Never user_metadata.
+-- Authz: trainers.user_id, courses.creator_id, plus club/expert helpers from 008/009.
+-- Never user_metadata. Do NOT apply 004.
 
 CREATE OR REPLACE FUNCTION public.user_owns_trainer(target_trainer_id UUID)
 RETURNS BOOLEAN
@@ -55,12 +56,13 @@ AS $$
       WHEN entity_type = 'club' AND entity_id IS NOT NULL THEN public.user_owns_club(entity_id)
       WHEN entity_type = 'trainer' AND entity_id IS NOT NULL THEN public.user_owns_trainer(entity_id)
       WHEN entity_type = 'course' AND entity_id IS NOT NULL THEN public.user_owns_course(entity_id)
+      WHEN entity_type = 'expert' AND entity_id IS NOT NULL THEN public.user_owns_expert(entity_id)
       ELSE false
     END;
 $$;
 
 COMMENT ON FUNCTION public.blog_linked_entity_allowed(TEXT, UUID) IS
-  'Ownership gate for linked_entity_*: club (owner_id), trainer (user_id), course (creator_id). Other types false until mirror PRs.';
+  'Ownership gate for linked_entity_*: club, trainer, course, expert. Other types false until mirror PRs.';
 
 CREATE OR REPLACE FUNCTION public.blog_user_owns_linked_entity(
   entity_type TEXT,
@@ -77,12 +79,13 @@ AS $$
       WHEN entity_type = 'club' AND entity_id IS NOT NULL THEN public.user_owns_club(entity_id)
       WHEN entity_type = 'trainer' AND entity_id IS NOT NULL THEN public.user_owns_trainer(entity_id)
       WHEN entity_type = 'course' AND entity_id IS NOT NULL THEN public.user_owns_course(entity_id)
+      WHEN entity_type = 'expert' AND entity_id IS NOT NULL THEN public.user_owns_expert(entity_id)
       ELSE false
     END;
 $$;
 
 COMMENT ON FUNCTION public.blog_user_owns_linked_entity(TEXT, UUID) IS
-  'True when auth.uid() owns the linked club/trainer/course row (select/update/delete paths).';
+  'True when auth.uid() owns the linked club/trainer/course/expert row (select/update/delete paths).';
 
 DROP POLICY IF EXISTS blog_select ON public.blog_posts;
 DROP POLICY IF EXISTS blog_insert ON public.blog_posts;

@@ -5,6 +5,7 @@ import { getCurrentProfile } from "@/lib/auth";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { ListingCard } from "@/components/ui";
 import { BlogCover } from "@/components/ui/BlogCover";
+import { HealthDisclaimerBlock } from "@/components/blog/HealthDisclaimerBlock";
 import { BLOG_CATEGORIES } from "@/lib/constants";
 import { labelFromOptions } from "@/lib/labels";
 import { resolveBlogCover } from "@/lib/blog-covers";
@@ -53,6 +54,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ id:
     ? post.linked_entity_type
     : null;
   const linkedId = linkedType && post.linked_entity_id ? (post.linked_entity_id as string) : null;
+  const showHealthDisclaimer = linkedType === "expert" || post.category === "health";
 
   let linkedEntity: { id: string; name: string; href: string } | null = null;
   if (linkedType && linkedId) {
@@ -79,6 +81,14 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ id:
         .eq("id", linkedId)
         .maybeSingle();
       if (data && href) linkedEntity = { id: data.id, name: data.title, href };
+    } else if (linkedType === "expert") {
+      const { data } = await supabase
+        .from("experts")
+        .select("id, display_name")
+        .eq("id", linkedId)
+        .maybeSingle();
+      if (data && href)
+        linkedEntity = { id: data.id, name: data.display_name, href };
     }
   }
 
@@ -142,6 +152,14 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ id:
         .select("id")
         .eq("id", linkedId)
         .eq("creator_id", profile.id)
+        .maybeSingle();
+      canEdit = Boolean(owned);
+    } else if (linkedType === "expert") {
+      const { data: owned } = await supabase
+        .from("experts")
+        .select("id")
+        .eq("id", linkedId)
+        .eq("user_id", profile.id)
         .maybeSingle();
       canEdit = Boolean(owned);
     }
@@ -213,6 +231,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ id:
       <div className="prose-legal max-w-none whitespace-pre-wrap text-base leading-relaxed">
         {post.content}
       </div>
+      {showHealthDisclaimer ? <HealthDisclaimerBlock /> : null}
       {related && related.length > 0 ? (
         <section className="mt-16 border-t border-[var(--color-border)] pt-10">
           <h2 className="font-serif text-2xl font-bold">Related articles</h2>

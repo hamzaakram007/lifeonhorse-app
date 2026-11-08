@@ -51,7 +51,6 @@ export function FilterBar({
   className?: string;
 }) {
   const hasActive = Object.values(values).some((v) => Boolean(v && String(v).trim()));
-
   const fieldNames = new Set(
     fields.map((field) => (field.kind === "country" ? field.name ?? "country" : field.name))
   );

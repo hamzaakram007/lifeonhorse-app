@@ -1,5 +1,5 @@
 -- Demo trainer tips + course notes (safe local covers under /images/blog).
--- Requires migrations 008_blog_entity_links.sql and 009_blog_trainer_course_links.sql.
+-- Requires migrations 008_blog_entity_links.sql and 010_blog_trainer_course_links.sql.
 -- Idempotent on slug. Uses existing published trainers/courses + a profile author.
 
 WITH author AS (

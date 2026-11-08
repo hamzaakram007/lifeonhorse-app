@@ -9,8 +9,13 @@ export const BLOG_LINKED_ENTITY_TYPES = [
 
 export type BlogLinkedEntityType = (typeof BLOG_LINKED_ENTITY_TYPES)[number];
 
-/** Entity types that Slice F / P0–P1 composers can link today. */
-export const BLOG_COMPOSER_ENTITY_TYPES = ["club", "trainer", "course"] as const;
+/** Entity types composers can lock via `/blog/new?<type>=` today. */
+export const BLOG_COMPOSER_ENTITY_TYPES = [
+  "club",
+  "trainer",
+  "course",
+  "expert",
+] as const;
 export type BlogComposerEntityType = (typeof BLOG_COMPOSER_ENTITY_TYPES)[number];
 
 export function isBlogLinkedEntityType(
@@ -35,6 +40,8 @@ export function defaultCategoryForLinkedEntity(
       return "trainer_tips";
     case "course":
       return "course_updates";
+    case "expert":
+      return "health";
     default:
       return "guides";
   }
@@ -93,6 +100,8 @@ export function linkedEntityFilterLabel(
       return "Trainer tips";
     case "course":
       return "Course updates";
+    case "expert":
+      return "Health tips";
     default:
       return "Entity posts";
   }

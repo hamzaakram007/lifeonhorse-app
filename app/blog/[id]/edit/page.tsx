@@ -23,29 +23,37 @@ export default async function EditBlogPage({ params }: { params: Promise<{ id: s
   let ownsLinked = false;
   if (linkedType && linkedId) {
     if (linkedType === "club") {
-      const { data: club } = await supabase
+      const { data } = await supabase
         .from("clubs")
         .select("id")
         .eq("id", linkedId)
         .eq("owner_id", profile.id)
         .maybeSingle();
-      ownsLinked = Boolean(club);
+      ownsLinked = Boolean(data);
     } else if (linkedType === "trainer") {
-      const { data: trainer } = await supabase
+      const { data } = await supabase
         .from("trainers")
         .select("id")
         .eq("id", linkedId)
         .eq("user_id", profile.id)
         .maybeSingle();
-      ownsLinked = Boolean(trainer);
+      ownsLinked = Boolean(data);
     } else if (linkedType === "course") {
-      const { data: course } = await supabase
+      const { data } = await supabase
         .from("courses")
         .select("id")
         .eq("id", linkedId)
         .eq("creator_id", profile.id)
         .maybeSingle();
-      ownsLinked = Boolean(course);
+      ownsLinked = Boolean(data);
+    } else if (linkedType === "expert") {
+      const { data } = await supabase
+        .from("experts")
+        .select("id")
+        .eq("id", linkedId)
+        .eq("user_id", profile.id)
+        .maybeSingle();
+      ownsLinked = Boolean(data);
     }
   }
 
@@ -60,7 +68,9 @@ export default async function EditBlogPage({ params }: { params: Promise<{ id: s
         ? "Edit trainer tip"
         : linkedType === "course"
           ? "Edit course update"
-          : "Edit article";
+          : linkedType === "expert"
+            ? "Edit health tip"
+            : "Edit article";
 
   return (
     <BlogPostForm
@@ -68,6 +78,7 @@ export default async function EditBlogPage({ params }: { params: Promise<{ id: s
       presetClubId={linkedType === "club" ? linkedId : null}
       presetTrainerId={linkedType === "trainer" ? linkedId : null}
       presetCourseId={linkedType === "course" ? linkedId : null}
+      presetExpertId={linkedType === "expert" ? linkedId : null}
       initial={{
         id: post.id,
         title: post.title,

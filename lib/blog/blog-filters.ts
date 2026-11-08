@@ -3,12 +3,13 @@ export type BlogSearchParams = {
   club?: string;
   trainer?: string;
   course?: string;
+  expert?: string;
   entity_type?: string;
   featured?: string;
   q?: string;
 };
 
-const ENTITY_FILTER_TYPES = ["club", "trainer", "course", "event"] as const;
+const ENTITY_TYPES = new Set(["club", "trainer", "event", "course", "seller", "expert"]);
 
 export function normalizeBlogSearchParams(
   raw: Record<string, string | string[] | undefined> | BlogSearchParams
@@ -26,10 +27,8 @@ export function normalizeBlogSearchParams(
     club: pick("club"),
     trainer: pick("trainer"),
     course: pick("course"),
-    entity_type:
-      entityType && (ENTITY_FILTER_TYPES as readonly string[]).includes(entityType)
-        ? entityType
-        : undefined,
+    expert: pick("expert"),
+    entity_type: entityType && ENTITY_TYPES.has(entityType) ? entityType : undefined,
     q: pick("q"),
     featured: featured === "1" || featured === "true" ? "1" : undefined,
   };

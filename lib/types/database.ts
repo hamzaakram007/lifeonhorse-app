@@ -195,7 +195,7 @@ export interface BlogPost {
   id: string;
   author_id: string;
   category_id: string | null;
-  /** Polymorphic link (club / trainer / course / …). Paired with linked_entity_id. */
+  /** Polymorphic link (club / trainer / course / expert / …). Paired with linked_entity_id. */
   linked_entity_type: BlogLinkedEntityType | null;
   linked_entity_id: string | null;
   title: string;

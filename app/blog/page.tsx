@@ -44,14 +44,16 @@ export default async function Page({
   const filters = normalizeBlogSearchParams(await searchParams);
   const supabase = await createClient();
   const active = hasActiveBlogFilters(filters);
-  const entityIdFilter = filters.club || filters.trainer || filters.course;
-  const entityTypeFilter =
-    filters.club
-      ? "club"
-      : filters.trainer
-        ? "trainer"
-        : filters.course
-          ? "course"
+  const entityIdFilter =
+    filters.club || filters.trainer || filters.course || filters.expert;
+  const entityTypeFilter = filters.club
+    ? "club"
+    : filters.trainer
+      ? "trainer"
+      : filters.course
+        ? "course"
+        : filters.expert
+          ? "expert"
           : filters.entity_type;
   const wantsEntityFilter = Boolean(entityIdFilter || entityTypeFilter);
 
@@ -79,7 +81,6 @@ export default async function Page({
   const first = await query;
   let data = (first.data ?? []) as BlogListRow[];
 
-  // Until 008_blog_entity_links is applied, fall back so the Journal still lists.
   if (isMissingLinkedEntityColumn(first.error)) {
     if (wantsEntityFilter) {
       data = [];
@@ -123,10 +124,18 @@ export default async function Page({
         .map((p) => p.linked_entity_id as string)
     ),
   ];
+  const expertIds = [
+    ...new Set(
+      data
+        .filter((p) => p.linked_entity_type === "expert" && p.linked_entity_id)
+        .map((p) => p.linked_entity_id as string)
+    ),
+  ];
 
   const clubMap = new Map<string, EntityChip>();
   const trainerMap = new Map<string, EntityChip>();
   const courseMap = new Map<string, EntityChip>();
+  const expertMap = new Map<string, EntityChip>();
 
   await Promise.all([
     clubIds.length
@@ -160,6 +169,17 @@ export default async function Page({
             }
           })
       : Promise.resolve(),
+    expertIds.length
+      ? supabase
+          .from("experts")
+          .select("id, display_name")
+          .in("id", expertIds)
+          .then(({ data: experts }) => {
+            for (const e of experts ?? []) {
+              expertMap.set(e.id, { id: e.id, name: e.display_name });
+            }
+          })
+      : Promise.resolve(),
   ]);
 
   function entityNameFor(item: BlogListRow): string | undefined {
@@ -169,6 +189,8 @@ export default async function Page({
       return trainerMap.get(item.linked_entity_id)?.name;
     if (item.linked_entity_type === "course")
       return courseMap.get(item.linked_entity_id)?.name;
+    if (item.linked_entity_type === "expert")
+      return expertMap.get(item.linked_entity_id)?.name;
     return undefined;
   }
 
@@ -178,21 +200,29 @@ export default async function Page({
       ? `/blog/new?trainer=${filters.trainer}`
       : filters.course
         ? `/blog/new?course=${filters.course}`
-        : null;
+        : filters.expert
+          ? `/blog/new?expert=${filters.expert}`
+          : null;
   const emptyWriteLabel = filters.club
     ? "Write club update"
     : filters.trainer
       ? "Share tip"
       : filters.course
         ? "Post about course"
-        : null;
+        : filters.expert
+          ? "Write health tip"
+          : null;
   const emptyEntityCopy = filters.club
     ? "No published updates from this club yet."
     : filters.trainer
       ? "No published tips from this trainer yet."
       : filters.course
         ? "No published notes from this course yet."
-        : "Try clearing filters or broadening your search.";
+        : filters.expert
+          ? "No published health tips from this expert yet."
+          : entityTypeFilter === "expert"
+            ? "No expert health tips published yet."
+            : "Try clearing filters or broadening your search.";
 
   return (
     <div className="space-y-8">
@@ -214,6 +244,7 @@ export default async function Page({
           club: filters.club,
           trainer: filters.trainer,
           course: filters.course,
+          expert: filters.expert,
         }}
         fields={[
           {
@@ -229,6 +260,7 @@ export default async function Page({
               { value: "club", label: "Club updates" },
               { value: "trainer", label: "Trainer tips" },
               { value: "course", label: "Course updates" },
+              { value: "expert", label: "Expert health tips" },
             ],
             allLabel: "All posts",
           },
