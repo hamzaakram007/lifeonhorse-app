@@ -35,13 +35,14 @@ This creates 10 demo auth users, then seeds horses, clubs, trainers, products, s
 | `npm run seed` | Seed content (requires users to exist) |
 | `npm run seed:all` | Users then content |
 | `npm run seed:cleanup` | Remove all demo data and users |
+| `npm run seed:products` | Upsert marketplace products + remap photos (Management API or SQL) |
 
 ## Content seeded
 
 - 15 horses across breeders (PK, UK, US, UAE, AR, DE, etc.)
 - 6 clubs (polo, tent pegging, riding school, rescue, sports)
 - 6 trainers with specialties and verified badges
-- 8 products, 6 services distributed across sellers
+- 16 products across tack / feed / grooming / stable / apparel (local `/images/demo/product-*.jpg`), 6 services distributed across sellers
 - 6 events (polo cup, tent pegging championship, clinic, auction)
 - 8 blog posts with editorial-quality content
 - 6 courses (beginner to advanced, free + paid)

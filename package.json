@@ -12,6 +12,7 @@
     "seed:all": "node --env-file=.env.local scripts/seed-users.mjs && node --env-file=.env.local scripts/seed-demo.mjs",
     "seed:cleanup": "node --env-file=.env.local scripts/cleanup-demo.mjs",
     "seed:photos": "node --env-file=.env.local scripts/update-demo-photos.mjs",
+    "seed:products": "node --env-file=.env.local scripts/seed-products.mjs",
     "seed:blog-photos": "node --env-file=.env.local scripts/update-blog-photos.mjs",
     "seed:club-photos": "node --env-file=.env.local scripts/update-demo-photos.mjs"
   },
