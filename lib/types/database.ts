@@ -278,3 +278,18 @@ export interface HealthRequest {
   created_at: string;
   updated_at?: string;
 }
+
+/** In-app activity alert (012_activity_notifications). No email/push. */
+export interface ActivityNotification {
+  id: string;
+  user_id: string;
+  kind: string;
+  title: string;
+  body: string | null;
+  href: string | null;
+  entity_type: string | null;
+  entity_id: string | null;
+  blog_post_id: string | null;
+  is_read: boolean;
+  created_at: string;
+}

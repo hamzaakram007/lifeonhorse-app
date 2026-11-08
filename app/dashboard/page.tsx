@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { requireAuth } from "@/lib/auth";
+import { isMissingNotificationsTable } from "@/lib/notifications/query";
 import { createClient } from "@/lib/supabase/server";
 import { OwnedList } from "@/components/dashboard/OwnedList";
 
@@ -42,6 +43,7 @@ const defaultLinks = [
 ];
 
 const sharedLinks = [
+  { href: "/dashboard/alerts", label: "Activity alerts" },
   { href: "/dashboard/profile", label: "Edit profile" },
   { href: "/dashboard/inquiries", label: "Inquiries inbox" },
   { href: "/dashboard/favorites", label: "Saved listings" },
@@ -63,8 +65,14 @@ export default async function DashboardPage() {
   const showClubLists = ["club_owner", "admin"].includes(profile.role);
   const showTrainerLists = ["trainer", "course_creator", "admin"].includes(profile.role);
 
-  const [{ data: horses }, { data: clubs }, { data: events }, { data: trainer }, { data: courses }] =
-    await Promise.all([
+  const [
+    { data: horses },
+    { data: clubs },
+    { data: events },
+    { data: trainer },
+    { data: courses },
+    unreadResult,
+  ] = await Promise.all([
       showSellerLists
         ? supabase
             .from("horses")
@@ -100,7 +108,17 @@ export default async function DashboardPage() {
             .order("created_at", { ascending: false })
             .limit(8)
         : Promise.resolve({ data: [] as { id: string; title: string; status: string }[] }),
+      supabase
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", profile.id)
+        .eq("is_read", false),
     ]);
+
+  const unreadCount =
+    !isMissingNotificationsTable(unreadResult.error) && typeof unreadResult.count === "number"
+      ? unreadResult.count
+      : 0;
 
   return (
     <div className="space-y-6">
@@ -111,12 +129,26 @@ export default async function DashboardPage() {
         <p className="mt-2 text-[var(--color-muted)]">
           Your {profile.role.replace("_", " ")} dashboard — manage what you own below.
         </p>
+        {unreadCount > 0 ? (
+          <p className="mt-3 text-sm">
+            <Link href="/dashboard/alerts" className="font-medium text-[var(--color-primary)] hover:underline">
+              {unreadCount} unread activity alert{unreadCount === 1 ? "" : "s"}
+            </Link>
+          </p>
+        ) : null}
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {uniqueLinks.map((l) => (
           <Link key={l.href} href={l.href} className="card card-hover p-5 no-underline">
-            <span className="font-semibold text-[var(--color-text)]">{l.label}</span>
+            <span className="font-semibold text-[var(--color-text)]">
+              {l.label}
+              {l.href === "/dashboard/alerts" && unreadCount > 0 ? (
+                <span className="ml-2 text-sm font-normal text-[var(--color-primary)]">
+                  ({unreadCount})
+                </span>
+              ) : null}
+            </span>
           </Link>
         ))}
       </div>
