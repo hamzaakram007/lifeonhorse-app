@@ -22,6 +22,7 @@ export const metadata: Metadata = {
 };
 
 type ClubChip = { id: string; name: string };
+type ExpertChip = { id: string; display_name: string };
 type BlogListRow = {
   id: string;
   title: string;
@@ -40,7 +41,12 @@ export default async function Page({
   const filters = normalizeBlogSearchParams(await searchParams);
   const supabase = await createClient();
   const active = hasActiveBlogFilters(filters);
-  const wantsEntityFilter = Boolean(filters.club || filters.entity_type === "club");
+  const wantsEntityFilter = Boolean(
+    filters.club ||
+      filters.expert ||
+      filters.entity_type === "club" ||
+      filters.entity_type === "expert"
+  );
 
   let query = supabase
     .from("blog_posts")
@@ -56,8 +62,12 @@ export default async function Page({
   if (filters.featured) query = query.eq("is_featured", true);
   if (filters.club) {
     query = query.eq("linked_entity_type", "club").eq("linked_entity_id", filters.club);
+  } else if (filters.expert) {
+    query = query.eq("linked_entity_type", "expert").eq("linked_entity_id", filters.expert);
   } else if (filters.entity_type === "club") {
     query = query.eq("linked_entity_type", "club");
+  } else if (filters.entity_type === "expert") {
+    query = query.eq("linked_entity_type", "expert");
   }
   if (filters.q) {
     const q = escapeIlike(filters.q.replace(/,/g, " "));
@@ -97,10 +107,25 @@ export default async function Page({
         .map((p) => p.linked_entity_id as string)
     ),
   ];
+  const expertIds = [
+    ...new Set(
+      data
+        .filter((p) => p.linked_entity_type === "expert" && p.linked_entity_id)
+        .map((p) => p.linked_entity_id as string)
+    ),
+  ];
   const clubMap = new Map<string, ClubChip>();
+  const expertMap = new Map<string, ExpertChip>();
   if (clubIds.length) {
     const { data: clubs } = await supabase.from("clubs").select("id, name").in("id", clubIds);
     for (const c of clubs ?? []) clubMap.set(c.id, c);
+  }
+  if (expertIds.length) {
+    const { data: experts } = await supabase
+      .from("experts")
+      .select("id, display_name")
+      .in("id", expertIds);
+    for (const e of experts ?? []) expertMap.set(e.id, e);
   }
 
   return (
@@ -121,6 +146,7 @@ export default async function Page({
           featured: filters.featured,
           q: filters.q,
           club: filters.club,
+          expert: filters.expert,
         }}
         fields={[
           {
@@ -132,7 +158,10 @@ export default async function Page({
           {
             kind: "select",
             name: "entity_type",
-            options: [{ value: "club", label: "Club updates" }],
+            options: [
+              { value: "club", label: "Club updates" },
+              { value: "expert", label: "Expert health tips" },
+            ],
             allLabel: "All posts",
           },
           {
@@ -150,14 +179,22 @@ export default async function Page({
           title={active ? "No articles match these filters" : "No articles yet"}
           description={
             active
-              ? filters.club
-                ? "No published updates from this club yet."
-                : "Try clearing filters or broadening your search."
+              ? filters.expert
+                ? "No published health tips from this expert yet."
+                : filters.club
+                  ? "No published updates from this club yet."
+                  : filters.entity_type === "expert"
+                    ? "No expert health tips published yet."
+                    : "Try clearing filters or broadening your search."
               : "Share your expertise and stories with a community that values the finest in equestrian culture."
           }
           action={
             active ? (
-              filters.club ? (
+              filters.expert ? (
+                <Link href={`/blog/new?expert=${filters.expert}`} className="btn btn-primary">
+                  Write health tip
+                </Link>
+              ) : filters.club ? (
                 <Link href={`/blog/new?club=${filters.club}`} className="btn btn-primary">
                   Write club update
                 </Link>
@@ -181,13 +218,21 @@ export default async function Page({
               item.linked_entity_type === "club" && item.linked_entity_id
                 ? clubMap.get(item.linked_entity_id)
                 : undefined;
+            const expert =
+              item.linked_entity_type === "expert" && item.linked_entity_id
+                ? expertMap.get(item.linked_entity_id)
+                : undefined;
             return (
               <ListingCard
                 key={item.id}
                 href={`/blog/${item.id}`}
                 title={item.title}
                 subtitle={
-                  club ? `${categoryLabel ?? "Update"} · ${club.name}` : categoryLabel
+                  expert
+                    ? `${categoryLabel ?? "Health"} · ${expert.display_name}`
+                    : club
+                      ? `${categoryLabel ?? "Update"} · ${club.name}`
+                      : categoryLabel
                 }
                 image={resolveBlogCover(item.title, item.cover_image)}
                 badges={
@@ -195,6 +240,9 @@ export default async function Page({
                     {item.is_featured ? <FeaturedBadge /> : null}
                     {item.linked_entity_type === "club" ? (
                       <span className="badge">Club update</span>
+                    ) : null}
+                    {item.linked_entity_type === "expert" ? (
+                      <span className="badge">Health tip</span>
                     ) : null}
                   </>
                 }

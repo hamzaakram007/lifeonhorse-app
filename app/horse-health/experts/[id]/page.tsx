@@ -1,11 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { ListingGallery, VerifiedBadge, FeaturedBadge } from "@/components/ui";
+import { getCurrentProfile } from "@/lib/auth";
+import { ListingGallery, ListingCard, VerifiedBadge, FeaturedBadge, EmptyState } from "@/components/ui";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { ReviewsSection } from "@/components/ReviewsSection";
 import { getCountryName } from "@/lib/countries";
 import { resolveExpertPhotos } from "@/lib/expert-covers";
+import { resolveBlogCover } from "@/lib/blog-covers";
+import { isMissingLinkedEntityColumn } from "@/lib/blog/query";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -17,9 +20,11 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 export default async function ExpertDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
+  const profile = await getCurrentProfile();
   const { data: expert } = await supabase.from("experts").select("*").eq("id", id).single();
   if (!expert) notFound();
 
+  const isOwner = Boolean(profile && profile.id === expert.user_id);
   const location = [expert.city, getCountryName(expert.country_code)].filter(Boolean).join(", ");
   const photos = resolveExpertPhotos(
     expert.id,
@@ -27,6 +32,16 @@ export default async function ExpertDetailPage({ params }: { params: Promise<{ i
     expert.photos,
     expert.specialty,
   );
+
+  const tipsResult = await supabase
+    .from("blog_posts")
+    .select("id, title, category, cover_image, published_at, excerpt")
+    .eq("status", "published")
+    .eq("linked_entity_type", "expert")
+    .eq("linked_entity_id", id)
+    .order("published_at", { ascending: false })
+    .limit(6);
+  const tipPosts = isMissingLinkedEntityColumn(tipsResult.error) ? [] : tipsResult.data;
 
   return (
     <div className="space-y-6">
@@ -46,8 +61,20 @@ export default async function ExpertDetailPage({ params }: { params: Promise<{ i
             {expert.specialty ? <span className="badge">{expert.specialty}</span> : null}
           </div>
 
-          <h1 className="font-serif text-3xl font-bold">{expert.display_name}</h1>
-          {location ? <p className="text-[var(--color-muted)]">{location}</p> : null}
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h1 className="font-serif text-3xl font-bold">{expert.display_name}</h1>
+              {location ? <p className="text-[var(--color-muted)]">{location}</p> : null}
+            </div>
+            {isOwner ? (
+              <Link
+                href={`/blog/new?expert=${expert.id}&category=health`}
+                className="btn btn-primary"
+              >
+                Write a tip
+              </Link>
+            ) : null}
+          </div>
 
           <ListingGallery photos={photos} alt={expert.display_name} />
 
@@ -71,6 +98,55 @@ export default async function ExpertDetailPage({ params }: { params: Promise<{ i
               Full disclaimer
             </Link>
           </div>
+
+          <section className="space-y-4 border-t border-[var(--color-border)] pt-6">
+            <div className="flex flex-wrap items-end justify-between gap-2">
+              <h2 className="font-serif text-2xl font-bold">Articles & tips</h2>
+              <Link
+                href={`/blog?expert=${expert.id}`}
+                className="text-sm text-[var(--color-primary)] hover:underline"
+              >
+                View all tips
+              </Link>
+            </div>
+            {!tipPosts?.length ? (
+              <EmptyState
+                title={isOwner ? "No tips yet" : "No tips published yet"}
+                description={
+                  isOwner
+                    ? "You’re the expert — publish the first health tip for horse owners."
+                    : "Ask this expert to share educational guidance in the Journal."
+                }
+                action={
+                  isOwner ? (
+                    <Link
+                      href={`/blog/new?expert=${expert.id}&category=health`}
+                      className="btn btn-primary"
+                    >
+                      Write a tip
+                    </Link>
+                  ) : null
+                }
+              />
+            ) : (
+              <div className="listing-grid">
+                {tipPosts.map((post) => (
+                  <ListingCard
+                    key={post.id}
+                    href={`/blog/${post.id}`}
+                    title={post.title}
+                    subtitle={
+                      post.published_at
+                        ? new Date(post.published_at).toLocaleDateString()
+                        : undefined
+                    }
+                    image={resolveBlogCover(post.title, post.cover_image)}
+                    badges={<span className="badge">Health tip</span>}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
 
           <ReviewsSection entityType="expert" entityId={id} />
         </div>

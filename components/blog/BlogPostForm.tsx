@@ -9,8 +9,10 @@ import { ImageUpload } from "@/components/ui/ImageUpload";
 import { STORAGE_BUCKETS } from "@/lib/storage/upload";
 import { BLOG_CATEGORIES } from "@/lib/constants";
 import { slugify } from "@/lib/utils";
+import type { BlogLinkedEntityType } from "@/lib/blog/linked-entity";
 
 type ClubOption = { id: string; name: string };
+type ExpertOption = { id: string; display_name: string };
 
 export type BlogPostFormInitial = {
   id?: string;
@@ -19,35 +21,61 @@ export type BlogPostFormInitial = {
   content?: string;
   category?: string;
   cover_image?: string | null;
-  linked_entity_type?: "club" | null;
+  linked_entity_type?: BlogLinkedEntityType | null;
   linked_entity_id?: string | null;
   status?: "draft" | "published";
 };
 
+function defaultCategory(
+  presetClubId?: string | null,
+  presetExpertId?: string | null,
+  linkedType?: BlogLinkedEntityType | null
+) {
+  if (presetExpertId || linkedType === "expert") return "health";
+  if (presetClubId || linkedType === "club") return "club_activity";
+  return "guides";
+}
+
 export function BlogPostForm({
   initial,
   presetClubId,
+  presetExpertId,
   heading,
 }: {
   initial?: BlogPostFormInitial;
   /** From `/blog/new?club=` — locks link to this club after ownership check. */
   presetClubId?: string | null;
+  /** From `/blog/new?expert=` — locks link to this expert after ownership check. */
+  presetExpertId?: string | null;
   heading?: string;
 }) {
   const router = useRouter();
   const isEdit = Boolean(initial?.id);
+  const expertMode = Boolean(
+    presetExpertId || initial?.linked_entity_type === "expert"
+  );
+  const clubMode = Boolean(
+    !expertMode && (presetClubId || initial?.linked_entity_type === "club")
+  );
+
   const [clubs, setClubs] = useState<ClubOption[]>([]);
+  const [experts, setExperts] = useState<ExpertOption[]>([]);
   const [clubName, setClubName] = useState<string | null>(null);
+  const [expertName, setExpertName] = useState<string | null>(null);
   const [form, setForm] = useState({
     title: initial?.title ?? "",
     excerpt: initial?.excerpt ?? "",
     content: initial?.content ?? "",
     category:
       initial?.category ??
-      (presetClubId || initial?.linked_entity_type === "club" ? "club_activity" : "guides"),
+      defaultCategory(presetClubId, presetExpertId, initial?.linked_entity_type),
     linked_entity_id:
-      presetClubId || initial?.linked_entity_id || "",
-    status: (initial?.status === "draft" ? "draft" : "published") as "draft" | "published",
+      (expertMode ? presetExpertId : presetClubId) ||
+      initial?.linked_entity_id ||
+      "",
+    status: (initial?.status === "draft" ? "draft" : "published") as
+      | "draft"
+      | "published",
   });
   const [coverImage, setCoverImage] = useState<string[]>(
     initial?.cover_image ? [initial.cover_image] : []
@@ -58,17 +86,52 @@ export function BlogPostForm({
 
   useEffect(() => {
     let cancelled = false;
-    async function loadClubs() {
+    async function loadOwned() {
       const supabase = createClient();
       const {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) {
-        if (presetClubId && !cancelled) {
-          setOwnershipError("Sign in as the club owner to publish a club update.");
+        if (!cancelled && (presetClubId || presetExpertId)) {
+          setOwnershipError(
+            presetExpertId
+              ? "Sign in as this expert to publish a health tip."
+              : "Sign in as the club owner to publish a club update."
+          );
         }
         return;
       }
+
+      if (expertMode) {
+        const { data } = await supabase
+          .from("experts")
+          .select("id, display_name")
+          .eq("user_id", user.id)
+          .order("display_name");
+        if (cancelled) return;
+        const owned = data ?? [];
+        setExperts(owned);
+
+        if (presetExpertId) {
+          const match = owned.find((e) => e.id === presetExpertId);
+          if (!match) {
+            setOwnershipError("You can only publish health tips for your own expert profile.");
+            setForm((prev) => ({ ...prev, linked_entity_id: "" }));
+          } else {
+            setExpertName(match.display_name);
+            setForm((prev) => ({
+              ...prev,
+              linked_entity_id: match.id,
+              category: "health",
+            }));
+          }
+        } else if (initial?.linked_entity_id) {
+          const match = owned.find((e) => e.id === initial.linked_entity_id);
+          if (match) setExpertName(match.display_name);
+        }
+        return;
+      }
+
       const { data } = await supabase
         .from("clubs")
         .select("id, name")
@@ -96,11 +159,16 @@ export function BlogPostForm({
         if (match) setClubName(match.name);
       }
     }
-    void loadClubs();
+    void loadOwned();
     return () => {
       cancelled = true;
     };
-  }, [presetClubId, initial?.linked_entity_id]);
+  }, [
+    presetClubId,
+    presetExpertId,
+    expertMode,
+    initial?.linked_entity_id,
+  ]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -111,11 +179,13 @@ export function BlogPostForm({
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) {
-      const redirect = presetClubId
-        ? `/blog/new?club=${presetClubId}`
-        : isEdit
-          ? `/blog/${initial!.id}/edit`
-          : "/blog/new";
+      const redirect = presetExpertId
+        ? `/blog/new?expert=${presetExpertId}`
+        : presetClubId
+          ? `/blog/new?club=${presetClubId}`
+          : isEdit
+            ? `/blog/${initial!.id}/edit`
+            : "/blog/new";
       router.push(`/auth/login?redirect=${encodeURIComponent(redirect)}`);
       return;
     }
@@ -126,26 +196,42 @@ export function BlogPostForm({
       return;
     }
 
-    const clubId = form.linked_entity_id || null;
-    if (presetClubId && clubId !== presetClubId) {
+    const entityId = form.linked_entity_id || null;
+    if (presetExpertId && entityId !== presetExpertId) {
+      setError("This tip must stay linked to your expert profile.");
+      setLoading(false);
+      return;
+    }
+    if (presetClubId && entityId !== presetClubId) {
       setError("This update must stay linked to the selected club.");
       setLoading(false);
       return;
     }
-    if (clubId && !clubs.some((c) => c.id === clubId)) {
+    if (expertMode && entityId && !experts.some((ex) => ex.id === entityId)) {
+      setError("You can only link tips to your own expert profile.");
+      setLoading(false);
+      return;
+    }
+    if (!expertMode && entityId && clubs.length && !clubs.some((c) => c.id === entityId)) {
       setError("You can only link updates to clubs you own.");
       setLoading(false);
       return;
     }
 
+    const linkedType: BlogLinkedEntityType | null = entityId
+      ? expertMode
+        ? "expert"
+        : "club"
+      : null;
+
     const payload = {
       title: form.title.trim(),
       excerpt: form.excerpt.trim() || null,
       content: form.content,
-      category: form.category,
+      category: expertMode ? "health" : form.category,
       cover_image: coverImage[0] ?? null,
-      linked_entity_type: clubId ? ("club" as const) : null,
-      linked_entity_id: clubId,
+      linked_entity_type: linkedType,
+      linked_entity_id: entityId,
       status: form.status,
       published_at: form.status === "published" ? new Date().toISOString() : null,
     };
@@ -186,19 +272,33 @@ export function BlogPostForm({
   }
 
   const clubLocked = Boolean(presetClubId);
+  const expertLocked = Boolean(presetExpertId);
+  const entityLocked = clubLocked || expertLocked;
+
   const title =
     heading ??
     (isEdit
-      ? clubLocked || form.linked_entity_id
-        ? "Edit club update"
-        : "Edit article"
-      : clubLocked
-        ? "Write club update"
-        : "Write article");
+      ? expertMode
+        ? "Edit health tip"
+        : clubMode || form.linked_entity_id
+          ? "Edit club update"
+          : "Edit article"
+      : expertLocked
+        ? "Write health tip"
+        : clubLocked
+          ? "Write club update"
+          : "Write article");
 
   return (
     <form onSubmit={submit} className="mx-auto max-w-2xl space-y-4 px-4 py-8">
       <h1 className="font-serif text-2xl font-bold">{title}</h1>
+      {expertLocked && expertName ? (
+        <p className="text-sm text-[var(--color-muted)]">
+          Publishing for{" "}
+          <span className="font-medium text-[var(--color-text)]">{expertName}</span>.
+          Tips use the Health category and appear in the Journal and on your expert profile.
+        </p>
+      ) : null}
       {clubLocked && clubName ? (
         <p className="text-sm text-[var(--color-muted)]">
           Publishing for <span className="font-medium text-[var(--color-text)]">{clubName}</span>.
@@ -237,7 +337,8 @@ export function BlogPostForm({
         <div>
           <Label>Category</Label>
           <Select
-            value={form.category}
+            value={expertMode ? "health" : form.category}
+            disabled={expertMode}
             onChange={(e) => setForm({ ...form, category: e.target.value })}
           >
             {BLOG_CATEGORIES.map((opt) => (
@@ -246,6 +347,11 @@ export function BlogPostForm({
               </option>
             ))}
           </Select>
+          {expertMode ? (
+            <p className="mt-1 text-xs text-[var(--color-muted)]">
+              Expert tips always use the Health category.
+            </p>
+          ) : null}
         </div>
         <div>
           <Label>Status</Label>
@@ -261,7 +367,32 @@ export function BlogPostForm({
         </div>
       </div>
 
-      {(clubs.length > 0 || clubLocked) && (
+      {expertMode ? (
+        <div>
+          <Label>{expertLocked ? "Expert profile" : "Link to expert"}</Label>
+          <Select
+            value={form.linked_entity_id}
+            disabled={expertLocked || Boolean(ownershipError)}
+            onChange={(e) => {
+              const next = e.target.value;
+              const match = experts.find((ex) => ex.id === next);
+              setExpertName(match?.display_name ?? null);
+              setForm((prev) => ({
+                ...prev,
+                linked_entity_id: next,
+                category: "health",
+              }));
+            }}
+          >
+            {!expertLocked ? <option value="">No expert linked</option> : null}
+            {experts.map((ex) => (
+              <option key={ex.id} value={ex.id}>
+                {ex.display_name}
+              </option>
+            ))}
+          </Select>
+        </div>
+      ) : (clubs.length > 0 || clubLocked) ? (
         <div>
           <Label>{clubLocked ? "Club" : "Link to club (optional)"}</Label>
           <Select
@@ -287,7 +418,7 @@ export function BlogPostForm({
             ))}
           </Select>
         </div>
-      )}
+      ) : null}
 
       <div>
         <Label required>Content</Label>
@@ -299,7 +430,14 @@ export function BlogPostForm({
         />
       </div>
 
-      <Button type="submit" disabled={loading || Boolean(ownershipError && clubLocked)}>
+      {expertMode ? (
+        <p className="rounded-lg border border-amber-200/80 bg-amber-50/90 p-3 text-xs text-amber-950">
+          Tips are educational only — not a veterinary diagnosis. Readers will see a health
+          disclaimer on the article page.
+        </p>
+      ) : null}
+
+      <Button type="submit" disabled={loading || Boolean(ownershipError && entityLocked)}>
         {loading
           ? isEdit
             ? "Saving…"
@@ -310,9 +448,11 @@ export function BlogPostForm({
             ? "Save changes"
             : form.status === "draft"
               ? "Save draft"
-              : clubLocked
-                ? "Publish club update"
-                : "Publish article"}
+              : expertLocked
+                ? "Publish health tip"
+                : clubLocked
+                  ? "Publish club update"
+                  : "Publish article"}
       </Button>
     </form>
   );
