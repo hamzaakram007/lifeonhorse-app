@@ -9,14 +9,12 @@ export const { dynamic, dynamicParams, revalidate, generateStaticParams, GET } =
   createSerwistRoute({
     swSrc: "app/sw.ts",
     useNativeEsbuild: true,
+    // Only add offline HTML shells here. manifest.json + icons are already
+    // picked up from /public — duplicate precache URLs make Serwist throw
+    // during SW evaluation and registration fails.
     additionalPrecacheEntries: [
-      // English (localePrefix: as-needed — unprefixed)
       { url: "/~offline", revision },
-      // Localized offline fallbacks
       { url: "/ur/~offline", revision },
       { url: "/ar/~offline", revision },
-      { url: "/manifest.json", revision },
-      { url: "/icons/icon-192.png", revision },
-      { url: "/icons/icon-512.png", revision },
     ],
   });
