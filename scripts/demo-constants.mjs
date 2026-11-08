@@ -37,6 +37,19 @@ export const IMG = {
   product1: "/images/demo/product-1.jpg",
   service: "/images/demo/service-1.jpg",
   expert: "/images/demo/expert-1.jpg",
+  expertVet: "/images/demo/expert-vet.jpg",
+  expertDressage: "/images/demo/expert-dressage.jpg",
+  expertNutrition: "/images/demo/expert-nutrition.jpg",
+  expertFarrier: "/images/demo/expert-farrier.jpg",
+  expertDental: "/images/demo/expert-dental.jpg",
+  expertReproduction: "/images/demo/expert-reproduction.jpg",
+  expertClinic: "/images/demo/expert-clinic.jpg",
+  expertRehab: "/images/demo/expert-rehab.jpg",
+  expertBehavior: "/images/demo/expert-behavior.jpg",
+  expertLameness: "/images/demo/expert-lameness.jpg",
+  expertFirstaid: "/images/demo/expert-firstaid.jpg",
+  expertDirectory: "/images/demo/expert-directory.jpg",
+  expertAskHelp: "/images/demo/expert-ask-help.jpg",
   // Clubs — unique covers
   clubPolo: "/images/demo/club-polo.jpg",
   clubTent: "/images/demo/club-tent.jpg",
@@ -196,12 +209,12 @@ export const COMMUNITY_POSTS = [
 ];
 
 export const EXPERTS = [
-  { id: "dbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb01", user: "vet", display_name: "Dr. James Whitfield", specialty: "Equine Veterinarian", description: "Sport horse lameness specialist, 22 years experience.", country: "GB", city: "London", photos: [IMG.vet], featured: true, verified: true },
-  { id: "dbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb02", user: "trainer", display_name: "Sarah Mitchell", specialty: "Dressage Coach", description: "FEI dressage coach available for remote consultations.", country: "GB", city: "Newmarket", photos: [IMG.riding], featured: true, verified: true },
-  { id: "dbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb03", user: "feed", display_name: "Dr. Priya Sharma", specialty: "Equine Nutritionist", description: "PhD in equine nutrition, specializing in performance horses.", country: "IN", city: "Jaipur", photos: [IMG.stable], featured: false, verified: true },
-  { id: "dbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb04", user: "tack", display_name: "Ahmed Farooq", specialty: "Master Farrier", description: "Certified farrier serving elite stables across Punjab.", country: "PK", city: "Lahore", photos: [IMG.grooming], featured: false, verified: true },
-  { id: "dbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb05", user: "poloClub", display_name: "Dr. Maria Santos", specialty: "Equine Dentist", description: "Specialized equine dental care for sport horses.", country: "AR", city: "Buenos Aires", photos: [IMG.vet], featured: false, verified: true },
-  { id: "dbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb06", user: "transport", display_name: "Dr. Khalid Al-Rashid", specialty: "Equine Reproduction", description: "Leading reproduction specialist in the Gulf region.", country: "AE", city: "Dubai", photos: [IMG.horse1], featured: true, verified: true },
+  { id: "dbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb01", user: "vet", display_name: "Dr. James Whitfield", specialty: "Equine Veterinarian", description: "Sport horse lameness specialist, 22 years experience.", country: "GB", city: "London", photos: [IMG.expertVet], featured: true, verified: true },
+  { id: "dbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb02", user: "trainer", display_name: "Sarah Mitchell", specialty: "Dressage Coach", description: "FEI dressage coach available for remote consultations.", country: "GB", city: "Newmarket", photos: [IMG.expertDressage], featured: true, verified: true },
+  { id: "dbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb03", user: "feed", display_name: "Dr. Priya Sharma", specialty: "Equine Nutritionist", description: "PhD in equine nutrition, specializing in performance horses.", country: "IN", city: "Jaipur", photos: [IMG.expertNutrition], featured: false, verified: true },
+  { id: "dbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb04", user: "tack", display_name: "Ahmed Farooq", specialty: "Master Farrier", description: "Certified farrier serving elite stables across Punjab.", country: "PK", city: "Lahore", photos: [IMG.expertFarrier], featured: false, verified: true },
+  { id: "dbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb05", user: "poloClub", display_name: "Dr. Maria Santos", specialty: "Equine Dentist", description: "Specialized equine dental care for sport horses.", country: "AR", city: "Buenos Aires", photos: [IMG.expertDental], featured: false, verified: true },
+  { id: "dbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb06", user: "transport", display_name: "Dr. Khalid Al-Rashid", specialty: "Equine Reproduction", description: "Leading reproduction specialist in the Gulf region.", country: "AE", city: "Dubai", photos: [IMG.expertReproduction], featured: true, verified: true },
 ];
 
 export const DEMO_USER_IDS = Object.values(USERS).map((u) => u.id);
