@@ -4,29 +4,39 @@ import { createClient } from "@/lib/supabase/server";
 import { requireAuth } from "@/lib/auth";
 import { OwnedList } from "@/components/dashboard/OwnedList";
 import { EmptyState } from "@/components/ui";
+import { isMissingLinkedEntityColumn } from "@/lib/blog/query";
 
 export default async function ClubOwnerDashboardPage() {
   const profile = await requireAuth();
   if (!profile) redirect("/auth/login?redirect=/dashboard/club");
 
   const supabase = await createClient();
-  const [{ data: clubs }, { data: events }, { data: pendingFeatured }] = await Promise.all([
-    supabase
-      .from("clubs")
-      .select("id, name, status, city, country_code, is_verified, is_featured")
-      .eq("owner_id", profile.id)
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("events")
-      .select("id, title, status, start_date, city, is_featured")
-      .eq("host_id", profile.id)
-      .order("start_date", { ascending: false }),
-    supabase
-      .from("featured_listing_requests")
-      .select("entity_type, entity_id")
-      .eq("user_id", profile.id)
-      .eq("status", "pending"),
-  ]);
+  const [{ data: clubs }, { data: events }, { data: pendingFeatured }, updatesResult] =
+    await Promise.all([
+      supabase
+        .from("clubs")
+        .select("id, name, status, city, country_code, is_verified, is_featured")
+        .eq("owner_id", profile.id)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("events")
+        .select("id, title, status, start_date, city, is_featured")
+        .eq("host_id", profile.id)
+        .order("start_date", { ascending: false }),
+      supabase
+        .from("featured_listing_requests")
+        .select("entity_type, entity_id")
+        .eq("user_id", profile.id)
+        .eq("status", "pending"),
+      supabase
+        .from("blog_posts")
+        .select("id, title, status, linked_entity_id, published_at")
+        .eq("author_id", profile.id)
+        .eq("linked_entity_type", "club")
+        .order("updated_at", { ascending: false })
+        .limit(12),
+    ]);
+  const drafts = isMissingLinkedEntityColumn(updatesResult.error) ? [] : updatesResult.data;
 
   const pendingKey = new Set(
     (pendingFeatured ?? []).map((r) => `${r.entity_type}:${r.entity_id}`)
@@ -61,6 +71,18 @@ export default async function ClubOwnerDashboardPage() {
       featurePending: pendingKey.has(`event:${e.id}`),
     })) ?? [];
 
+  const updateItems =
+    drafts?.map((p) => ({
+      id: p.id,
+      title: p.title,
+      status: p.status,
+      href: `/blog/${p.id}`,
+      editHref: `/blog/${p.id}/edit`,
+      meta: p.published_at
+        ? new Date(p.published_at).toLocaleDateString()
+        : "Club update",
+    })) ?? [];
+
   return (
     <div className="space-y-6">
       <div>
@@ -69,7 +91,7 @@ export default async function ClubOwnerDashboardPage() {
         </Link>
         <h1 className="mt-2 text-2xl font-bold">Club owner dashboard</h1>
         <p className="text-sm text-[var(--color-muted)]">
-          Manage clubs you own and events you host.{" "}
+          Manage clubs you own, publish Journal updates, and host events.{" "}
           <Link href="/payments" className="text-[var(--color-primary)] hover:underline">
             Featured listing pricing
           </Link>
@@ -93,13 +115,73 @@ export default async function ClubOwnerDashboardPage() {
         />
       ) : (
         <>
+          <section className="space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h3 className="font-semibold">Your clubs ({clubItems.length})</h3>
+              <div className="flex flex-wrap gap-2">
+                <Link href="/clubs/register" className="btn btn-secondary inline-flex text-sm">
+                  + New club
+                </Link>
+                {clubItems[0] ? (
+                  <Link
+                    href={`/blog/new?club=${clubItems[0].id}`}
+                    className="btn btn-primary inline-flex text-sm"
+                  >
+                    Write club update
+                  </Link>
+                ) : null}
+              </div>
+            </div>
+            {!clubItems.length ? (
+              <p className="text-sm text-[var(--color-muted)]">
+                You have not registered a club yet.
+              </p>
+            ) : (
+              <ul className="space-y-2">
+                {clubItems.map((item) => (
+                  <li
+                    key={item.id}
+                    className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 text-sm"
+                  >
+                    <div className="min-w-0">
+                      <Link href={item.href} className="font-medium hover:underline">
+                        {item.title}
+                      </Link>
+                      <p className="text-xs text-[var(--color-muted)]">
+                        {[item.status, item.meta].filter(Boolean).join(" · ")}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <Link href={item.href} className="text-[var(--color-primary)] hover:underline">
+                        View
+                      </Link>
+                      <Link
+                        href={`/blog/new?club=${item.id}`}
+                        className="font-medium text-[var(--color-primary)] hover:underline"
+                      >
+                        Write club update
+                      </Link>
+                      <Link
+                        href={`/events/new`}
+                        className="text-[var(--color-primary)] hover:underline"
+                      >
+                        List event
+                      </Link>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
           <OwnedList
-            title="Your clubs"
-            items={clubItems}
-            createHref="/clubs/register"
-            createLabel="+ New club"
-            emptyDescription="You have not registered a club yet."
+            title="Your club updates"
+            items={updateItems}
+            createHref={clubItems[0] ? `/blog/new?club=${clubItems[0].id}` : "/blog/new"}
+            createLabel="+ Write club update"
+            emptyDescription="No Journal updates linked to your clubs yet."
           />
+
           <OwnedList
             title="Your events"
             items={eventItems}

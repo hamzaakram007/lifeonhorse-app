@@ -14,6 +14,7 @@ import { labelFromOptions, humanizeSlug } from "@/lib/labels";
 import { formatLocation } from "@/lib/location";
 import { firstPhoto } from "@/lib/storage/upload";
 import { formatPrice } from "@/lib/utils";
+import { isMissingLinkedEntityColumn } from "@/lib/blog/query";
 
 export const metadata: Metadata = buildMetadata({
   title: "Global Horse Marketplace & Community",
@@ -27,6 +28,7 @@ export default async function HomePage() {
 
   const [
     { data: blogPosts },
+    { data: clubActivityPosts },
     { data: featuredHorses },
     { data: featuredClubs },
     { data: featuredTrainers },
@@ -39,6 +41,16 @@ export default async function HomePage() {
       .eq("status", "published")
       .order("is_featured", { ascending: false })
       .limit(3),
+    supabase
+      .from("blog_posts")
+      .select("id, title, cover_image, excerpt, linked_entity_id")
+      .eq("status", "published")
+      .eq("linked_entity_type", "club")
+      .order("published_at", { ascending: false })
+      .limit(4)
+      .then((res) =>
+        isMissingLinkedEntityColumn(res.error) ? { data: [] as typeof res.data } : res
+      ),
     supabase
       .from("horses")
       .select("id, title, photos, price, currency, city, country_code")
@@ -152,6 +164,17 @@ export default async function HomePage() {
           title: c.title,
           subtitle: labelFromOptions(COURSE_CATEGORIES, c.category) || undefined,
           image: c.cover_image,
+        }))}
+      />
+      <FeaturedListings
+        title="Latest from clubs"
+        viewAllHref="/blog?entity_type=club"
+        items={(clubActivityPosts ?? []).map((p) => ({
+          id: p.id,
+          href: `/blog/${p.id}`,
+          title: p.title,
+          image: resolveBlogCover(p.title, p.cover_image),
+          subtitle: p.excerpt?.slice(0, 80) || "Club update",
         }))}
       />
       <AboutSection />

@@ -183,20 +183,34 @@ export interface Lesson {
   order_index: number;
 }
 
+export type BlogLinkedEntityType =
+  | "club"
+  | "trainer"
+  | "event"
+  | "course"
+  | "seller"
+  | "expert";
+
 export interface BlogPost {
   id: string;
   author_id: string;
   category_id: string | null;
+  /** Polymorphic link (P0: club). Paired with linked_entity_id. */
+  linked_entity_type: BlogLinkedEntityType | null;
+  linked_entity_id: string | null;
   title: string;
   slug: string;
   excerpt: string | null;
   content: string | null;
   cover_image: string | null;
+  category: string | null;
   seo_title: string | null;
   seo_description: string | null;
   status: ContentStatus;
   is_featured: boolean;
   published_at: string | null;
+  created_at?: string;
+  updated_at?: string;
   blog_categories?: { name: string; slug: string };
   profiles?: Profile;
 }
