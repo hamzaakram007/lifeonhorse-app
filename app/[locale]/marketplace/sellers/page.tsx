@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ListingCard, EmptyState, VerifiedBadge } from "@/components/ui";
 import { SectionHero } from "@/components/layout/SectionHero";
@@ -22,16 +23,28 @@ export default async function Page() {
     .order("business_name", { ascending: true })
     .limit(24);
 
+  const heroT = await getTranslations("Heroes.sellers");
+  const commonT = await getTranslations("Common");
+  const emptyT = await getTranslations("Empty");
+
   return (
     <div className="space-y-6">
       <SectionHero
-        title="Seller Directory"
-        subtitle="Find trusted sellers in your region"
+        title={heroT("title")}
+        subtitle={heroT("subtitle")}
         image={SECTION_IMAGES.sellers}
-        action={{ href: "/dashboard/seller", label: "Create seller profile" }}
+        action={{ href: "/dashboard/seller", label: commonT("createSellerProfile") }}
       />
       {!data?.length ? (
-        <EmptyState title="No listings yet" description="Be the first to add one." action={<Link href="/dashboard/seller" className="btn btn-primary">Create</Link>} />
+        <EmptyState
+          title={emptyT("noSellers")}
+          description={emptyT("beFirst")}
+          action={
+            <Link href="/dashboard/seller" className="btn btn-primary">
+              {commonT("create")}
+            </Link>
+          }
+        />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {data.map((item: Record<string, unknown>) => (
@@ -39,7 +52,7 @@ export default async function Page() {
               key={String(item.id)}
               href={`/marketplace/sellers/${item.id}`}
               title={String(item.business_name)}
-              subtitle={[item.city, getCountryName(item.country_code as string)].filter(Boolean).join(', ')}
+              subtitle={[item.city, getCountryName(item.country_code as string)].filter(Boolean).join(", ")}
               image={item.logo_url as string | null}
               badges={<>{item.is_verified ? <VerifiedBadge /> : null}</>}
               meta={undefined}

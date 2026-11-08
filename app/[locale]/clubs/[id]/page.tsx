@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth";
 import { ListingGallery, ListingCard, VerifiedBadge, FeaturedBadge, EmptyState } from "@/components/ui";
@@ -23,6 +24,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function ClubDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const emptyT = await getTranslations("Empty");
   const supabase = await createClient();
   const profile = await getCurrentProfile();
 
@@ -112,7 +114,7 @@ export default async function ClubDetailPage({ params }: { params: Promise<{ id:
             </div>
             {!activityPosts?.length ? (
               <EmptyState
-                title={isOwner ? "No updates yet" : "No club updates yet"}
+                title={isOwner ? emptyT("clubUpdatesOwner") : emptyT("clubUpdatesVisitor")}
                 description={
                   isOwner
                     ? "You’re the owner — publish the first update for members and visitors."

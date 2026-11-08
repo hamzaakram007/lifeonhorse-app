@@ -15,6 +15,7 @@ export const metadata: Metadata = {
 export default async function Page() {
   const heroT = await getTranslations("Heroes.community");
   const commonT = await getTranslations("Common");
+  const emptyT = await getTranslations("Empty");
   const supabase = await createClient();
   const { data } = await supabase
     .from("community_posts")
@@ -33,8 +34,8 @@ export default async function Page() {
       />
       {!data?.length ? (
         <EmptyState
-          title="No community posts yet"
-          description="Be the first to share your equestrian journey with riders across the globe."
+          title={emptyT("noCommunity")}
+          description={emptyT("noCommunityDesc")}
           action={
             <Link href="/community/new" className="btn btn-primary">
               {commonT("shareStory")}

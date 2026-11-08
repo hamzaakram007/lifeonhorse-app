@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ListingCard, EmptyState, VerifiedBadge, FeaturedBadge } from "@/components/ui";
 import { SectionHero } from "@/components/layout/SectionHero";
@@ -82,20 +83,25 @@ export default async function ExpertsPage({
   const experts = data ?? [];
   const active = Boolean(filters.country || filters.specialty || filters.q);
   const countryLabel = filters.country ? getCountryName(filters.country) : null;
+  const heroT = await getTranslations("Heroes.experts");
+  const commonT = await getTranslations("Common");
+  const formsT = await getTranslations("Forms");
+  const emptyT = await getTranslations("Empty");
+  const navT = await getTranslations("Nav");
 
   return (
     <div className="space-y-8">
       <SectionHero
-        title="Find an Expert"
-        subtitle="Verified equine veterinarians, farriers, nutritionists, and specialists ready to guide horse health decisions."
+        title={heroT("title")}
+        subtitle={heroT("subtitle")}
         image={SECTION_IMAGES.health}
-        action={{ href: "/horse-health/experts/apply", label: "+ Apply as expert" }}
+        action={{ href: "/horse-health/experts/apply", label: `+ ${commonT("applyAsExpert")}` }}
       >
         <Link
           href="/horse-health"
           className="mt-4 inline-flex text-sm font-medium text-white/85 underline-offset-4 hover:underline"
         >
-          ← Horse Health
+          ← {navT("horseHealth")}
         </Link>
       </SectionHero>
 
@@ -112,10 +118,10 @@ export default async function ExpertsPage({
           {
             kind: "select",
             name: "specialty",
-            allLabel: "All specialties",
+            allLabel: formsT("allSpecialties"),
             options: EXPERT_CATEGORIES.map((c) => ({ value: c.value, label: c.label })),
           },
-          { kind: "text", name: "q", placeholder: "Search experts…" },
+          { kind: "text", name: "q", placeholder: formsT("searchExperts") },
         ]}
       />
 
@@ -124,23 +130,19 @@ export default async function ExpertsPage({
           title={
             active
               ? countryLabel
-                ? `No experts in ${countryLabel}`
-                : "No experts match these filters"
-              : "No experts listed yet"
+                ? emptyT("noExpertsInCountry", { country: countryLabel })
+                : emptyT("noExpertsMatch")
+              : emptyT("noExperts")
           }
-          description={
-            active
-              ? "Try clearing filters or browse another specialty."
-              : "Apply to join the directory and help horse owners worldwide."
-          }
+          description={active ? emptyT("tryOtherSpecialty") : emptyT("noExpertsDesc")}
           action={
             active ? (
               <Link href="/horse-health/experts" className="btn btn-secondary">
-                Clear filters
+                {commonT("clearFilters")}
               </Link>
             ) : (
               <Link href="/horse-health/experts/apply" className="btn btn-primary">
-                Apply as expert
+                {commonT("applyAsExpert")}
               </Link>
             )
           }

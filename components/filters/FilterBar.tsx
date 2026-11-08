@@ -1,4 +1,7 @@
-import Link from "next/link";
+"use client";
+
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { CountryFilterSelect } from "@/components/ui/CountrySelect";
 import { cn } from "@/lib/utils";
 
@@ -39,7 +42,7 @@ export function FilterBar({
   action,
   values,
   fields,
-  submitLabel = "Filter",
+  submitLabel,
   clearHref,
   className,
 }: {
@@ -50,6 +53,7 @@ export function FilterBar({
   clearHref?: string;
   className?: string;
 }) {
+  const t = useTranslations("Forms");
   const hasActive = Object.values(values).some((v) => Boolean(v && String(v).trim()));
   const fieldNames = new Set(
     fields.map((field) => (field.kind === "country" ? field.name ?? "country" : field.name))
@@ -91,7 +95,7 @@ export function FilterBar({
               defaultValue={values[field.name] ?? ""}
               className={cn(controlClass, field.className)}
             >
-              <option value="">{field.allLabel ?? "All"}</option>
+              <option value="">{field.allLabel ?? t("all")}</option>
               {field.options.map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {opt.label}
@@ -130,11 +134,11 @@ export function FilterBar({
 
       <div className="flex flex-wrap gap-2">
         <button type="submit" className="btn btn-primary text-sm">
-          {submitLabel}
+          {submitLabel ?? t("filter")}
         </button>
         {hasActive && clearHref ? (
           <Link href={clearHref} className="btn btn-secondary text-sm">
-            Clear
+            {t("clear")}
           </Link>
         ) : null}
       </div>

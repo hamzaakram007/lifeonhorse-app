@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ListingCard, EmptyState, VerifiedBadge, FeaturedBadge } from "@/components/ui";
 import { SectionHero } from "@/components/layout/SectionHero";
@@ -57,14 +58,18 @@ export default async function Page({
   const { data } = await query;
   const active = Boolean(filters.country || filters.q);
   const countryLabel = filters.country ? getCountryName(filters.country) : null;
+  const heroT = await getTranslations("Heroes.trainers");
+  const commonT = await getTranslations("Common");
+  const formsT = await getTranslations("Forms");
+  const emptyT = await getTranslations("Empty");
 
   return (
     <div className="space-y-8">
       <SectionHero
-        title="Expert Trainers"
-        subtitle="Connect with Olympic-caliber coaches, master farriers, and renowned equine specialists trusted by champions."
+        title={heroT("title")}
+        subtitle={heroT("subtitle")}
         image={SECTION_IMAGES.trainers}
-        action={{ href: "/trainers/new", label: "+ Join as trainer" }}
+        action={{ href: "/trainers/new", label: `+ ${commonT("joinAsTrainer")}` }}
       />
 
       <FilterBar
@@ -73,7 +78,7 @@ export default async function Page({
         values={{ country: filters.country, q: filters.q }}
         fields={[
           { kind: "country", name: "country" },
-          { kind: "text", name: "q", placeholder: "Search trainers…" },
+          { kind: "text", name: "q", placeholder: formsT("searchTrainers") },
         ]}
       />
 
@@ -82,23 +87,19 @@ export default async function Page({
           title={
             active
               ? countryLabel
-                ? `No trainers in ${countryLabel}`
-                : "No trainers match these filters"
-              : "No trainers listed yet"
+                ? emptyT("noTrainersInCountry", { country: countryLabel })
+                : emptyT("noTrainersMatch")
+              : emptyT("noTrainers")
           }
-          description={
-            active
-              ? "Try clearing filters or browse another country."
-              : "Showcase your expertise to a discerning global audience of riders and stable owners."
-          }
+          description={active ? emptyT("tryClearFilters") : emptyT("trainersDesc")}
           action={
             active ? (
               <Link href="/trainers" className="btn btn-secondary">
-                Clear filters
+                {commonT("clearFilters")}
               </Link>
             ) : (
               <Link href="/trainers/new" className="btn btn-primary">
-                Join as trainer
+                {commonT("joinAsTrainer")}
               </Link>
             )
           }

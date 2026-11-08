@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth";
 import { ListingGallery, FeaturedBadge, ListingCard, EmptyState } from "@/components/ui";
@@ -39,6 +40,7 @@ export default async function EventDetailPage({
 }) {
   const { id } = await params;
   const { created } = await searchParams;
+  const emptyT = await getTranslations("Empty");
   const supabase = await createClient();
   const profile = await getCurrentProfile();
   const { data: event } = await supabase.from("events").select("*").eq("id", id).single();
@@ -191,7 +193,7 @@ export default async function EventDetailPage({
         </div>
         {!activityPosts?.length ? (
           <EmptyState
-            title={isHost ? "No updates yet" : "No event updates yet"}
+            title={isHost ? emptyT("eventUpdatesOwner") : emptyT("eventUpdatesVisitor")}
             description={
               isHost
                 ? "You’re the host — post schedule changes, travel notes, or results."

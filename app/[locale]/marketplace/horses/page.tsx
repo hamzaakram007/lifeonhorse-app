@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ListingCard, EmptyState, FeaturedBadge } from "@/components/ui";
 import { SectionHero } from "@/components/layout/SectionHero";
@@ -64,14 +65,18 @@ export default async function Page({
 
   const { data } = await query;
   const active = hasActiveHorseFilters(filters);
+  const heroT = await getTranslations("Heroes.horses");
+  const commonT = await getTranslations("Common");
+  const formsT = await getTranslations("Forms");
+  const emptyT = await getTranslations("Empty");
 
   return (
     <div className="space-y-8">
       <SectionHero
-        title="Horses for Sale"
-        subtitle="Exceptional bloodlines, champion pedigrees, and trusted breeders — discover your next partner in excellence."
+        title={heroT("title")}
+        subtitle={heroT("subtitle")}
         image={SECTION_IMAGES.marketplace}
-        action={{ href: "/marketplace/horses/new", label: "+ List horse" }}
+        action={{ href: "/marketplace/horses/new", label: `+ ${commonT("listHorse")}` }}
       />
 
       <FilterBar
@@ -93,43 +98,39 @@ export default async function Page({
             kind: "select",
             name: "listing_type",
             options: LISTING_TYPES,
-            allLabel: "All listing types",
+            allLabel: formsT("allListingTypes"),
           },
           {
             kind: "select",
             name: "discipline",
             options: HORSE_DISCIPLINES,
-            allLabel: "All disciplines",
+            allLabel: formsT("allDisciplines"),
           },
           {
             kind: "select",
             name: "gender",
             options: HORSE_GENDERS,
-            allLabel: "All genders",
+            allLabel: formsT("allGenders"),
           },
-          { kind: "text", name: "breed", placeholder: "Breed", className: "min-w-[8rem] flex-none" },
-          { kind: "number", name: "min_price", placeholder: "Min price", min: 0, step: "1" },
-          { kind: "number", name: "max_price", placeholder: "Max price", min: 0, step: "1" },
-          { kind: "text", name: "q", placeholder: "Search horses…" },
+          { kind: "text", name: "breed", placeholder: formsT("breed"), className: "min-w-[8rem] flex-none" },
+          { kind: "number", name: "min_price", placeholder: formsT("minPrice"), min: 0, step: "1" },
+          { kind: "number", name: "max_price", placeholder: formsT("maxPrice"), min: 0, step: "1" },
+          { kind: "text", name: "q", placeholder: formsT("searchHorses") },
         ]}
       />
 
       {!data?.length ? (
         <EmptyState
-          title={active ? "No horses match these filters" : "No horses listed yet"}
-          description={
-            active
-              ? "Try clearing filters or broadening your search."
-              : "Be the first to showcase your horse to discerning buyers worldwide."
-          }
+          title={active ? emptyT("noHorsesMatch") : emptyT("noHorses")}
+          description={active ? emptyT("tryBroadenSearch") : emptyT("noHorsesDesc")}
           action={
             active ? (
               <Link href="/marketplace/horses" className="btn btn-secondary">
-                Clear filters
+                {commonT("clearFilters")}
               </Link>
             ) : (
               <Link href="/marketplace/horses/new" className="btn btn-primary">
-                List horse
+                {commonT("listHorse")}
               </Link>
             )
           }
@@ -141,7 +142,7 @@ export default async function Page({
             const metaParts = [
               item.breed,
               item.listing_type,
-              item.price ? `${item.currency ?? "USD"} ${item.price}` : "Price on request",
+              item.price ? `${item.currency ?? "USD"} ${item.price}` : formsT("priceOnRequest"),
             ].filter(Boolean);
             return (
               <ListingCard

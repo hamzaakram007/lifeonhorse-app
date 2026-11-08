@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { ALL_COUNTRIES } from "@/lib/countries";
 import { Select } from "@/components/ui/Input";
 import { cn } from "@/lib/utils";
@@ -20,11 +23,14 @@ export function CountrySelect({
   name,
   id,
   required,
-  placeholder = "Select country",
+  placeholder,
   className,
   defaultValue,
   disabled,
 }: CountrySelectProps) {
+  const t = useTranslations("Forms");
+  const emptyLabel = placeholder ?? t("selectCountry");
+
   return (
     <Select
       id={id}
@@ -36,7 +42,7 @@ export function CountrySelect({
       className={cn(className)}
       onChange={onChange ? (e) => onChange(e.target.value) : undefined}
     >
-      <option value="">{placeholder === "Select country" ? "— Select country —" : placeholder}</option>
+      <option value="">{emptyLabel}</option>
       {ALL_COUNTRIES.map((c) => (
         <option key={c.code} value={c.code}>
           {c.name}
@@ -55,13 +61,15 @@ export function CountryFilterSelect({
   defaultValue?: string;
   className?: string;
 }) {
+  const t = useTranslations("Forms");
+
   return (
     <select
       name={name}
       defaultValue={defaultValue}
       className={cn("rounded-lg border border-stone-300 px-3 py-2 text-sm", className)}
     >
-      <option value="">All countries</option>
+      <option value="">{t("allCountries")}</option>
       {ALL_COUNTRIES.map((c) => (
         <option key={c.code} value={c.code}>
           {c.name}

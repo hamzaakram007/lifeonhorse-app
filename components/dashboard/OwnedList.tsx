@@ -1,4 +1,7 @@
-import Link from "next/link";
+"use client";
+
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { FeaturedRequestButton } from "@/components/FeaturedRequestButton";
 
 export type OwnedListItem = {
@@ -30,6 +33,8 @@ export function OwnedList({
   createLabel?: string;
   emptyDescription?: string;
 }) {
+  const t = useTranslations("Forms");
+
   return (
     <section className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -38,13 +43,13 @@ export function OwnedList({
         </h3>
         {createHref ? (
           <Link href={createHref} className="btn btn-primary inline-flex text-sm">
-            {createLabel ?? "+ New"}
+            {createLabel ?? t("new")}
           </Link>
         ) : null}
       </div>
       {!items.length ? (
         <p className="text-sm text-[var(--color-muted)]">
-          {emptyDescription ?? "Nothing here yet."}
+          {emptyDescription ?? t("nothingHere")}
         </p>
       ) : (
         <ul className="space-y-2">
@@ -63,11 +68,11 @@ export function OwnedList({
               </div>
               <div className="flex flex-wrap items-center gap-3">
                 <Link href={item.href} className="text-[var(--color-primary)] hover:underline">
-                  View
+                  {t("view")}
                 </Link>
                 {item.editHref ? (
                   <Link href={item.editHref} className="text-[var(--color-primary)] hover:underline">
-                    Edit
+                    {t("edit")}
                   </Link>
                 ) : null}
                 {item.actionHref ? (
@@ -75,7 +80,7 @@ export function OwnedList({
                     href={item.actionHref}
                     className="font-medium text-[var(--color-primary)] hover:underline"
                   >
-                    {item.actionLabel ?? "Update"}
+                    {item.actionLabel ?? t("update")}
                   </Link>
                 ) : null}
                 {item.featureEntityType ? (

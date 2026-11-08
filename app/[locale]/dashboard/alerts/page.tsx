@@ -1,5 +1,6 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { AlertsInbox } from "@/components/dashboard/AlertsInbox";
 import { EmptyState } from "@/components/ui";
 import { requireAuth } from "@/lib/auth";
@@ -11,6 +12,7 @@ export default async function AlertsPage() {
   const profile = await requireAuth();
   if (!profile) redirect("/auth/login?redirect=/dashboard/alerts");
 
+  const t = await getTranslations("Dashboard");
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("notifications")
@@ -28,44 +30,41 @@ export default async function AlertsPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-serif text-3xl font-bold">Alerts</h1>
-          <p className="mt-1 text-sm text-[var(--color-muted)]">
-            Activity from clubs, trainers, events, and courses you follow. In-app only — no email
-            or push.
-          </p>
+          <h1 className="font-serif text-3xl font-bold">{t("activityAlerts")}</h1>
+          <p className="mt-1 text-sm text-[var(--color-muted)]">{t("alertsIntro")}</p>
         </div>
         <Link href="/dashboard/favorites" className="text-sm text-[var(--color-primary)] hover:underline">
-          Manage follows / saved
+          {t("manageFollows")}
         </Link>
       </div>
 
       {tableMissing ? (
         <EmptyState
-          title="Alerts not available yet"
-          description="The notifications migration (012) has not been applied on this environment. Once it is live, favorited entity Journal posts will appear here."
+          title={t("alertsUnavailable")}
+          description={t("alertsUnavailableDesc")}
           action={
             <Link href="/dashboard" className="btn btn-secondary">
-              Back to dashboard
+              {t("backToDashboard")}
             </Link>
           }
         />
       ) : error ? (
         <EmptyState
-          title="Could not load alerts"
+          title={t("alertsLoadError")}
           description={error.message}
           action={
             <Link href="/dashboard" className="btn btn-secondary">
-              Back to dashboard
+              {t("backToDashboard")}
             </Link>
           }
         />
       ) : !items.length ? (
         <EmptyState
-          title="No alerts yet"
-          description="Follow a club, trainer, event, or course. When they publish a Journal update linked to that entity, you will see it here."
+          title={t("noAlerts")}
+          description={t("noAlertsDesc")}
           action={
             <Link href="/clubs" className="btn btn-primary">
-              Browse clubs
+              {t("browseClubs")}
             </Link>
           }
         />

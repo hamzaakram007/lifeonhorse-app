@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth";
 import {
@@ -27,6 +28,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function TrainerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const emptyT = await getTranslations("Empty");
   const supabase = await createClient();
   const profile = await getCurrentProfile();
   const { data: trainer } = await supabase.from("trainers").select("*").eq("id", id).single();
@@ -115,7 +117,7 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
           </div>
           {!tipPosts?.length ? (
             <EmptyState
-              title={isOwner ? "No tips yet" : "No trainer tips yet"}
+              title={isOwner ? emptyT("trainerTipsOwner") : emptyT("trainerTipsVisitor")}
               description={
                 isOwner
                   ? "You’re the trainer — share the first tip for riders who follow your profile."

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth";
 import { ListingGallery, FeaturedBadge, ListingCard, EmptyState } from "@/components/ui";
@@ -19,6 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const emptyT = await getTranslations("Empty");
   const supabase = await createClient();
   const profile = await getCurrentProfile();
   const { data: course } = await supabase.from("courses").select("*").eq("id", id).single();
@@ -136,7 +138,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
         </div>
         {!notePosts?.length ? (
           <EmptyState
-            title={isCreator ? "No creator notes yet" : "No course updates yet"}
+            title={isCreator ? emptyT("courseNotesOwner") : emptyT("courseNotesVisitor")}
             description={
               isCreator
                 ? "You’re the creator — announce a lesson, schedule change, or tip for enrolled riders."

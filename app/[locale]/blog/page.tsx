@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ListingCard, EmptyState, FeaturedBadge } from "@/components/ui";
 import { SectionHero } from "@/components/layout/SectionHero";
@@ -246,6 +246,11 @@ export default async function Page({
     return undefined;
   }
 
+  const heroT = await getTranslations("Heroes.blog");
+  const commonT = await getTranslations("Common");
+  const formsT = await getTranslations("Forms");
+  const emptyT = await getTranslations("Empty");
+
   const emptyWriteHref = filters.club
     ? `/blog/new?club=${filters.club}`
     : filters.trainer
@@ -260,40 +265,37 @@ export default async function Page({
               ? `/blog/new?seller=${filters.seller}`
               : null;
   const emptyWriteLabel = filters.club
-    ? "Write club update"
+    ? emptyT("writeClubUpdate")
     : filters.trainer
-      ? "Share tip"
+      ? emptyT("shareTip")
       : filters.course
-        ? "Post about course"
+        ? emptyT("postAboutCourse")
         : filters.expert
-          ? "Write health tip"
+          ? emptyT("writeHealthTip")
           : filters.event
-            ? "Write event update"
+            ? emptyT("writeEventUpdate")
             : filters.seller
-              ? "Listing story"
+              ? emptyT("listingStory")
               : null;
   const emptyEntityCopy = filters.club
-    ? "No published updates from this club yet."
+    ? emptyT("blogClub")
     : filters.trainer
-      ? "No published tips from this trainer yet."
+      ? emptyT("blogTrainer")
       : filters.course
-        ? "No published notes from this course yet."
+        ? emptyT("blogCourse")
         : filters.expert
-          ? "No published health tips from this expert yet."
+          ? emptyT("blogExpert")
           : filters.event
-            ? "No published updates from this event yet."
+            ? emptyT("blogEvent")
             : filters.seller
-              ? "No published stories from this seller yet."
+              ? emptyT("blogSeller")
               : entityTypeFilter === "expert"
-                ? "No expert health tips published yet."
+                ? emptyT("blogExpertCategory")
                 : entityTypeFilter === "event"
-                  ? "No event updates published yet."
+                  ? emptyT("blogEventCategory")
                   : entityTypeFilter === "seller"
-                    ? "No seller stories published yet."
-                    : "Try clearing filters or broadening your search.";
-
-  const heroT = await getTranslations("Heroes.blog");
-  const commonT = await getTranslations("Common");
+                    ? emptyT("blogSellerCategory")
+                    : emptyT("tryBroadenSearch");
 
   return (
     <div className="space-y-8">
@@ -324,7 +326,7 @@ export default async function Page({
             kind: "select",
             name: "category",
             options: BLOG_CATEGORIES,
-            allLabel: "All categories",
+            allLabel: formsT("allCategories"),
           },
           {
             kind: "select",
@@ -337,26 +339,22 @@ export default async function Page({
               { value: "expert", label: "Expert health tips" },
               { value: "seller", label: "Seller stories" },
             ],
-            allLabel: "All posts",
+            allLabel: formsT("allPosts"),
           },
           {
             kind: "select",
             name: "featured",
-            options: [{ value: "1", label: "Featured only" }],
-            allLabel: "All visibility",
+            options: [{ value: "1", label: formsT("featuredOnly") }],
+            allLabel: formsT("allVisibility"),
           },
-          { kind: "text", name: "q", placeholder: "Search articles…" },
+          { kind: "text", name: "q", placeholder: formsT("searchArticles") },
         ]}
       />
 
       {!data.length ? (
         <EmptyState
-          title={active ? "No articles match these filters" : "No articles yet"}
-          description={
-            active
-              ? emptyEntityCopy
-              : "Share your expertise and stories with a community that values the finest in equestrian culture."
-          }
+          title={active ? emptyT("noArticlesMatch") : emptyT("noArticles")}
+          description={active ? emptyEntityCopy : emptyT("noArticlesDesc")}
           action={
             active ? (
               emptyWriteHref && emptyWriteLabel ? (
@@ -365,12 +363,12 @@ export default async function Page({
                 </Link>
               ) : (
                 <Link href="/blog" className="btn btn-secondary">
-                  Clear filters
+                  {commonT("clearFilters")}
                 </Link>
               )
             ) : (
               <Link href="/blog/new" className="btn btn-primary">
-                Write article
+                {commonT("writeArticle")}
               </Link>
             )
           }

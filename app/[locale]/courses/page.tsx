@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ListingCard, EmptyState, FeaturedBadge } from "@/components/ui";
 import { SectionHero } from "@/components/layout/SectionHero";
@@ -21,21 +22,25 @@ export default async function Page() {
     .order("is_featured", { ascending: false })
     .limit(24);
 
+  const heroT = await getTranslations("Heroes.courses");
+  const commonT = await getTranslations("Common");
+  const emptyT = await getTranslations("Empty");
+
   return (
     <div className="space-y-8">
       <SectionHero
-        title="Equestrian Academy"
-        subtitle="From foundational riding to advanced stable management — curated courses taught by the industry's finest minds."
+        title={heroT("title")}
+        subtitle={heroT("subtitle")}
         image={SECTION_IMAGES.courses}
-        action={{ href: "/courses/new", label: "+ Create course" }}
+        action={{ href: "/courses/new", label: `+ ${commonT("createCourse")}` }}
       />
       {!data?.length ? (
         <EmptyState
-          title="No courses yet"
-          description="Share your knowledge and build your reputation among serious equestrians worldwide."
+          title={emptyT("noCourses")}
+          description={emptyT("coursesDesc")}
           action={
             <Link href="/courses/new" className="btn btn-primary">
-              Create course
+              {commonT("createCourse")}
             </Link>
           }
         />
@@ -54,10 +59,10 @@ export default async function Page() {
                 badges={
                   <>
                     {item.is_featured ? <FeaturedBadge /> : null}
-                    <span className="badge">{item.is_free ? "Free" : "Paid"}</span>
+                    <span className="badge">{item.is_free ? commonT("free") : commonT("paid")}</span>
                   </>
                 }
-                meta={item.is_free ? "Open access" : "Checkout later"}
+                meta={item.is_free ? commonT("openAccess") : commonT("checkoutLater")}
               />
             );
           })}

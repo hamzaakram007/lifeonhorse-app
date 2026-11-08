@@ -16,11 +16,12 @@ export default async function OfflinePage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("Offline");
+  const brand = await getTranslations("Brand");
 
   return (
     <div className="mx-auto flex min-h-[60vh] max-w-lg flex-col items-center justify-center px-2 text-center">
       <p className="font-serif text-3xl font-bold tracking-tight text-[var(--color-primary)]">
-        LifeOnHorse
+        {brand("name")}
       </p>
       <h1 className="mt-6 font-serif text-2xl font-semibold text-[var(--color-text)] sm:text-3xl">
         {t("title")}

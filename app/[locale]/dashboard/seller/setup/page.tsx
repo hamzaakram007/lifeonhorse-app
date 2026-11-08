@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { COUNTRIES } from "@/lib/countries";
 
 export default function SellerSetupPage() {
+  const formsT = useTranslations("Forms");
   const [form, setForm] = useState({ business_name: "", description: "", country_code: "PK", city: "", phone: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -29,7 +31,9 @@ export default function SellerSetupPage() {
       <div><label className="label">Description</label><textarea className="input min-h-24" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
       <div><label className="label">Country</label><select className="input" value={form.country_code} onChange={(e) => setForm({ ...form, country_code: e.target.value })}>{COUNTRIES.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}</select></div>
       <div><label className="label">City</label><input className="input" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
-      <button type="submit" className="btn btn-primary" disabled={loading}>{loading ? "Saving..." : "Create profile"}</button>
+      <button type="submit" className="btn btn-primary" disabled={loading}>
+        {loading ? formsT("saving") : formsT("createProfile")}
+      </button>
     </form>
   );
 }

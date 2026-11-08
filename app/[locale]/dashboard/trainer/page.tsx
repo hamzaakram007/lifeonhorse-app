@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireAuth } from "@/lib/auth";
 import { OwnedList } from "@/components/dashboard/OwnedList";
@@ -12,6 +13,9 @@ export default async function TrainerDashboardPage() {
   const profile = await requireAuth();
   if (!profile) redirect("/auth/login?redirect=/dashboard/trainer");
 
+  const t = await getTranslations("Dashboard");
+  const emptyT = await getTranslations("Empty");
+  const formsT = await getTranslations("Forms");
   const supabase = await createClient();
   const { data: trainer } = await supabase
     .from("trainers")
@@ -97,10 +101,8 @@ export default async function TrainerDashboardPage() {
         <Link href="/dashboard" className="text-sm text-[var(--color-primary)] hover:underline">
           ← Dashboard
         </Link>
-        <h1 className="mt-2 text-2xl font-bold">Trainer dashboard</h1>
-        <p className="text-sm text-[var(--color-muted)]">
-          Your trainer profile, tips, and courses you created.
-        </p>
+        <h1 className="mt-2 text-2xl font-bold">{t("trainerDashboard")}</h1>
+        <p className="text-sm text-[var(--color-muted)]">{t("trainerIntro")}</p>
       </div>
 
       {trainer ? (
@@ -126,13 +128,13 @@ export default async function TrainerDashboardPage() {
                 href={`/trainers/${trainer.id}`}
                 className="text-[var(--color-primary)] hover:underline"
               >
-                View public profile
+                {t("viewPublicProfile")}
               </Link>
               <Link
                 href={`/blog/new?trainer=${trainer.id}`}
                 className="font-medium text-[var(--color-primary)] hover:underline"
               >
-                Share tip
+                {t("shareTip")}
               </Link>
               <span className="text-[var(--color-muted)]">Status: {trainer.status}</span>
             </div>
@@ -141,11 +143,11 @@ export default async function TrainerDashboardPage() {
         </>
       ) : (
         <EmptyState
-          title="No trainer profile"
-          description="Create a trainer profile to appear in the directory."
+          title={t("noTrainerYet")}
+          description={t("noTrainerYetDesc")}
           action={
             <Link href="/trainers/new" className="btn btn-primary">
-              Create trainer profile
+              {t("createTrainerProfile")}
             </Link>
           }
         />
@@ -153,19 +155,21 @@ export default async function TrainerDashboardPage() {
 
       {trainer ? (
         <OwnedList
-          title="Your tips"
+          title={t("yourTips")}
           items={tipItems}
           createHref={`/blog/new?trainer=${trainer.id}`}
-          createLabel="+ Share tip"
-          emptyDescription="No Journal tips linked to your trainer profile yet."
+          createLabel={t("newShareTip")}
+          emptyDescription={t("emptyTrainerTips")}
         />
       ) : null}
 
       <section className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h3 className="font-semibold">Your courses ({courseItems.length})</h3>
+          <h3 className="font-semibold">
+            {t("yourCourses")} ({courseItems.length})
+          </h3>
           <Link href="/courses/new" className="btn btn-primary inline-flex text-sm">
-            + New course
+            {t("newCourse")}
           </Link>
         </div>
         {!courseItems.length ? (
@@ -189,13 +193,13 @@ export default async function TrainerDashboardPage() {
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
                   <Link href={item.href} className="text-[var(--color-primary)] hover:underline">
-                    View
+                    {formsT("view")}
                   </Link>
                   <Link
                     href={`/blog/new?course=${item.id}`}
                     className="font-medium text-[var(--color-primary)] hover:underline"
                   >
-                    Post about course
+                    {emptyT("postAboutCourse")}
                   </Link>
                   <FeaturedRequestButton
                     entityType="course"
@@ -212,11 +216,11 @@ export default async function TrainerDashboardPage() {
 
       {courseItems.length ? (
         <OwnedList
-          title="Your course updates"
+          title={t("yourCourseUpdates")}
           items={courseNoteItems}
           createHref={`/blog/new?course=${courseItems[0].id}`}
-          createLabel="+ Post about course"
-          emptyDescription="No Journal notes linked to your courses yet."
+          createLabel={`+ ${emptyT("postAboutCourse")}`}
+          emptyDescription={t("emptyCourseNotes")}
         />
       ) : null}
     </div>
