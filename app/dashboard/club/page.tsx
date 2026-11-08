@@ -63,6 +63,8 @@ export default async function ClubOwnerDashboardPage() {
       title: e.title,
       status: e.status,
       href: `/events/${e.id}`,
+      actionHref: `/blog/new?event=${e.id}`,
+      actionLabel: "Event update",
       meta: [e.city, e.start_date ? new Date(e.start_date).toLocaleDateString() : null]
         .filter(Boolean)
         .join(" · ") || null,

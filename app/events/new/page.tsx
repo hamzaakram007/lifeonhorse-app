@@ -99,7 +99,7 @@ export default function NewEventPage() {
       setLoading(false);
       return;
     }
-    router.push(`/events/${data.id}`);
+    router.push(`/events/${data.id}?created=1`);
   }
 
   return (

@@ -4,6 +4,7 @@ export type BlogSearchParams = {
   trainer?: string;
   course?: string;
   expert?: string;
+  event?: string;
   entity_type?: string;
   featured?: string;
   q?: string;
@@ -28,6 +29,7 @@ export function normalizeBlogSearchParams(
     trainer: pick("trainer"),
     course: pick("course"),
     expert: pick("expert"),
+    event: pick("event"),
     entity_type: entityType && ENTITY_TYPES.has(entityType) ? entityType : undefined,
     q: pick("q"),
     featured: featured === "1" || featured === "true" ? "1" : undefined,
