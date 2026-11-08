@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { ListingCard, EmptyState, VerifiedBadge, FeaturedBadge } from "@/components/ui";
+import { ListingCard, EmptyState, VerifiedBadge } from "@/components/ui";
 import { SectionHero } from "@/components/layout/SectionHero";
 import { getCountryName } from "@/lib/countries";
 import { SECTION_IMAGES } from "@/lib/section-images";
@@ -13,7 +13,14 @@ export const metadata: Metadata = {
 
 export default async function Page() {
   const supabase = await createClient();
-  const { data } = await supabase.from("seller_profiles").select("id, business_name, city, country_code, logo_url, is_verified, is_featured").eq("status", "published").order("is_featured", { ascending: false }).limit(24);
+  // seller_profiles has no is_featured in live 001 schema — ordering by it empties the directory.
+  const { data } = await supabase
+    .from("seller_profiles")
+    .select("id, business_name, city, country_code, logo_url, is_verified")
+    .eq("status", "published")
+    .order("is_verified", { ascending: false })
+    .order("business_name", { ascending: true })
+    .limit(24);
 
   return (
     <div className="space-y-6">
@@ -34,7 +41,7 @@ export default async function Page() {
               title={String(item.business_name)}
               subtitle={[item.city, getCountryName(item.country_code as string)].filter(Boolean).join(', ')}
               image={item.logo_url as string | null}
-              badges={<>{item.is_verified ? <VerifiedBadge /> : null}{item.is_featured ? <FeaturedBadge /> : null}</>}
+              badges={<>{item.is_verified ? <VerifiedBadge /> : null}</>}
               meta={undefined}
             />
           ))}
