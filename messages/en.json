@@ -1,0 +1,103 @@
+{
+  "Brand": {
+    "name": "LifeOnHorse",
+    "tagline": "Your Global Horse Community"
+  },
+  "Nav": {
+    "marketplace": "Marketplace",
+    "horseHealth": "Horse Health",
+    "clubs": "Clubs",
+    "trainers": "Trainers",
+    "events": "Events",
+    "courses": "Courses",
+    "blog": "Blog",
+    "community": "Community",
+    "skipToContent": "Skip to content",
+    "homeAria": "LifeOnHorse home",
+    "mainAria": "Main navigation",
+    "mobileAria": "Mobile navigation"
+  },
+  "Auth": {
+    "logIn": "Log in",
+    "signUp": "Sign up",
+    "signOut": "Sign out",
+    "dashboard": "Dashboard",
+    "admin": "Admin"
+  },
+  "Language": {
+    "label": "Language",
+    "switchTo": "Switch language"
+  },
+  "Footer": {
+    "blurb": "The world's premier platform for horse marketplace, elite clubs, expert trainers, and equestrian community.",
+    "explore": "Explore",
+    "legal": "Legal",
+    "payments": "Payments",
+    "support": "Support",
+    "newsletterEmail": "Your email",
+    "subscribe": "Subscribe",
+    "countries": "Countries",
+    "verifiedListings": "Verified listings",
+    "securePayments": "Payments",
+    "secure": "Secure",
+    "rights": "© {year} LifeOnHorse. All rights reserved.",
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "cookies": "Cookies",
+    "marketplaceSafety": "Marketplace Safety",
+    "healthDisclaimer": "Health Disclaimer",
+    "sellerBuyer": "Seller/Buyer Policy"
+  },
+  "Common": {
+    "exploreNow": "Explore Now",
+    "findExpert": "Find an expert",
+    "submitHealthRequest": "Submit a health request",
+    "shareStory": "Share story",
+    "writeArticle": "Write article",
+    "registerClub": "Register club",
+    "listHorse": "List horse",
+    "listProduct": "List product",
+    "listService": "List service",
+    "registerSeller": "Register as seller"
+  },
+  "Home": {
+    "heroTitle": "Where Every Journey Begins with a Horse",
+    "heroImageAlt": "Horse in golden field"
+  },
+  "Heroes": {
+    "marketplace": {
+      "title": "Global Horse Marketplace",
+      "subtitle": "Discover exceptional horses, premium tack, and trusted equestrian services from verified sellers across six continents."
+    },
+    "marketplaceTabs": {
+      "horses": "Horses",
+      "horsesDesc": "Buy, sell, adopt, lease, and stud",
+      "products": "Products",
+      "productsDesc": "Premium tack, feed, and equipment",
+      "services": "Services",
+      "servicesDesc": "Transport, farrier, and professional care",
+      "sellers": "Sellers",
+      "sellersDesc": "Verified seller directory worldwide"
+    },
+    "clubs": {
+      "title": "Equestrian Clubs",
+      "subtitle": "From championship polo grounds to world-class riding academies — find your community among the finest clubs on earth."
+    },
+    "blog": {
+      "title": "The LifeOnHorse Journal",
+      "subtitle": "Thoughtful perspectives on polo heritage, breeding excellence, and the art of horsemanship from leading voices worldwide."
+    },
+    "community": {
+      "title": "Global Community",
+      "subtitle": "Celebrate the bond between horse and rider — share moments, stories, and inspiration with fellow enthusiasts worldwide."
+    },
+    "horseHealth": {
+      "title": "Horse Health & Expert Help",
+      "subtitle": "Connect with verified equine experts and get guidance on horse health issues. For emergencies, contact a local veterinarian immediately.",
+      "expertDirectory": "Expert Directory",
+      "expertDirectoryDesc": "Browse vets, farriers, nutrition experts, and other equine specialists. Filter by specialty and location.",
+      "askHelp": "Ask for Help",
+      "askHelpDesc": "Describe your horse's symptoms, upload photos, and get connected with the right expert."
+    }
+  }
+}

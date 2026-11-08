@@ -1,26 +1,30 @@
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { SectionHero } from "@/components/layout/SectionHero";
 import { SECTION_IMAGES } from "@/lib/section-images";
+import { Link } from "@/i18n/navigation";
 
 export const metadata = { title: "Horse Health & Expert Help" };
 
 const DIRECTORY_IMG = "/images/demo/expert-directory.jpg";
 const ASK_HELP_IMG = "/images/demo/expert-ask-help.jpg";
 
-export default function HorseHealthPage() {
+export default async function HorseHealthPage() {
+  const t = await getTranslations("Heroes.horseHealth");
+  const commonT = await getTranslations("Common");
+
   return (
     <div className="mx-auto max-w-7xl space-y-10 px-4 py-8">
       <SectionHero
-        title="Horse Health & Expert Help"
-        subtitle="Connect with verified equine experts and get guidance on horse health issues. For emergencies, contact a local veterinarian immediately."
+        title={t("title")}
+        subtitle={t("subtitle")}
         image={SECTION_IMAGES.health}
-        action={{ href: "/horse-health/experts", label: "Find an expert" }}
+        action={{ href: "/horse-health/experts", label: commonT("findExpert") }}
       >
         <Link
           href="/horse-health/requests/new"
           className="mt-4 inline-flex rounded-lg bg-black/45 px-5 py-2.5 text-sm font-medium text-white no-underline ring-1 ring-white/50 backdrop-blur-sm hover:bg-black/55"
         >
-          Submit a health request
+          {commonT("submitHealthRequest")}
         </Link>
       </SectionHero>
 
@@ -35,11 +39,8 @@ export default function HorseHealthPage() {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/45 to-black/20" />
           <div className="relative z-10 flex min-h-[220px] flex-col justify-end p-6 text-white">
-            <h2 className="font-serif text-xl font-semibold">Expert Directory</h2>
-            <p className="mt-2 text-sm text-white/85">
-              Browse vets, farriers, nutrition experts, and other equine specialists. Filter by
-              specialty and location.
-            </p>
+            <h2 className="font-serif text-xl font-semibold">{t("expertDirectory")}</h2>
+            <p className="mt-2 text-sm text-white/85">{t("expertDirectoryDesc")}</p>
           </div>
         </Link>
         <Link
@@ -52,11 +53,8 @@ export default function HorseHealthPage() {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/45 to-black/20" />
           <div className="relative z-10 flex min-h-[220px] flex-col justify-end p-6 text-white">
-            <h2 className="font-serif text-xl font-semibold">Ask for Help</h2>
-            <p className="mt-2 text-sm text-white/85">
-              Describe your horse&apos;s symptoms, upload photos, and get connected with the right
-              expert.
-            </p>
+            <h2 className="font-serif text-xl font-semibold">{t("askHelp")}</h2>
+            <p className="mt-2 text-sm text-white/85">{t("askHelpDesc")}</p>
           </div>
         </Link>
       </div>

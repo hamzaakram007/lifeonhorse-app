@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { ListingCard, EmptyState, VerifiedBadge, FeaturedBadge } from "@/components/ui";
 import { SectionHero } from "@/components/layout/SectionHero";
@@ -57,14 +58,16 @@ export default async function Page({
   const clubs = (data ?? []).filter((item) => !DUPLICATE_CLUB_IDS.has(item.id));
   const active = Boolean(filters.country || filters.q);
   const countryLabel = filters.country ? getCountryName(filters.country) : null;
+  const heroT = await getTranslations("Heroes.clubs");
+  const commonT = await getTranslations("Common");
 
   return (
     <div className="space-y-8">
       <SectionHero
-        title="Equestrian Clubs"
-        subtitle="From championship polo grounds to world-class riding academies — find your community among the finest clubs on earth."
+        title={heroT("title")}
+        subtitle={heroT("subtitle")}
         image={SECTION_IMAGES.clubs}
-        action={{ href: "/clubs/register", label: "+ Register club" }}
+        action={{ href: "/clubs/register", label: `+ ${commonT("registerClub")}` }}
       />
 
       <FilterBar

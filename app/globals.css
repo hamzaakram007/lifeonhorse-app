@@ -27,6 +27,23 @@ body {
   font-family: var(--font-serif);
 }
 
+.font-arabic {
+  --font-sans: var(--font-arabic), var(--font-source-sans), system-ui, sans-serif;
+  --font-serif: var(--font-arabic), var(--font-playfair), Georgia, serif;
+  font-family: var(--font-sans);
+}
+
+.font-urdu {
+  --font-sans: var(--font-urdu), var(--font-arabic), var(--font-source-sans), system-ui, sans-serif;
+  --font-serif: var(--font-urdu), var(--font-playfair), Georgia, serif;
+  font-family: var(--font-sans);
+}
+
+html[dir="rtl"] .hero-cta,
+html[dir="rtl"] .btn {
+  letter-spacing: normal;
+}
+
 a {
   color: var(--color-primary);
 }

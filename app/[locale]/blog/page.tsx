@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { ListingCard, EmptyState, FeaturedBadge } from "@/components/ui";
 import { SectionHero } from "@/components/layout/SectionHero";
@@ -291,13 +292,16 @@ export default async function Page({
                     ? "No seller stories published yet."
                     : "Try clearing filters or broadening your search.";
 
+  const heroT = await getTranslations("Heroes.blog");
+  const commonT = await getTranslations("Common");
+
   return (
     <div className="space-y-8">
       <SectionHero
-        title="The LifeOnHorse Journal"
-        subtitle="Thoughtful perspectives on polo heritage, breeding excellence, and the art of horsemanship from leading voices worldwide."
+        title={heroT("title")}
+        subtitle={heroT("subtitle")}
         image={SECTION_IMAGES.blog}
-        action={{ href: "/blog/new", label: "+ Write article" }}
+        action={{ href: "/blog/new", label: `+ ${commonT("writeArticle")}` }}
       />
 
       <FilterBar
