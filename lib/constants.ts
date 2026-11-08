@@ -133,6 +133,7 @@ export const BLOG_CATEGORIES = [
   { value: "club_activity", label: "Club activity" },
   { value: "trainer_tips", label: "Trainer tips" },
   { value: "course_updates", label: "Course updates" },
+  { value: "seller_stories", label: "Seller stories" },
 ] as const;
 
 export const NAV_LINKS = [

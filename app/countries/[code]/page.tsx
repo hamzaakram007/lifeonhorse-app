@@ -10,6 +10,8 @@ import { CLUB_TYPES } from "@/lib/constants";
 import { labelFromOptions, humanizeSlug } from "@/lib/labels";
 import { DUPLICATE_CLUB_IDS, resolveClubCover } from "@/lib/club-covers";
 import { firstPhoto } from "@/lib/storage/upload";
+import { resolveBlogCover } from "@/lib/blog-covers";
+import { isMissingLinkedEntityColumn } from "@/lib/blog/query";
 
 export async function generateMetadata({ params }: { params: Promise<{ code: string }> }): Promise<Metadata> {
   const { code } = await params;
@@ -56,30 +58,61 @@ export default async function CountryPage({ params }: { params: Promise<{ code: 
   if (!country) notFound();
   const supabase = await createClient();
   const cc = country.code;
-  const [{ data: horses }, { data: clubs }, { data: trainers }] = await Promise.all([
-    supabase
-      .from("horses")
-      .select("id, title, photos, price, currency, city")
-      .eq("country_code", cc)
-      .eq("status", "published")
-      .limit(8),
-    supabase
-      .from("clubs")
-      .select("id, name, club_type, logo_url, photos")
-      .eq("country_code", cc)
-      .eq("status", "published")
-      .limit(16),
-    supabase
-      .from("trainers")
-      .select("id, display_name, specialty, photos")
-      .eq("country_code", cc)
-      .eq("status", "published")
-      .limit(8),
-  ]);
+  const [{ data: horses }, { data: clubs }, { data: trainers }, { data: activityClubs }] =
+    await Promise.all([
+      supabase
+        .from("horses")
+        .select("id, title, photos, price, currency, city")
+        .eq("country_code", cc)
+        .eq("status", "published")
+        .limit(8),
+      supabase
+        .from("clubs")
+        .select("id, name, club_type, logo_url, photos")
+        .eq("country_code", cc)
+        .eq("status", "published")
+        .limit(16),
+      supabase
+        .from("trainers")
+        .select("id, display_name, specialty, photos")
+        .eq("country_code", cc)
+        .eq("status", "published")
+        .limit(8),
+      supabase
+        .from("clubs")
+        .select("id, name")
+        .eq("country_code", cc)
+        .eq("status", "published")
+        .limit(200),
+    ]);
 
   const countryClubs = (clubs ?? []).filter((c) => !DUPLICATE_CLUB_IDS.has(c.id)).slice(0, 8);
   const countryHorses = horses ?? [];
   const countryTrainers = trainers ?? [];
+
+  const clubIdsForActivity = (activityClubs ?? []).map((c) => c.id);
+  const clubNameById = new Map((activityClubs ?? []).map((c) => [c.id, c.name]));
+  let recentClubActivity: {
+    id: string;
+    title: string;
+    cover_image: string | null;
+    published_at: string | null;
+    linked_entity_id: string | null;
+  }[] = [];
+
+  if (clubIdsForActivity.length) {
+    const activityResult = await supabase
+      .from("blog_posts")
+      .select("id, title, cover_image, published_at, linked_entity_id")
+      .eq("status", "published")
+      .eq("linked_entity_type", "club")
+      .in("linked_entity_id", clubIdsForActivity)
+      .order("published_at", { ascending: false })
+      .limit(6);
+    recentClubActivity = isMissingLinkedEntityColumn(activityResult.error)
+      ? []
+      : ((activityResult.data ?? []) as typeof recentClubActivity);
+  }
 
   return (
     <div className="space-y-8">
@@ -88,6 +121,55 @@ export default async function CountryPage({ params }: { params: Promise<{ code: 
         subtitle={`Horse marketplace, clubs, and trainers in ${country.name}`}
         image={SECTION_IMAGES.countries}
       />
+      <section className="space-y-4">
+        <div className="mb-1 flex items-end justify-between gap-4">
+          <h2 className="text-xl font-semibold">Recent club activity</h2>
+          <Link
+            href={`/blog?entity_type=club`}
+            className="text-sm font-semibold text-[var(--color-primary)] no-underline hover:underline"
+          >
+            Journal club updates
+          </Link>
+        </div>
+        {!recentClubActivity.length ? (
+          <EmptyState
+            title={`No club updates in ${country.name} yet`}
+            description={`When clubs in ${country.name} publish Journal updates, they appear here.`}
+            action={
+              <Link href={`/clubs?country=${cc}`} className="btn btn-secondary">
+                Browse clubs in {country.name}
+              </Link>
+            }
+          />
+        ) : (
+          <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {recentClubActivity.map((post) => {
+              const clubName = post.linked_entity_id
+                ? clubNameById.get(post.linked_entity_id)
+                : undefined;
+              return (
+                <ListingCard
+                  key={post.id}
+                  href={`/blog/${post.id}`}
+                  title={post.title}
+                  subtitle={
+                    [
+                      clubName,
+                      post.published_at
+                        ? new Date(post.published_at).toLocaleDateString()
+                        : null,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ") || undefined
+                  }
+                  image={resolveBlogCover(post.title, post.cover_image)}
+                  badges={<span className="badge">Club update</span>}
+                />
+              );
+            })}
+          </div>
+        )}
+      </section>
       <section>
         <div className="mb-3 flex items-end justify-between gap-4">
           <h2 className="text-xl font-semibold">Horses</h2>

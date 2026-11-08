@@ -35,11 +35,13 @@ function resolvePresetType(opts: {
   presetCourseId?: string | null;
   presetExpertId?: string | null;
   presetEventId?: string | null;
+  presetSellerId?: string | null;
   initialType?: BlogComposerEntityType | null;
 }): BlogComposerEntityType | null {
-  // Priority when multiple params present: expert > event > trainer > course > club
+  // Priority when multiple params present: expert > event > seller > trainer > course > club
   if (opts.presetExpertId) return "expert";
   if (opts.presetEventId) return "event";
+  if (opts.presetSellerId) return "seller";
   if (opts.presetTrainerId) return "trainer";
   if (opts.presetCourseId) return "course";
   if (opts.presetClubId) return "club";
@@ -64,6 +66,7 @@ export function BlogPostForm({
   presetCourseId,
   presetExpertId,
   presetEventId,
+  presetSellerId,
   heading,
 }: {
   initial?: BlogPostFormInitial;
@@ -72,6 +75,7 @@ export function BlogPostForm({
   presetCourseId?: string | null;
   presetExpertId?: string | null;
   presetEventId?: string | null;
+  presetSellerId?: string | null;
   heading?: string;
 }) {
   const router = useRouter();
@@ -83,6 +87,7 @@ export function BlogPostForm({
     presetCourseId,
     presetExpertId,
     presetEventId,
+    presetSellerId,
     initialType: initial?.linked_entity_type,
   });
   const presetId =
@@ -90,13 +95,15 @@ export function BlogPostForm({
       ? presetExpertId
       : presetType === "event"
         ? presetEventId
-        : presetType === "trainer"
-          ? presetTrainerId
-          : presetType === "course"
-            ? presetCourseId
-            : presetType === "club"
-              ? presetClubId
-              : null) ||
+        : presetType === "seller"
+          ? presetSellerId
+          : presetType === "trainer"
+            ? presetTrainerId
+            : presetType === "course"
+              ? presetCourseId
+              : presetType === "club"
+                ? presetClubId
+                : null) ||
     (initial?.linked_entity_type ? initial.linked_entity_id : null) ||
     null;
 
@@ -139,6 +146,7 @@ export function BlogPostForm({
         presetCourseId,
         presetExpertId,
         presetEventId,
+        presetSellerId,
         initialType: initial?.linked_entity_type,
       });
       const targetId =
@@ -146,13 +154,15 @@ export function BlogPostForm({
           ? presetExpertId
           : targetType === "event"
             ? presetEventId
-            : targetType === "trainer"
-              ? presetTrainerId
-              : targetType === "course"
-                ? presetCourseId
-                : targetType === "club"
-                  ? presetClubId
-                  : null) ||
+            : targetType === "seller"
+              ? presetSellerId
+              : targetType === "trainer"
+                ? presetTrainerId
+                : targetType === "course"
+                  ? presetCourseId
+                  : targetType === "club"
+                    ? presetClubId
+                    : null) ||
         initial?.linked_entity_id ||
         null;
 
@@ -167,7 +177,9 @@ export function BlogPostForm({
                   ? "course creator"
                   : targetType === "event"
                     ? "event host"
-                    : "expert";
+                    : targetType === "seller"
+                      ? "seller"
+                      : "expert";
           setOwnershipError(`Sign in as the ${noun} to publish this update.`);
         }
         return;
@@ -252,6 +264,30 @@ export function BlogPostForm({
         return;
       }
 
+      if (targetType === "seller" && targetId) {
+        const { data: seller } = await supabase
+          .from("seller_profiles")
+          .select("id, business_name")
+          .eq("id", targetId)
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (cancelled) return;
+        if (!seller) {
+          setOwnershipError("You can only publish listing stories for your own seller profile.");
+          setForm((prev) => ({ ...prev, linked_entity_id: "" }));
+          setLinkedType(null);
+        } else {
+          setEntityName(seller.business_name);
+          setLinkedType("seller");
+          setForm((prev) => ({
+            ...prev,
+            linked_entity_id: seller.id,
+            category: prev.category || "seller_stories",
+          }));
+        }
+        return;
+      }
+
       if (targetType === "trainer" && targetId) {
         const { data: trainer } = await supabase
           .from("trainers")
@@ -318,6 +354,7 @@ export function BlogPostForm({
     presetCourseId,
     presetExpertId,
     presetEventId,
+    presetSellerId,
     initial?.linked_entity_id,
     initial?.linked_entity_type,
   ]);
@@ -377,11 +414,25 @@ export function BlogPostForm({
         return;
       }
     }
+    if (resolvedType === "seller" && entityId) {
+      const { data: seller } = await supabase
+        .from("seller_profiles")
+        .select("id")
+        .eq("id", entityId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (!seller) {
+        setError("You can only publish listing stories for your own seller profile.");
+        setLoading(false);
+        return;
+      }
+    }
     if (
       (resolvedType === "trainer" ||
         resolvedType === "course" ||
         resolvedType === "expert" ||
-        resolvedType === "event") &&
+        resolvedType === "event" ||
+        resolvedType === "seller") &&
       !entityId
     ) {
       setError("Missing linked entity.");
@@ -450,7 +501,9 @@ export function BlogPostForm({
               ? "Edit health tip"
               : activeType === "event"
                 ? "Edit event update"
-                : "Edit article"
+                : activeType === "seller"
+                  ? "Edit listing story"
+                  : "Edit article"
       : presetType === "club"
         ? "Write club update"
         : presetType === "trainer"
@@ -461,7 +514,9 @@ export function BlogPostForm({
               ? "Write health tip"
               : presetType === "event"
                 ? "Write event update"
-                : "Write article");
+                : presetType === "seller"
+                  ? "Listing story"
+                  : "Write article");
 
   const publishingCopy =
     activeType === "club"
@@ -474,17 +529,21 @@ export function BlogPostForm({
             ? "Tips use the Health category and appear in the Journal and on your expert profile."
             : activeType === "event"
               ? "This update appears in the Journal and on the event page."
-              : null;
+              : activeType === "seller"
+                ? "This story appears in the Journal and on your seller page."
+                : null;
 
   const showClubSelect =
     !presetTrainerId &&
     !presetCourseId &&
     !presetExpertId &&
     !presetEventId &&
+    !presetSellerId &&
     linkedType !== "trainer" &&
     linkedType !== "course" &&
     linkedType !== "expert" &&
     linkedType !== "event" &&
+    linkedType !== "seller" &&
     (clubs.length > 0 || Boolean(presetClubId));
 
   const showExpertSelect = activeType === "expert";
@@ -509,7 +568,9 @@ export function BlogPostForm({
                 ? "Publish health tip"
                 : presetType === "event"
                   ? "Publish event update"
-                  : "Publish article";
+                  : presetType === "seller"
+                    ? "Publish listing story"
+                    : "Publish article";
 
   return (
     <form onSubmit={submit} className="mx-auto max-w-2xl space-y-4 px-4 py-8">
@@ -656,6 +717,13 @@ export function BlogPostForm({
       {(presetEventId || linkedType === "event") && entityName ? (
         <div>
           <Label>Event</Label>
+          <Input value={entityName} disabled />
+        </div>
+      ) : null}
+
+      {(presetSellerId || linkedType === "seller") && entityName ? (
+        <div>
+          <Label>Seller</Label>
           <Input value={entityName} disabled />
         </div>
       ) : null}

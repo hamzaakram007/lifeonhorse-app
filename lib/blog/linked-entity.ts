@@ -16,6 +16,7 @@ export const BLOG_COMPOSER_ENTITY_TYPES = [
   "course",
   "expert",
   "event",
+  "seller",
 ] as const;
 export type BlogComposerEntityType = (typeof BLOG_COMPOSER_ENTITY_TYPES)[number];
 
@@ -45,6 +46,8 @@ export function defaultCategoryForLinkedEntity(
       return "health";
     case "event":
       return "events";
+    case "seller":
+      return "seller_stories";
     default:
       return "guides";
   }
@@ -107,6 +110,8 @@ export function linkedEntityFilterLabel(
       return "Health tips";
     case "event":
       return "Event updates";
+    case "seller":
+      return "Seller stories";
     default:
       return "Entity posts";
   }
