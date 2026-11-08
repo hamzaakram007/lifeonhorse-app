@@ -1,58 +1,60 @@
+import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { requireAuth } from "@/lib/auth";
 import { isMissingNotificationsTable } from "@/lib/notifications/query";
 import { createClient } from "@/lib/supabase/server";
 import { OwnedList } from "@/components/dashboard/OwnedList";
 
-const roleLinks: Record<string, { href: string; label: string }[]> = {
-  admin: [
-    { href: "/admin", label: "Admin panel" },
-    { href: "/admin/reports", label: "Review reports" },
-    { href: "/admin/users", label: "Manage users" },
-  ],
-  seller: [
-    { href: "/dashboard/seller", label: "Seller dashboard" },
-    { href: "/marketplace/horses/new", label: "List a horse" },
-    { href: "/marketplace/products/new", label: "List a product" },
-  ],
-  club_owner: [
-    { href: "/dashboard/club", label: "Club dashboard" },
-    { href: "/clubs/register", label: "Register a club" },
-    { href: "/events/new", label: "List an event" },
-  ],
-  trainer: [
-    { href: "/dashboard/trainer", label: "Trainer dashboard" },
-    { href: "/courses/new", label: "Create a course" },
-  ],
-  course_creator: [
-    { href: "/dashboard/trainer", label: "Courses dashboard" },
-    { href: "/courses/new", label: "Create a course" },
-  ],
-  member: [
-    { href: "/dashboard/favorites", label: "Saved listings" },
-    { href: "/community/new", label: "Share a story" },
-    { href: "/horse-health", label: "Horse health" },
-  ],
-};
-
-const defaultLinks = [
-  { href: "/dashboard/inquiries", label: "Inquiries inbox" },
-  { href: "/dashboard/favorites", label: "Saved listings" },
-  { href: "/marketplace/horses/new", label: "List a horse" },
-];
-
-const sharedLinks = [
-  { href: "/dashboard/alerts", label: "Activity alerts" },
-  { href: "/dashboard/profile", label: "Edit profile" },
-  { href: "/dashboard/inquiries", label: "Inquiries inbox" },
-  { href: "/dashboard/favorites", label: "Saved listings" },
-  { href: "/dashboard/expert", label: "Expert dashboard" },
-];
-
 export default async function DashboardPage() {
   const profile = await requireAuth();
   if (!profile) redirect("/auth/login?redirect=/dashboard");
+
+  const t = await getTranslations("Dashboard");
+  const roleLinks: Record<string, { href: string; label: string }[]> = {
+    admin: [
+      { href: "/admin", label: t("adminPanel") },
+      { href: "/admin/reports", label: t("reviewReports") },
+      { href: "/admin/users", label: t("manageUsers") },
+    ],
+    seller: [
+      { href: "/dashboard/seller", label: t("sellerDashboard") },
+      { href: "/marketplace/horses/new", label: t("listAHorse") },
+      { href: "/marketplace/products/new", label: t("listAProduct") },
+    ],
+    club_owner: [
+      { href: "/dashboard/club", label: t("clubDashboard") },
+      { href: "/clubs/register", label: t("registerAClub") },
+      { href: "/events/new", label: t("listAnEvent") },
+    ],
+    trainer: [
+      { href: "/dashboard/trainer", label: t("trainerDashboard") },
+      { href: "/courses/new", label: t("createACourse") },
+    ],
+    course_creator: [
+      { href: "/dashboard/trainer", label: t("coursesDashboard") },
+      { href: "/courses/new", label: t("createACourse") },
+    ],
+    member: [
+      { href: "/dashboard/favorites", label: t("savedListings") },
+      { href: "/community/new", label: t("shareAStory") },
+      { href: "/horse-health", label: t("horseHealth") },
+    ],
+  };
+
+  const defaultLinks = [
+    { href: "/dashboard/inquiries", label: t("inquiriesInbox") },
+    { href: "/dashboard/favorites", label: t("savedListings") },
+    { href: "/marketplace/horses/new", label: t("listAHorse") },
+  ];
+
+  const sharedLinks = [
+    { href: "/dashboard/alerts", label: t("activityAlerts") },
+    { href: "/dashboard/profile", label: t("editProfile") },
+    { href: "/dashboard/inquiries", label: t("inquiriesInbox") },
+    { href: "/dashboard/favorites", label: t("savedListings") },
+    { href: "/dashboard/expert", label: t("expertDashboard") },
+  ];
 
   const links = [...(roleLinks[profile.role] ?? defaultLinks), ...sharedLinks];
   const uniqueLinks = links.filter(
@@ -120,19 +122,25 @@ export default async function DashboardPage() {
       ? unreadResult.count
       : 0;
 
+  const roleLabel = profile.role.replace("_", " ");
+  const unreadLabel =
+    unreadCount === 1
+      ? t("unreadAlerts", { count: unreadCount })
+      : t("unreadAlertsPlural", { count: unreadCount });
+
   return (
     <div className="space-y-6">
       <div className="card bg-gradient-to-br from-[var(--color-bg)] to-white p-8">
         <h1 className="font-serif text-3xl font-bold">
-          Welcome back, {profile.full_name ?? profile.email}
+          {t("welcomeBack", { name: profile.full_name ?? profile.email })}
         </h1>
         <p className="mt-2 text-[var(--color-muted)]">
-          Your {profile.role.replace("_", " ")} dashboard — manage what you own below.
+          {t("roleDashboard", { role: roleLabel })}
         </p>
         {unreadCount > 0 ? (
           <p className="mt-3 text-sm">
             <Link href="/dashboard/alerts" className="font-medium text-[var(--color-primary)] hover:underline">
-              {unreadCount} unread activity alert{unreadCount === 1 ? "" : "s"}
+              {unreadLabel}
             </Link>
           </p>
         ) : null}
@@ -155,7 +163,7 @@ export default async function DashboardPage() {
 
       {showSellerLists ? (
         <OwnedList
-          title="Your horses"
+          title={t("yourHorses")}
           items={
             horses?.map((h) => ({
               id: h.id,
@@ -166,15 +174,15 @@ export default async function DashboardPage() {
             })) ?? []
           }
           createHref="/marketplace/horses/new"
-          createLabel="+ New horse"
-          emptyDescription="No horse listings yet — open the seller dashboard for products and services too."
+          createLabel={t("newHorse")}
+          emptyDescription={t("emptyHorses")}
         />
       ) : null}
 
       {showClubLists ? (
         <>
           <OwnedList
-            title="Your clubs"
+            title={t("yourClubs")}
             items={
               clubs?.map((c) => ({
                 id: c.id,
@@ -184,10 +192,10 @@ export default async function DashboardPage() {
               })) ?? []
             }
             createHref="/clubs/register"
-            createLabel="+ New club"
+            createLabel={t("newClub")}
           />
           <OwnedList
-            title="Your events"
+            title={t("yourEvents")}
             items={
               events?.map((e) => ({
                 id: e.id,
@@ -195,11 +203,11 @@ export default async function DashboardPage() {
                 status: e.status,
                 href: `/events/${e.id}`,
                 actionHref: `/blog/new?event=${e.id}`,
-                actionLabel: "Event update",
+                actionLabel: t("eventUpdate"),
               })) ?? []
             }
             createHref="/events/new"
-            createLabel="+ New event"
+            createLabel={t("newEvent")}
           />
         </>
       ) : null}
@@ -208,7 +216,7 @@ export default async function DashboardPage() {
         <>
           {trainer ? (
             <section className="card space-y-2 p-4">
-              <h3 className="font-semibold">Trainer profile</h3>
+              <h3 className="font-semibold">{t("trainerProfile")}</h3>
               <p className="text-sm">
                 <Link href={`/trainers/${trainer.id}`} className="font-medium hover:underline">
                   {trainer.display_name}
@@ -216,20 +224,20 @@ export default async function DashboardPage() {
                 <span className="ml-2 text-[var(--color-muted)]">{trainer.status}</span>
               </p>
               <Link href="/dashboard/trainer" className="text-sm text-[var(--color-primary)] hover:underline">
-                Open trainer dashboard
+                {t("openTrainerDashboard")}
               </Link>
             </section>
           ) : (
             <OwnedList
-              title="Trainer profile"
+              title={t("trainerProfile")}
               items={[]}
               createHref="/trainers/new"
-              createLabel="Create trainer profile"
-              emptyDescription="You do not have a trainer profile yet."
+              createLabel={t("createTrainerProfile")}
+              emptyDescription={t("emptyTrainerProfile")}
             />
           )}
           <OwnedList
-            title="Your courses"
+            title={t("yourCourses")}
             items={
               courses?.map((c) => ({
                 id: c.id,
@@ -239,7 +247,7 @@ export default async function DashboardPage() {
               })) ?? []
             }
             createHref="/courses/new"
-            createLabel="+ New course"
+            createLabel={t("newCourse")}
           />
         </>
       ) : null}

@@ -1,9 +1,15 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
 export function VerifiedBadge() {
-  return <span className="badge badge-verified">✓ Verified</span>;
+  const t = useTranslations("Common");
+  return <span className="badge badge-verified">✓ {t("verified")}</span>;
 }
 
 export function FeaturedBadge() {
-  return <span className="badge badge-featured">★ Featured</span>;
+  const t = useTranslations("Common");
+  return <span className="badge badge-featured">★ {t("featured")}</span>;
 }
 
 export function EmptyState({
@@ -38,6 +44,7 @@ export function LoadingSpinner() {
 }
 
 export function PhotoGallery({ photos }: { photos: string[] }) {
+  const t = useTranslations("Common");
   const unique = [...new Set((photos ?? []).map((p) => p?.trim()).filter(Boolean))];
   if (!unique.length) {
     return (
@@ -45,7 +52,7 @@ export function PhotoGallery({ photos }: { photos: string[] }) {
         className="flex h-48 items-center justify-center rounded-lg bg-cover bg-center text-[var(--color-muted)]"
         style={{ backgroundImage: 'url("/images/fallback-empty.jpg")' }}
       >
-        No photos
+        {t("noPhotos")}
       </div>
     );
   }
@@ -56,7 +63,7 @@ export function PhotoGallery({ photos }: { photos: string[] }) {
         <img
           key={url + i}
           src={url}
-          alt={`Photo ${i + 1}`}
+          alt={t("photoAlt", { n: i + 1 })}
           className="aspect-[4/3] h-auto w-full rounded-lg object-cover"
         />
       ))}

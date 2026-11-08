@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth";
 import { VerifiedBadge, ListingCard, EmptyState } from "@/components/ui";
@@ -21,6 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function SellerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const emptyT = await getTranslations("Empty");
   const supabase = await createClient();
   const profile = await getCurrentProfile();
   const { data: seller } = await supabase.from("seller_profiles").select("*").eq("id", id).single();
@@ -100,7 +102,7 @@ export default async function SellerDetailPage({ params }: { params: Promise<{ i
         </div>
         {!activityPosts?.length ? (
           <EmptyState
-            title={isOwner ? "No listing stories yet" : "No seller stories yet"}
+            title={isOwner ? emptyT("sellerStoriesOwner") : emptyT("sellerStoriesVisitor")}
             description={
               isOwner
                 ? "You’re the seller — tell buyers about new arrivals, care guides, or your shop."

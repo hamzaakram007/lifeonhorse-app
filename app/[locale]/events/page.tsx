@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ListingCard, EmptyState, FeaturedBadge } from "@/components/ui";
 import { SectionHero } from "@/components/layout/SectionHero";
@@ -52,14 +53,18 @@ export default async function Page({
 
   const { data } = await query;
   const active = hasActiveEventFilters(filters);
+  const heroT = await getTranslations("Heroes.events");
+  const commonT = await getTranslations("Common");
+  const formsT = await getTranslations("Forms");
+  const emptyT = await getTranslations("Empty");
 
   return (
     <div className="space-y-8">
       <SectionHero
-        title="Equestrian Events"
-        subtitle="Polo cups, tent pegging championships, dressage galas, and exclusive clinics — the world's finest calendar awaits."
+        title={heroT("title")}
+        subtitle={heroT("subtitle")}
         image={SECTION_IMAGES.events}
-        action={{ href: "/events/new", label: "+ List event" }}
+        action={{ href: "/events/new", label: `+ ${commonT("listEvent")}` }}
       />
 
       <FilterBar
@@ -77,34 +82,30 @@ export default async function Page({
             kind: "select",
             name: "event_type",
             options: EVENT_TYPES,
-            allLabel: "All event types",
+            allLabel: formsT("allEventTypes"),
           },
           {
             kind: "select",
             name: "featured",
-            options: [{ value: "1", label: "Featured only" }],
-            allLabel: "All events",
+            options: [{ value: "1", label: formsT("featuredOnly") }],
+            allLabel: formsT("allEvents"),
           },
-          { kind: "text", name: "q", placeholder: "Search events…" },
+          { kind: "text", name: "q", placeholder: formsT("searchEvents") },
         ]}
       />
 
       {!data?.length ? (
         <EmptyState
-          title={active ? "No upcoming events match these filters" : "No upcoming events"}
-          description={
-            active
-              ? "Try clearing filters or broadening your search."
-              : "Share your competition, clinic, or gathering with riders across the globe."
-          }
+          title={active ? emptyT("noEventsMatch") : emptyT("noEvents")}
+          description={active ? emptyT("tryBroadenSearch") : emptyT("eventsDesc")}
           action={
             active ? (
               <Link href="/events" className="btn btn-secondary">
-                Clear filters
+                {commonT("clearFilters")}
               </Link>
             ) : (
               <Link href="/events/new" className="btn btn-primary">
-                List event
+                {commonT("listEvent")}
               </Link>
             )
           }

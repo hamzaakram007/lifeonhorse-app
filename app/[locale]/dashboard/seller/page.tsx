@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireAuth } from "@/lib/auth";
 import { VerifiedBadge, EmptyState } from "@/components/ui";
@@ -11,6 +12,9 @@ export default async function SellerDashboardPage() {
   const profile = await requireAuth();
   if (!profile) redirect("/auth/login?redirect=/dashboard/seller");
 
+  const t = await getTranslations("Dashboard");
+  const emptyT = await getTranslations("Empty");
+  const commonT = await getTranslations("Common");
   const supabase = await createClient();
   const { data: seller } = await supabase
     .from("seller_profiles")
@@ -124,7 +128,7 @@ export default async function SellerDashboardPage() {
         <Link href="/dashboard" className="text-sm text-[var(--color-primary)] hover:underline">
           ← Dashboard
         </Link>
-        <h1 className="mt-2 text-2xl font-bold">Seller dashboard</h1>
+        <h1 className="mt-2 text-2xl font-bold">{t("sellerDashboard")}</h1>
         <p className="text-sm text-[var(--color-muted)]">
           Horses, products, and services you list.{" "}
           <Link href="/payments" className="text-[var(--color-primary)] hover:underline">
@@ -146,54 +150,54 @@ export default async function SellerDashboardPage() {
                 href={`/marketplace/sellers/${seller.id}`}
                 className="text-[var(--color-primary)] hover:underline"
               >
-                View public profile
+                {t("viewPublicProfile")}
               </Link>
               <Link
                 href={`/blog/new?seller=${seller.id}`}
                 className="font-medium text-[var(--color-primary)] hover:underline"
               >
-                Listing story
+                {emptyT("listingStory")}
               </Link>
               <span className="text-[var(--color-muted)]">Status: {seller.status}</span>
             </div>
           </div>
           <VerificationUpload entityType="seller" entityId={seller.id} />
           <OwnedList
-            title="Your journal"
+            title={t("yourJournal")}
             items={journalItems}
             createHref={`/blog/new?seller=${seller.id}`}
-            createLabel="+ Listing story"
-            emptyDescription="No Journal stories linked to your seller profile yet. Tell buyers about new arrivals or care guides."
+            createLabel={`+ ${emptyT("listingStory")}`}
+            emptyDescription={t("emptySellerStories")}
           />
           <OwnedList
-            title="Your horses"
+            title={t("yourHorses")}
             items={horseItems}
             createHref="/marketplace/horses/new"
-            createLabel="+ New horse"
-            emptyDescription="No horse listings yet."
+            createLabel={t("newHorse")}
+            emptyDescription={t("emptySellerHorses")}
           />
           <OwnedList
             title="Products"
             items={productItems}
             createHref="/marketplace/products/new"
-            createLabel="+ New product"
-            emptyDescription="No products yet."
+            createLabel={`+ ${commonT("listProduct")}`}
+            emptyDescription={t("emptySellerProducts")}
           />
           <OwnedList
             title="Services"
             items={serviceItems}
             createHref="/marketplace/services/new"
-            createLabel="+ New service"
-            emptyDescription="No services yet."
+            createLabel={`+ ${commonT("listService")}`}
+            emptyDescription={t("emptySellerServices")}
           />
         </>
       ) : (
         <EmptyState
-          title="Set up your seller profile"
-          description="Create a seller profile to start listing horses, products, and services."
+          title={t("noSellerProfile")}
+          description={t("noSellerProfileDesc")}
           action={
             <Link href="/dashboard/seller/setup" className="btn btn-primary">
-              Set up seller profile
+              {commonT("createSellerProfile")}
             </Link>
           }
         />

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireAuth } from "@/lib/auth";
 import { OwnedList } from "@/components/dashboard/OwnedList";
@@ -10,6 +11,9 @@ export default async function ClubOwnerDashboardPage() {
   const profile = await requireAuth();
   if (!profile) redirect("/auth/login?redirect=/dashboard/club");
 
+  const t = await getTranslations("Dashboard");
+  const commonT = await getTranslations("Common");
+  const formsT = await getTranslations("Forms");
   const supabase = await createClient();
   const [{ data: clubs }, { data: events }, { data: pendingFeatured }, updatesResult] =
     await Promise.all([
@@ -64,7 +68,7 @@ export default async function ClubOwnerDashboardPage() {
       status: e.status,
       href: `/events/${e.id}`,
       actionHref: `/blog/new?event=${e.id}`,
-      actionLabel: "Event update",
+      actionLabel: t("eventUpdate"),
       meta: [e.city, e.start_date ? new Date(e.start_date).toLocaleDateString() : null]
         .filter(Boolean)
         .join(" · ") || null,
@@ -82,7 +86,7 @@ export default async function ClubOwnerDashboardPage() {
       editHref: `/blog/${p.id}/edit`,
       meta: p.published_at
         ? new Date(p.published_at).toLocaleDateString()
-        : "Club update",
+        : t("clubUpdateFallback"),
     })) ?? [];
 
   return (
@@ -91,9 +95,9 @@ export default async function ClubOwnerDashboardPage() {
         <Link href="/dashboard" className="text-sm text-[var(--color-primary)] hover:underline">
           ← Dashboard
         </Link>
-        <h1 className="mt-2 text-2xl font-bold">Club owner dashboard</h1>
+        <h1 className="mt-2 text-2xl font-bold">{t("clubDashboard")}</h1>
         <p className="text-sm text-[var(--color-muted)]">
-          Manage clubs you own, publish Journal updates, and host events.{" "}
+          {t("clubIntro")}{" "}
           <Link href="/payments" className="text-[var(--color-primary)] hover:underline">
             Featured listing pricing
           </Link>
@@ -102,15 +106,15 @@ export default async function ClubOwnerDashboardPage() {
 
       {!clubItems.length && !eventItems.length ? (
         <EmptyState
-          title="No clubs or events yet"
-          description="Register a club or list an event to get started."
+          title={t("noClubsOrEvents")}
+          description={t("noClubsOrEventsDesc")}
           action={
             <div className="flex flex-wrap justify-center gap-3">
               <Link href="/clubs/register" className="btn btn-primary">
-                Register a club
+                {t("registerAClub")}
               </Link>
               <Link href="/events/new" className="btn btn-secondary">
-                List an event
+                {t("listAnEvent")}
               </Link>
             </div>
           }
@@ -119,17 +123,19 @@ export default async function ClubOwnerDashboardPage() {
         <>
           <section className="space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h3 className="font-semibold">Your clubs ({clubItems.length})</h3>
+              <h3 className="font-semibold">
+                {t("yourClubs")} ({clubItems.length})
+              </h3>
               <div className="flex flex-wrap gap-2">
                 <Link href="/clubs/register" className="btn btn-secondary inline-flex text-sm">
-                  + New club
+                  {t("newClub")}
                 </Link>
                 {clubItems[0] ? (
                   <Link
                     href={`/blog/new?club=${clubItems[0].id}`}
                     className="btn btn-primary inline-flex text-sm"
                   >
-                    Write club update
+                    {t("writeClubUpdate")}
                   </Link>
                 ) : null}
               </div>
@@ -155,19 +161,19 @@ export default async function ClubOwnerDashboardPage() {
                     </div>
                     <div className="flex flex-wrap items-center gap-3">
                       <Link href={item.href} className="text-[var(--color-primary)] hover:underline">
-                        View
+                        {formsT("view")}
                       </Link>
                       <Link
                         href={`/blog/new?club=${item.id}`}
                         className="font-medium text-[var(--color-primary)] hover:underline"
                       >
-                        Write club update
+                        {t("writeClubUpdate")}
                       </Link>
                       <Link
                         href={`/events/new`}
                         className="text-[var(--color-primary)] hover:underline"
                       >
-                        List event
+                        {commonT("listEvent")}
                       </Link>
                     </div>
                   </li>
@@ -177,19 +183,19 @@ export default async function ClubOwnerDashboardPage() {
           </section>
 
           <OwnedList
-            title="Your club updates"
+            title={t("yourClubUpdates")}
             items={updateItems}
             createHref={clubItems[0] ? `/blog/new?club=${clubItems[0].id}` : "/blog/new"}
-            createLabel="+ Write club update"
-            emptyDescription="No Journal updates linked to your clubs yet."
+            createLabel={t("newClubUpdate")}
+            emptyDescription={t("emptyClubUpdates")}
           />
 
           <OwnedList
-            title="Your events"
+            title={t("yourEvents")}
             items={eventItems}
             createHref="/events/new"
-            createLabel="+ New event"
-            emptyDescription="No hosted events yet."
+            createLabel={t("newEvent")}
+            emptyDescription={t("emptyHostedEvents")}
           />
         </>
       )}

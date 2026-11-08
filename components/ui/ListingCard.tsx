@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { safeListingImage } from "@/lib/listing-photos";
 import { SITE_IMAGES } from "@/lib/section-images";
 import { distinctSubtitle } from "@/lib/labels";
@@ -26,6 +27,7 @@ export function ListingCard({
   meta?: string;
   photoCount?: number;
 }) {
+  const t = useTranslations("ListingCard");
   // Skip known-dead Unsplash/Picsum URLs so Next Image never hits `/_next/image` 404s.
   const initial = safeListingImage(image) ?? (image?.trim() ? FALLBACK : null);
   const [src, setSrc] = useState<string | null>(initial);
@@ -55,7 +57,7 @@ export function ListingCard({
         )}
         {photoCount && photoCount > 1 && (
           <span className="absolute left-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-xs font-medium text-white">
-            +{photoCount - 1} photos
+            {t("morePhotos", { count: photoCount - 1 })}
           </span>
         )}
         {meta && (
@@ -72,3 +74,4 @@ export function ListingCard({
     </Link>
   );
 }
+

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireAuth } from "@/lib/auth";
 import { VerifiedBadge, EmptyState } from "@/components/ui";
@@ -10,6 +11,8 @@ import { isMissingLinkedEntityColumn } from "@/lib/blog/query";
 export default async function ExpertDashboardPage() {
   const profile = await requireAuth();
   if (!profile) redirect("/auth/login?redirect=/dashboard/expert");
+  const t = await getTranslations("Dashboard");
+  const commonT = await getTranslations("Common");
   const supabase = await createClient();
   const { data: expert } = await supabase.from("experts").select("*").eq("user_id", profile.id).maybeSingle();
   const [{ data: requests }, { data: pendingFeatured }, tipsResult] = expert
@@ -46,10 +49,8 @@ export default async function ExpertDashboardPage() {
         <Link href="/dashboard" className="text-sm text-[var(--color-primary)] hover:underline">
           ← Dashboard
         </Link>
-        <h1 className="mt-2 text-2xl font-bold">Expert dashboard</h1>
-        <p className="text-sm text-[var(--color-muted)]">
-          Assigned horse-health requests and Journal tips.
-        </p>
+        <h1 className="mt-2 text-2xl font-bold">{t("expertDashboard")}</h1>
+        <p className="text-sm text-[var(--color-muted)]">{t("expertIntro")}</p>
       </div>
       {expert ? (
         <>
@@ -70,32 +71,31 @@ export default async function ExpertDashboardPage() {
                 href={`/horse-health/experts/${expert.id}`}
                 className="text-sm text-[var(--color-primary)] hover:underline"
               >
-                View public profile
+                {t("viewPublicProfile")}
               </Link>
               <Link
                 href={`/blog/new?expert=${expert.id}&category=health`}
                 className="btn btn-primary inline-flex text-sm"
               >
-                Write a tip
+                {t("writeATip")}
               </Link>
             </div>
           </div>
           <VerificationUpload entityType="expert" entityId={expert.id} />
           <section className="space-y-2">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h3 className="font-semibold">Your health tips ({tips.length})</h3>
+              <h3 className="font-semibold">
+                {t("yourHealthTips")} ({tips.length})
+              </h3>
               <Link
                 href={`/blog/new?expert=${expert.id}&category=health`}
                 className="text-sm font-medium text-[var(--color-primary)] hover:underline"
               >
-                + Write a tip
+                {t("newWriteTip")}
               </Link>
             </div>
             {!tips.length ? (
-              <p className="text-sm text-[var(--color-muted)]">
-                No Journal tips linked to your expert profile yet. Share educational guidance —
-                readers see a health disclaimer; patients are never auto-notified.
-              </p>
+              <p className="text-sm text-[var(--color-muted)]">{t("emptyExpertTips")}</p>
             ) : (
               tips.map((tip) => (
                 <div key={tip.id} className="card p-3 text-sm">
@@ -118,9 +118,11 @@ export default async function ExpertDashboardPage() {
             )}
           </section>
           <section className="space-y-2">
-            <h3 className="font-semibold">Assigned requests ({requests?.length ?? 0})</h3>
+            <h3 className="font-semibold">
+              {t("assignedRequests")} ({requests?.length ?? 0})
+            </h3>
             {!requests?.length ? (
-              <p className="text-sm text-[var(--color-muted)]">No requests assigned yet.</p>
+              <p className="text-sm text-[var(--color-muted)]">{t("noRequestsAssigned")}</p>
             ) : (
               requests.map((r) => (
                 <div key={r.id} className="card p-3 text-sm">
@@ -137,11 +139,11 @@ export default async function ExpertDashboardPage() {
         </>
       ) : (
         <EmptyState
-          title="Register as a health expert"
-          description="Create an expert profile to receive health requests and publish tips."
+          title={t("registerExpert")}
+          description={t("registerExpertDesc")}
           action={
             <Link href="/horse-health/experts/apply" className="btn btn-primary">
-              Register
+              {commonT("applyAsExpert")}
             </Link>
           }
         />

@@ -1,14 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
 import { Input, Label } from "@/components/ui/Input";
-import { BRAND_NAME } from "@/lib/constants";
 
 export default function LoginForm() {
+  const t = useTranslations("AuthPages");
+  const tAuth = useTranslations("Auth");
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") ?? "/dashboard";
@@ -34,23 +36,42 @@ export default function LoginForm() {
 
   return (
     <div className="mx-auto max-w-md px-4 py-16">
-      <h1 className="text-2xl font-bold">Log in to {BRAND_NAME}</h1>
+      <h1 className="text-2xl font-bold">{t("loginTitle")}</h1>
       <form onSubmit={handleLogin} className="mt-6 space-y-4">
         <div>
-          <Label htmlFor="email" required>Email</Label>
-          <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+          <Label htmlFor="email" required>
+            {t("email")}
+          </Label>
+          <Input
+            id="email"
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
         </div>
         <div>
-          <Label htmlFor="password" required>Password</Label>
-          <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+          <Label htmlFor="password" required>
+            {t("password")}
+          </Label>
+          <Input
+            id="password"
+            type="password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
         <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? "Signing in…" : "Sign in"}
+          {loading ? t("signingIn") : t("signIn")}
         </Button>
       </form>
       <p className="mt-4 text-center text-sm text-stone-600">
-        No account? <Link href="/auth/signup" className="text-amber-800 hover:underline">Sign up</Link>
+        {t("noAccount")}{" "}
+        <Link href="/auth/signup" className="text-amber-800 hover:underline">
+          {tAuth("signUp")}
+        </Link>
       </p>
     </div>
   );

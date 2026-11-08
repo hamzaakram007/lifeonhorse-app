@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ListingCard, EmptyState, VerifiedBadge, FeaturedBadge } from "@/components/ui";
 import { SectionHero } from "@/components/layout/SectionHero";
@@ -60,6 +60,8 @@ export default async function Page({
   const countryLabel = filters.country ? getCountryName(filters.country) : null;
   const heroT = await getTranslations("Heroes.clubs");
   const commonT = await getTranslations("Common");
+  const formsT = await getTranslations("Forms");
+  const emptyT = await getTranslations("Empty");
 
   return (
     <div className="space-y-8">
@@ -76,7 +78,7 @@ export default async function Page({
         values={{ country: filters.country, q: filters.q }}
         fields={[
           { kind: "country", name: "country" },
-          { kind: "text", name: "q", placeholder: "Search clubs…" },
+          { kind: "text", name: "q", placeholder: formsT("searchClubs") },
         ]}
       />
 
@@ -85,23 +87,19 @@ export default async function Page({
           title={
             active
               ? countryLabel
-                ? `No clubs in ${countryLabel}`
-                : "No clubs match these filters"
-              : "No clubs listed yet"
+                ? emptyT("noClubsInCountry", { country: countryLabel })
+                : emptyT("noClubsMatch")
+              : emptyT("noClubs")
           }
-          description={
-            active
-              ? "Try clearing filters or browse another country."
-              : "Be the first to showcase your club to a global audience of riders and enthusiasts."
-          }
+          description={active ? emptyT("tryClearFilters") : emptyT("noClubsDesc")}
           action={
             active ? (
               <Link href="/clubs" className="btn btn-secondary">
-                Clear filters
+                {commonT("clearFilters")}
               </Link>
             ) : (
               <Link href="/clubs/register" className="btn btn-primary">
-                Register club
+                {commonT("registerClub")}
               </Link>
             )
           }
