@@ -130,6 +130,7 @@ export const BLOG_CATEGORIES = [
   { value: "country-culture", label: "Country Culture" },
   { value: "breeds-care", label: "Breeds & Care" },
   { value: "club-guides", label: "Club Guides" },
+  { value: "club_activity", label: "Club activity" },
 ] as const;
 
 export const NAV_LINKS = [
