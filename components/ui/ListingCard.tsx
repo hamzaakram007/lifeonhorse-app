@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { safeListingImage } from "@/lib/listing-photos";
 import { SITE_IMAGES } from "@/lib/section-images";
 import { distinctSubtitle } from "@/lib/labels";
 
@@ -25,7 +26,8 @@ export function ListingCard({
   meta?: string;
   photoCount?: number;
 }) {
-  const initial = image?.trim() || null;
+  // Skip known-dead Unsplash/Picsum URLs so Next Image never hits `/_next/image` 404s.
+  const initial = safeListingImage(image) ?? (image?.trim() ? FALLBACK : null);
   const [src, setSrc] = useState<string | null>(initial);
   const displaySubtitle = distinctSubtitle(title, subtitle);
   const showImage = Boolean(src);
