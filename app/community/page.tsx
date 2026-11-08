@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ListingCard, EmptyState } from "@/components/ui";
 import { SectionHero } from "@/components/layout/SectionHero";
 import { SECTION_IMAGES } from "@/lib/section-images";
+import { parseCommunityShareMeta } from "@/lib/community/dual-publish";
 
 export const metadata: Metadata = {
   title: "Community",
@@ -35,17 +36,21 @@ export default async function Page() {
         />
       ) : (
         <div className="listing-grid">
-          {data.map((item) => (
-            <ListingCard
-              key={item.id}
-              href={`/community/${item.id}`}
-              title={item.title}
-              subtitle={item.content?.slice(0, 100) ?? undefined}
-              image={Array.isArray(item.photos) ? item.photos[0] : null}
-              photoCount={Array.isArray(item.photos) ? item.photos.length : undefined}
-              badges={undefined}
-            />
-          ))}
+          {data.map((item) => {
+            const share = parseCommunityShareMeta(item.content);
+            const excerpt = (share.body || "").trim().slice(0, 100) || undefined;
+            return (
+              <ListingCard
+                key={item.id}
+                href={`/community/${item.id}`}
+                title={item.title}
+                subtitle={excerpt}
+                image={Array.isArray(item.photos) ? item.photos[0] : null}
+                photoCount={Array.isArray(item.photos) ? item.photos.length : undefined}
+                badges={undefined}
+              />
+            );
+          })}
         </div>
       )}
     </div>
