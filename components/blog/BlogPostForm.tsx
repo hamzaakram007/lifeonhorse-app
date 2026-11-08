@@ -14,6 +14,7 @@ import {
   type BlogComposerEntityType,
 } from "@/lib/blog/linked-entity";
 import { loadOwnedEventForUser } from "@/lib/blog/event-ownership";
+import { buildCommunityShareContent } from "@/lib/community/dual-publish";
 
 type EntityOption = { id: string; name: string };
 
@@ -128,6 +129,7 @@ export function BlogPostForm({
   const [coverImage, setCoverImage] = useState<string[]>(
     initial?.cover_image ? [initial.cover_image] : []
   );
+  const [shareToCommunity, setShareToCommunity] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [ownershipError, setOwnershipError] = useState("");
@@ -252,7 +254,9 @@ export function BlogPostForm({
           setOwnershipError("You can only post updates for clubs you own.");
           setForm((prev) => ({ ...prev, linked_entity_id: "" }));
           setLinkedType(null);
+          setEntityName(null);
         } else {
+          setOwnershipError("");
           setEntityName(match.name);
           setLinkedType("club");
           setForm((prev) => ({
@@ -483,6 +487,42 @@ export function BlogPostForm({
       setLoading(false);
       return;
     }
+
+    const shouldShareCommunity =
+      shareToCommunity &&
+      form.status === "published" &&
+      resolvedType === "club" &&
+      Boolean(entityId) &&
+      !ownershipError;
+
+    if (shouldShareCommunity && data?.id && entityId) {
+      const clubLabel =
+        entityName || clubs.find((c) => c.id === entityId)?.name || "Club";
+      const communityContent = buildCommunityShareContent({
+        body: form.content,
+        excerpt: form.excerpt,
+        blogPostId: data.id,
+        clubId: entityId,
+        clubName: clubLabel,
+      });
+      const photos = coverImage[0] ? [coverImage[0]] : [];
+      const { error: communityErr } = await supabase.from("community_posts").insert({
+        author_id: user.id,
+        title: form.title.trim(),
+        content: communityContent,
+        photos,
+        status: "published",
+      });
+      if (communityErr) {
+        router.push(`/blog/${data.id}?community_share=failed`);
+        router.refresh();
+        return;
+      }
+      router.push(`/blog/${data.id}?community_share=ok`);
+      router.refresh();
+      return;
+    }
+
     router.push(`/blog/${data.id}`);
     router.refresh();
   }
@@ -743,6 +783,27 @@ export function BlogPostForm({
           Tips are educational only — not a veterinary diagnosis. Readers will see a health
           disclaimer on the article page.
         </p>
+      ) : null}
+
+      {activeType === "club" && form.linked_entity_id && !ownershipError ? (
+        <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-3 text-sm">
+          <input
+            type="checkbox"
+            className="mt-0.5 h-4 w-4 accent-[var(--color-primary)]"
+            checked={shareToCommunity}
+            disabled={form.status !== "published"}
+            onChange={(e) => setShareToCommunity(e.target.checked)}
+          />
+          <span>
+            <span className="font-medium text-[var(--color-text)]">Also share to Community</span>
+            <span className="mt-0.5 block text-[var(--color-muted)]">
+              Posts a short Community story with links back to this Journal update and your club.
+              {form.status !== "published"
+                ? " Available when status is Published."
+                : null}
+            </span>
+          </span>
+        </label>
       ) : null}
 
       <Button type="submit" disabled={loading || Boolean(ownershipError && entityLocked)}>

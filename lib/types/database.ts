@@ -279,6 +279,18 @@ export interface HealthRequest {
   updated_at?: string;
 }
 
+/** Member stories / gallery (001 community_posts). Dual-publish stubs reuse these columns. */
+export interface CommunityPost {
+  id: string;
+  author_id: string;
+  title: string;
+  content: string | null;
+  photos: string[] | unknown;
+  status: ContentStatus;
+  created_at?: string;
+  updated_at?: string;
+}
+
 /** In-app activity alert (012_activity_notifications). No email/push. */
 export interface ActivityNotification {
   id: string;
