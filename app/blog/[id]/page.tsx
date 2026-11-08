@@ -16,6 +16,7 @@ import {
   linkedEntityHref,
 } from "@/lib/blog/linked-entity";
 import { loadOwnedEventForUser } from "@/lib/blog/event-ownership";
+import { COMMUNITY_SHARE_MARKER } from "@/lib/community/dual-publish";
 
 function readingTime(text: string) {
   const words = text.trim().split(/\s+/).length;
@@ -43,8 +44,15 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   };
 }
 
-export default async function BlogDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function BlogDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<{ community_share?: string }>;
+}) {
   const { id } = await params;
+  const shareParam = searchParams ? (await searchParams).community_share : undefined;
   const supabase = await createClient();
   const profile = await getCurrentProfile();
 
@@ -195,6 +203,20 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ id:
   const crumbLabel = linkedType ? linkedEntityFilterLabel(linkedType) : null;
   const crumbHref = linkedType ? `/blog?entity_type=${linkedType}` : null;
 
+  let communityShareId: string | null = null;
+  if (linkedType === "club" && post.status === "published") {
+    const { data: shared } = await supabase
+      .from("community_posts")
+      .select("id, content")
+      .eq("author_id", post.author_id)
+      .eq("status", "published")
+      .ilike("content", `%blog:${id}%`)
+      .order("created_at", { ascending: false })
+      .limit(5);
+    communityShareId =
+      shared?.find((row) => row.content?.includes(`${COMMUNITY_SHARE_MARKER}`))?.id ?? null;
+  }
+
   return (
     <article className="mx-auto max-w-4xl">
       <Breadcrumbs
@@ -206,6 +228,30 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ id:
           { label: post.title },
         ]}
       />
+      {shareParam === "ok" ? (
+        <p className="mb-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)]">
+          Shared to Community
+          {communityShareId ? (
+            <>
+              {" "}
+              —{" "}
+              <Link
+                href={`/community/${communityShareId}`}
+                className="text-[var(--color-primary)] hover:underline"
+              >
+                view story
+              </Link>
+            </>
+          ) : null}
+          .
+        </p>
+      ) : null}
+      {shareParam === "failed" ? (
+        <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
+          Journal update published, but sharing to Community failed. You can still post from Community
+          separately.
+        </p>
+      ) : null}
       <div className="relative mb-8 aspect-[21/9] overflow-hidden rounded-2xl bg-[var(--color-bg)]">
         <BlogCover src={cover} alt={post.title} priority />
       </div>
@@ -218,6 +264,11 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ id:
             </Link>
           ) : badge ? (
             <span className="badge">{badge}</span>
+          ) : null}
+          {communityShareId ? (
+            <Link href={`/community/${communityShareId}`} className="badge hover:opacity-90">
+              On Community
+            </Link>
           ) : null}
           {canEdit ? (
             <Link
