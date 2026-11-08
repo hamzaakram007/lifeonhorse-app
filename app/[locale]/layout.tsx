@@ -4,6 +4,7 @@ import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { PwaProvider } from "@/components/PwaProvider";
 import {
   notoNaskhArabic,
   notoNastaliqUrdu,
@@ -16,11 +17,15 @@ import "../globals.css";
 
 export const metadata: Metadata = {
   ...defaultMetadata,
+  applicationName: "LifeOnHorse",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "LifeOnHorse",
+  },
+  formatDetection: {
+    telephone: false,
   },
 };
 
@@ -68,11 +73,13 @@ export default async function LocaleLayout({
     <html lang={locale} dir={rtl ? "rtl" : "ltr"} className={fontVars}>
       <body className={`flex min-h-screen flex-col font-sans ${scriptClass}`}>
         <NextIntlClientProvider messages={messages}>
-          <Header />
-          <main id="main-content" className="mx-auto w-full max-w-7xl flex-1 px-4 py-8">
-            {children}
-          </main>
-          <Footer />
+          <PwaProvider>
+            <Header />
+            <main id="main-content" className="mx-auto w-full max-w-7xl flex-1 px-4 py-8">
+              {children}
+            </main>
+            <Footer />
+          </PwaProvider>
         </NextIntlClientProvider>
       </body>
     </html>
