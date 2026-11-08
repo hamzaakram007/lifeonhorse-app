@@ -1,87 +1,184 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { Card, Badge } from "@/components/ui/Card";
-import { CountryFilterSelect } from "@/components/ui/CountrySelect";
-import { EmptyState } from "@/components/ui/EmptyState";
-import { PhotoCover } from "@/components/ui/PhotoCover";
-import { getCountryName } from "@/lib/countries";
+import { ListingCard, EmptyState, VerifiedBadge, FeaturedBadge } from "@/components/ui";
+import { SectionHero } from "@/components/layout/SectionHero";
+import { FilterBar } from "@/components/filters/FilterBar";
+import { formatLocation } from "@/lib/location";
+import { SECTION_IMAGES } from "@/lib/section-images";
 import { EXPERT_CATEGORIES } from "@/lib/constants";
+import { resolveExpertCover, resolveExpertPhotos } from "@/lib/expert-covers";
+import { getCountryName } from "@/lib/countries";
 
-export const metadata = { title: "Equine Experts" };
+export const metadata: Metadata = {
+  title: "Find an Expert",
+  description: "Browse verified equine veterinarians, farriers, nutritionists, and specialists",
+};
 
-function specialtyFromCategory(value?: string) {
-  if (!value) return null;
-  return EXPERT_CATEGORIES.find((c) => c.value === value)?.label ?? value;
+type ExpertSearchParams = {
+  country?: string;
+  specialty?: string;
+  q?: string;
+};
+
+/** Map filter values to DB specialty ILIKE patterns (live rows use free-text specialties). */
+const SPECIALTY_PATTERNS: Record<string, string> = {
+  vet: "%vet%",
+  farrier: "%farrier%",
+  nutrition: "%nutrition%",
+  behavior: "%behavior%",
+  breeding: "%breed%",
+  other: "%",
+};
+
+function normalizeExpertParams(
+  raw: Record<string, string | string[] | undefined>,
+): ExpertSearchParams {
+  const pick = (key: keyof ExpertSearchParams) => {
+    const v = raw[key];
+    const s = Array.isArray(v) ? v[0] : v;
+    return s?.trim() || undefined;
+  };
+  return {
+    country: pick("country"),
+    specialty: pick("specialty"),
+    q: pick("q"),
+  };
 }
 
 export default async function ExpertsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ country?: string; specialty?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const params = await searchParams;
+  const filters = normalizeExpertParams(await searchParams);
   const supabase = await createClient();
+
   let query = supabase
     .from("experts")
-    .select("id, display_name, specialty, city, country_code, photos, is_verified, is_featured, credentials")
+    .select("id, display_name, specialty, city, country_code, photos, is_verified, is_featured")
     .eq("status", "published")
     .order("is_featured", { ascending: false })
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(48);
 
-  if (params.country) query = query.eq("country_code", params.country);
-  const specialty = specialtyFromCategory(params.specialty);
-  if (specialty) query = query.eq("specialty", specialty);
+  if (filters.country) query = query.eq("country_code", filters.country);
+  if (filters.specialty && filters.specialty !== "other") {
+    if (filters.specialty === "breeding") {
+      query = query.or("specialty.ilike.%breed%,specialty.ilike.%reproduct%");
+    } else {
+      const pattern = SPECIALTY_PATTERNS[filters.specialty] ?? `%${filters.specialty}%`;
+      query = query.ilike("specialty", pattern);
+    }
+  }
+  if (filters.q) {
+    const q = filters.q.replace(/,/g, " ").replace(/[%_\\]/g, "");
+    query = query.or(
+      `display_name.ilike.%${q}%,specialty.ilike.%${q}%,city.ilike.%${q}%`,
+    );
+  }
 
-  const { data: experts } = await query;
+  const { data } = await query;
+  const experts = data ?? [];
+  const active = Boolean(filters.country || filters.specialty || filters.q);
+  const countryLabel = filters.country ? getCountryName(filters.country) : null;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <Link href="/horse-health" className="text-sm text-emerald-800 hover:underline">← Horse Health</Link>
-          <h1 className="mt-2 text-3xl font-bold">Equine Expert Directory</h1>
-          <p className="text-stone-600">Vets, farriers, nutritionists, and specialists</p>
-        </div>
-        <Link href="/horse-health/experts/apply" className="rounded-lg bg-emerald-800 px-4 py-2 font-medium text-white hover:bg-emerald-900">
-          + Apply as expert
+    <div className="space-y-8">
+      <SectionHero
+        title="Find an Expert"
+        subtitle="Verified equine veterinarians, farriers, nutritionists, and specialists ready to guide horse health decisions."
+        image={SECTION_IMAGES.health}
+        action={{ href: "/horse-health/experts/apply", label: "+ Apply as expert" }}
+      >
+        <Link
+          href="/horse-health"
+          className="mt-4 inline-flex text-sm font-medium text-white/85 underline-offset-4 hover:underline"
+        >
+          ← Horse Health
         </Link>
-      </div>
+      </SectionHero>
 
-      <form method="get" className="mt-6 flex flex-wrap gap-3 rounded-xl border border-stone-200 bg-white p-4">
-        <CountryFilterSelect name="country" defaultValue={params.country ?? ""} />
-        <select name="specialty" defaultValue={params.specialty ?? ""} className="rounded-lg border px-3 py-2 text-sm">
-          <option value="">All specialties</option>
-          {EXPERT_CATEGORIES.map((c) => (
-            <option key={c.value} value={c.value}>{c.label}</option>
-          ))}
-        </select>
-        <button type="submit" className="rounded-lg bg-stone-800 px-4 py-2 text-sm text-white">Filter</button>
-      </form>
+      <FilterBar
+        action="/horse-health/experts"
+        clearHref="/horse-health/experts"
+        values={{
+          country: filters.country,
+          specialty: filters.specialty,
+          q: filters.q,
+        }}
+        fields={[
+          { kind: "country", name: "country" },
+          {
+            kind: "select",
+            name: "specialty",
+            allLabel: "All specialties",
+            options: EXPERT_CATEGORIES.map((c) => ({ value: c.value, label: c.label })),
+          },
+          { kind: "text", name: "q", placeholder: "Search experts…" },
+        ]}
+      />
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {experts?.map((e) => (
-          <Card key={e.id} href={`/horse-health/experts/${e.id}`}>
-            <PhotoCover photos={Array.isArray(e.photos) ? e.photos : []} alt={e.display_name} className="aspect-square rounded-lg" />
-            <div className="mt-2 flex flex-wrap gap-1">
-              {e.specialty ? <Badge>{e.specialty}</Badge> : null}
-              {e.is_verified && <Badge variant="verified">Verified</Badge>}
-              {e.is_featured && <Badge variant="featured">Featured</Badge>}
-            </div>
-            <h2 className="mt-2 font-semibold">{e.display_name}</h2>
-            <p className="text-sm text-stone-600">
-              {[e.city, getCountryName(e.country_code)].filter(Boolean).join(" · ") || "—"}
-            </p>
-          </Card>
-        ))}
-        {!experts?.length && (
-          <EmptyState
-            title="No experts found"
-            description="Try adjusting filters or apply to join the expert directory."
-            actionLabel="Apply as expert"
-            actionHref="/horse-health/experts/apply"
-          />
-        )}
-      </div>
+      {!experts.length ? (
+        <EmptyState
+          title={
+            active
+              ? countryLabel
+                ? `No experts in ${countryLabel}`
+                : "No experts match these filters"
+              : "No experts listed yet"
+          }
+          description={
+            active
+              ? "Try clearing filters or browse another specialty."
+              : "Apply to join the directory and help horse owners worldwide."
+          }
+          action={
+            active ? (
+              <Link href="/horse-health/experts" className="btn btn-secondary">
+                Clear filters
+              </Link>
+            ) : (
+              <Link href="/horse-health/experts/apply" className="btn btn-primary">
+                Apply as expert
+              </Link>
+            )
+          }
+        />
+      ) : (
+        <div className="listing-grid">
+          {experts.map((item) => {
+            const photos = resolveExpertPhotos(
+              item.id,
+              item.display_name,
+              item.photos,
+              item.specialty,
+            );
+            return (
+              <ListingCard
+                key={item.id}
+                href={`/horse-health/experts/${item.id}`}
+                title={item.display_name}
+                subtitle={item.specialty || undefined}
+                image={resolveExpertCover(
+                  item.id,
+                  item.display_name,
+                  item.photos,
+                  item.specialty,
+                )}
+                photoCount={photos.length || undefined}
+                badges={
+                  <>
+                    {item.is_verified ? <VerifiedBadge /> : null}
+                    {item.is_featured ? <FeaturedBadge /> : null}
+                  </>
+                }
+                meta={formatLocation(item.city, item.country_code) || undefined}
+              />
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

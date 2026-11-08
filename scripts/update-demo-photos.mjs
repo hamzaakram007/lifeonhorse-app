@@ -63,6 +63,28 @@ const EVENT_IMGS = {
   "daaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa06": "/images/demo/club-rescue.jpg",
 };
 
+const EXPERT_IMGS = {
+  "dbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb01": "/images/demo/expert-vet.jpg",
+  "dbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb02": "/images/demo/expert-dressage.jpg",
+  "dbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb03": "/images/demo/expert-nutrition.jpg",
+  "dbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb04": "/images/demo/expert-farrier.jpg",
+  "dbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb05": "/images/demo/expert-dental.jpg",
+  "dbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb06": "/images/demo/expert-reproduction.jpg",
+};
+
+const EXPERT_BY_NAME = {
+  "Dr. James Whitfield": "/images/demo/expert-vet.jpg",
+  "Sarah Mitchell": "/images/demo/expert-dressage.jpg",
+  "Dr. Priya Sharma": "/images/demo/expert-nutrition.jpg",
+  "Ahmed Farooq": "/images/demo/expert-farrier.jpg",
+  "Dr. Maria Santos": "/images/demo/expert-dental.jpg",
+  "Dr. Khalid Al-Rashid": "/images/demo/expert-reproduction.jpg",
+  "Dr. Sana Malik": "/images/demo/expert-clinic.jpg",
+  "Dr. Mark Hughes": "/images/demo/expert-rehab.jpg",
+  "Dr. Elena Rossi": "/images/demo/expert-lameness.jpg",
+  "Dr. Sofia Ahmed": "/images/demo/expert-behavior.jpg",
+};
+
 const COURSE_IMGS = {
   "d9999999-9999-4999-8999-999999999901": "/images/demo/course-dressage.jpg",
   "d9999999-9999-4999-8999-999999999902": "/images/demo/course-arabian.jpg",
@@ -110,11 +132,22 @@ function buildStatements() {
   for (const [id, img] of Object.entries(COURSE_IMGS)) {
     stmts.push(`UPDATE courses SET cover_image = ${sqlLit(img)} WHERE id = ${sqlLit(id)}`);
   }
+  for (const [id, img] of Object.entries(EXPERT_IMGS)) {
+    const arr = JSON.stringify([img]);
+    stmts.push(`UPDATE experts SET photos = ${sqlLit(arr)}::jsonb WHERE id = ${sqlLit(id)}`);
+  }
+  for (const [name, img] of Object.entries(EXPERT_BY_NAME)) {
+    const arr = JSON.stringify([img]);
+    stmts.push(
+      `UPDATE experts SET photos = ${sqlLit(arr)}::jsonb WHERE display_name = ${sqlLit(name)}`,
+    );
+  }
   // Sweep remaining bad CDNs
   stmts.push(`UPDATE clubs SET logo_url = '/images/fallback-empty.jpg', photos = '["/images/fallback-empty.jpg"]'::jsonb WHERE logo_url ILIKE '%unsplash%' OR logo_url ILIKE '%picsum%' OR photos::text ILIKE '%unsplash%' OR photos::text ILIKE '%picsum%'`);
   stmts.push(`UPDATE trainers SET photos = '["/images/fallback-empty.jpg"]'::jsonb WHERE photos::text ILIKE '%unsplash%' OR photos::text ILIKE '%picsum%'`);
   stmts.push(`UPDATE events SET photos = '["/images/fallback-empty.jpg"]'::jsonb WHERE photos::text ILIKE '%unsplash%' OR photos::text ILIKE '%picsum%'`);
   stmts.push(`UPDATE courses SET cover_image = '/images/fallback-empty.jpg' WHERE cover_image ILIKE '%unsplash%' OR cover_image ILIKE '%picsum%'`);
+  stmts.push(`UPDATE experts SET photos = '["/images/fallback-empty.jpg"]'::jsonb WHERE photos::text ILIKE '%unsplash%' OR photos::text ILIKE '%picsum%'`);
   return stmts;
 }
 
@@ -167,6 +200,14 @@ async function viaServiceRole(stmts) {
   for (const [id, img] of Object.entries(COURSE_IMGS)) {
     const { error } = await supabase.from("courses").update({ cover_image: img }).eq("id", id);
     if (error) console.warn("courses", id, error.message);
+  }
+  for (const [id, img] of Object.entries(EXPERT_IMGS)) {
+    const { error } = await supabase.from("experts").update({ photos: [img] }).eq("id", id);
+    if (error) console.warn("experts", id, error.message);
+  }
+  for (const [name, img] of Object.entries(EXPERT_BY_NAME)) {
+    const { error } = await supabase.from("experts").update({ photos: [img] }).eq("display_name", name);
+    if (error) console.warn("experts name", name, error.message);
   }
   return stmts.length;
 }

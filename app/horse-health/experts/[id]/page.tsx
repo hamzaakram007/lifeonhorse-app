@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { Badge } from "@/components/ui/Card";
 import { ListingGallery, VerifiedBadge, FeaturedBadge } from "@/components/ui";
+import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { ReviewsSection } from "@/components/ReviewsSection";
 import { getCountryName } from "@/lib/countries";
+import { resolveExpertPhotos } from "@/lib/expert-covers";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -20,52 +21,81 @@ export default async function ExpertDetailPage({ params }: { params: Promise<{ i
   if (!expert) notFound();
 
   const location = [expert.city, getCountryName(expert.country_code)].filter(Boolean).join(", ");
-  const photos = Array.isArray(expert.photos) ? expert.photos : [];
+  const photos = resolveExpertPhotos(
+    expert.id,
+    expert.display_name,
+    expert.photos,
+    expert.specialty,
+  );
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 px-4 py-8">
-      <Link href="/horse-health/experts" className="text-sm text-emerald-800 hover:underline">
-        ← Back to experts
-      </Link>
+    <div className="space-y-6">
+      <Breadcrumbs
+        items={[
+          { label: "Horse Health", href: "/horse-health" },
+          { label: "Experts", href: "/horse-health/experts" },
+          { label: expert.display_name },
+        ]}
+      />
 
-      <div className="flex flex-wrap gap-2">
-        {expert.is_verified ? <VerifiedBadge /> : null}
-        {expert.is_featured ? <FeaturedBadge /> : null}
-        {expert.specialty ? <Badge>{expert.specialty}</Badge> : null}
-      </div>
+      <div className="grid gap-8 lg:grid-cols-3">
+        <div className="space-y-4 lg:col-span-2">
+          <div className="flex flex-wrap gap-2">
+            {expert.is_verified ? <VerifiedBadge /> : null}
+            {expert.is_featured ? <FeaturedBadge /> : null}
+            {expert.specialty ? <span className="badge">{expert.specialty}</span> : null}
+          </div>
 
-      <div>
-        <h1 className="text-3xl font-bold">{expert.display_name}</h1>
-        {location ? <p className="mt-1 text-stone-600">{location}</p> : null}
-      </div>
+          <h1 className="font-serif text-3xl font-bold">{expert.display_name}</h1>
+          {location ? <p className="text-[var(--color-muted)]">{location}</p> : null}
 
-      <ListingGallery photos={photos} alt={expert.display_name} />
+          <ListingGallery photos={photos} alt={expert.display_name} />
 
-      {expert.description ? <p className="leading-relaxed whitespace-pre-wrap">{expert.description}</p> : null}
+          {expert.description ? (
+            <p className="leading-relaxed whitespace-pre-wrap">{expert.description}</p>
+          ) : null}
 
-      {expert.credentials ? (
-        <div>
-          <h2 className="font-semibold">Credentials</h2>
-          <p className="mt-1 text-sm text-stone-700 whitespace-pre-wrap">{expert.credentials}</p>
+          {expert.credentials ? (
+            <div>
+              <h2 className="font-semibold">Credentials</h2>
+              <p className="mt-1 text-sm text-[var(--color-muted)] whitespace-pre-wrap">
+                {expert.credentials}
+              </p>
+            </div>
+          ) : null}
+
+          <div className="rounded-xl border border-amber-200/80 bg-amber-50/90 p-4 text-sm text-amber-950">
+            <strong>Safety notice:</strong> Expert listings are for guidance and coordination only.
+            LifeOnHorse is not for emergencies and does not replace a licensed veterinarian.{" "}
+            <Link href="/legal/health-disclaimer" className="underline">
+              Full disclaimer
+            </Link>
+          </div>
+
+          <ReviewsSection entityType="expert" entityId={id} />
         </div>
-      ) : null}
 
-      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-        <strong>Safety notice:</strong> Expert listings are for guidance and coordination only. LifeOnHorse is not for
-        emergencies and does not replace a licensed veterinarian.{" "}
-        <Link href="/legal/health-disclaimer" className="underline">
-          Full disclaimer
-        </Link>
+        <div className="space-y-4">
+          <div className="card p-5">
+            <h2 className="font-serif text-lg font-semibold">Need guidance?</h2>
+            <p className="mt-2 text-sm text-[var(--color-muted)]">
+              Submit a health request and this expert can review your horse&apos;s case.
+            </p>
+            <Link
+              href={`/horse-health/requests/new?expert_id=${expert.id}`}
+              className="btn btn-primary mt-4 inline-flex w-full justify-center"
+            >
+              Submit health request
+            </Link>
+            <Link
+              href="/horse-health/experts"
+              className="btn btn-secondary mt-3 inline-flex w-full justify-center"
+            >
+              Browse more experts
+            </Link>
+          </div>
+        </div>
       </div>
-
-      <Link
-        href={`/horse-health/requests/new?expert_id=${expert.id}`}
-        className="inline-flex rounded-lg bg-emerald-800 px-5 py-2.5 font-medium text-white hover:bg-emerald-900"
-      >
-        Submit health request to this expert
-      </Link>
-
-      <ReviewsSection entityType="expert" entityId={id} />
     </div>
   );
 }
