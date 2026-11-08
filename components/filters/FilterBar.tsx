@@ -52,6 +52,13 @@ export function FilterBar({
 }) {
   const hasActive = Object.values(values).some((v) => Boolean(v && String(v).trim()));
 
+  const fieldNames = new Set(
+    fields.map((field) => (field.kind === "country" ? field.name ?? "country" : field.name))
+  );
+  const hiddenValues = Object.entries(values).filter(
+    ([name, value]) => Boolean(value?.trim()) && !fieldNames.has(name)
+  );
+
   return (
     <form
       method="get"
@@ -61,6 +68,9 @@ export function FilterBar({
         className
       )}
     >
+      {hiddenValues.map(([name, value]) => (
+        <input key={name} type="hidden" name={name} value={value} />
+      ))}
       {fields.map((field) => {
         if (field.kind === "country") {
           const name = field.name ?? "country";

@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireAuth } from "@/lib/auth";
 import { BlogPostForm } from "@/components/blog/BlogPostForm";
+import { isBlogComposerEntityType } from "@/lib/blog/linked-entity";
 
 export default async function EditBlogPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -14,27 +15,59 @@ export default async function EditBlogPage({ params }: { params: Promise<{ id: s
 
   const isAuthor = post.author_id === profile.id;
   const isAdmin = ["admin", "moderator"].includes(profile.role);
-  let ownsClub = false;
-  if (post.linked_entity_type === "club" && post.linked_entity_id) {
-    const { data: club } = await supabase
-      .from("clubs")
-      .select("id")
-      .eq("id", post.linked_entity_id)
-      .eq("owner_id", profile.id)
-      .maybeSingle();
-    ownsClub = Boolean(club);
+  const linkedType = isBlogComposerEntityType(post.linked_entity_type)
+    ? post.linked_entity_type
+    : null;
+  const linkedId = linkedType && post.linked_entity_id ? (post.linked_entity_id as string) : null;
+
+  let ownsLinked = false;
+  if (linkedType && linkedId) {
+    if (linkedType === "club") {
+      const { data: club } = await supabase
+        .from("clubs")
+        .select("id")
+        .eq("id", linkedId)
+        .eq("owner_id", profile.id)
+        .maybeSingle();
+      ownsLinked = Boolean(club);
+    } else if (linkedType === "trainer") {
+      const { data: trainer } = await supabase
+        .from("trainers")
+        .select("id")
+        .eq("id", linkedId)
+        .eq("user_id", profile.id)
+        .maybeSingle();
+      ownsLinked = Boolean(trainer);
+    } else if (linkedType === "course") {
+      const { data: course } = await supabase
+        .from("courses")
+        .select("id")
+        .eq("id", linkedId)
+        .eq("creator_id", profile.id)
+        .maybeSingle();
+      ownsLinked = Boolean(course);
+    }
   }
 
-  if (!isAuthor && !isAdmin && !ownsClub) {
+  if (!isAuthor && !isAdmin && !ownsLinked) {
     redirect(`/blog/${id}`);
   }
 
-  const isClubPost = post.linked_entity_type === "club" && Boolean(post.linked_entity_id);
+  const heading =
+    linkedType === "club"
+      ? "Edit club update"
+      : linkedType === "trainer"
+        ? "Edit trainer tip"
+        : linkedType === "course"
+          ? "Edit course update"
+          : "Edit article";
 
   return (
     <BlogPostForm
-      heading={isClubPost ? "Edit club update" : "Edit article"}
-      presetClubId={isClubPost ? post.linked_entity_id : null}
+      heading={heading}
+      presetClubId={linkedType === "club" ? linkedId : null}
+      presetTrainerId={linkedType === "trainer" ? linkedId : null}
+      presetCourseId={linkedType === "course" ? linkedId : null}
       initial={{
         id: post.id,
         title: post.title,
@@ -42,8 +75,8 @@ export default async function EditBlogPage({ params }: { params: Promise<{ id: s
         content: post.content ?? "",
         category: post.category ?? "guides",
         cover_image: post.cover_image,
-        linked_entity_type: isClubPost ? "club" : null,
-        linked_entity_id: post.linked_entity_id,
+        linked_entity_type: linkedType,
+        linked_entity_id: linkedId,
         status: post.status === "draft" ? "draft" : "published",
       }}
     />

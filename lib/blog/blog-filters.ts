@@ -1,10 +1,14 @@
 export type BlogSearchParams = {
   category?: string;
   club?: string;
+  trainer?: string;
+  course?: string;
   entity_type?: string;
   featured?: string;
   q?: string;
 };
+
+const ENTITY_FILTER_TYPES = ["club", "trainer", "course", "event"] as const;
 
 export function normalizeBlogSearchParams(
   raw: Record<string, string | string[] | undefined> | BlogSearchParams
@@ -20,8 +24,10 @@ export function normalizeBlogSearchParams(
   return {
     category: pick("category"),
     club: pick("club"),
+    trainer: pick("trainer"),
+    course: pick("course"),
     entity_type:
-      entityType === "club" || entityType === "trainer" || entityType === "event"
+      entityType && (ENTITY_FILTER_TYPES as readonly string[]).includes(entityType)
         ? entityType
         : undefined,
     q: pick("q"),

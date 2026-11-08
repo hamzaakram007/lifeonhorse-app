@@ -131,6 +131,8 @@ export const BLOG_CATEGORIES = [
   { value: "breeds-care", label: "Breeds & Care" },
   { value: "club-guides", label: "Club Guides" },
   { value: "club_activity", label: "Club activity" },
+  { value: "trainer_tips", label: "Trainer tips" },
+  { value: "course_updates", label: "Course updates" },
 ] as const;
 
 export const NAV_LINKS = [
