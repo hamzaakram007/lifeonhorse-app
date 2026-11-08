@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { parsePhotoList } from "@/lib/storage/upload";
+import { safePhotoList } from "@/lib/listing-photos";
 import { SITE_IMAGES } from "@/lib/section-images";
 import { cn } from "@/lib/utils";
 
@@ -13,7 +13,8 @@ type ListingGalleryProps = {
 };
 
 export function ListingGallery({ photos, videoUrl, alt = "Listing photo", className }: ListingGalleryProps) {
-  const list = parsePhotoList(photos);
+  // Drop Unsplash/Picsum placeholders that 404 through the image optimizer.
+  const list = safePhotoList(photos);
   const [active, setActive] = useState(0);
 
   if (!list.length && !videoUrl) {
