@@ -58,6 +58,14 @@ export default async function EditBlogPage({ params }: { params: Promise<{ id: s
     } else if (linkedType === "event") {
       const event = await loadOwnedEventForUser(supabase, profile.id, linkedId);
       ownsLinked = Boolean(event);
+    } else if (linkedType === "seller") {
+      const { data } = await supabase
+        .from("seller_profiles")
+        .select("id")
+        .eq("id", linkedId)
+        .eq("user_id", profile.id)
+        .maybeSingle();
+      ownsLinked = Boolean(data);
     }
   }
 
@@ -76,7 +84,9 @@ export default async function EditBlogPage({ params }: { params: Promise<{ id: s
             ? "Edit health tip"
             : linkedType === "event"
               ? "Edit event update"
-              : "Edit article";
+              : linkedType === "seller"
+                ? "Edit listing story"
+                : "Edit article";
 
   return (
     <BlogPostForm
@@ -86,6 +96,7 @@ export default async function EditBlogPage({ params }: { params: Promise<{ id: s
       presetCourseId={linkedType === "course" ? linkedId : null}
       presetExpertId={linkedType === "expert" ? linkedId : null}
       presetEventId={linkedType === "event" ? linkedId : null}
+      presetSellerId={linkedType === "seller" ? linkedId : null}
       initial={{
         id: post.id,
         title: post.title,

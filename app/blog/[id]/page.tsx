@@ -97,6 +97,14 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ id:
         .eq("id", linkedId)
         .maybeSingle();
       if (data && href) linkedEntity = { id: data.id, name: data.title, href };
+    } else if (linkedType === "seller") {
+      const { data } = await supabase
+        .from("seller_profiles")
+        .select("id, business_name")
+        .eq("id", linkedId)
+        .maybeSingle();
+      if (data && href)
+        linkedEntity = { id: data.id, name: data.business_name, href };
     }
   }
 
@@ -172,6 +180,14 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ id:
       canEdit = Boolean(owned);
     } else if (linkedType === "event") {
       const owned = await loadOwnedEventForUser(supabase, profile.id, linkedId);
+      canEdit = Boolean(owned);
+    } else if (linkedType === "seller") {
+      const { data: owned } = await supabase
+        .from("seller_profiles")
+        .select("id")
+        .eq("id", linkedId)
+        .eq("user_id", profile.id)
+        .maybeSingle();
       canEdit = Boolean(owned);
     }
   }

@@ -9,6 +9,7 @@ export default async function NewBlogPage({
     course?: string;
     expert?: string;
     event?: string;
+    seller?: string;
     category?: string;
   }>;
 }) {
@@ -18,6 +19,7 @@ export default async function NewBlogPage({
   const courseId = params.course?.trim() || null;
   const expertId = params.expert?.trim() || null;
   const eventId = params.event?.trim() || null;
+  const sellerId = params.seller?.trim() || null;
 
   // Prefer the most specific entity when multiple params are present.
   if (expertId) {
@@ -25,6 +27,9 @@ export default async function NewBlogPage({
   }
   if (eventId) {
     return <BlogPostForm presetEventId={eventId} />;
+  }
+  if (sellerId) {
+    return <BlogPostForm presetSellerId={sellerId} />;
   }
   if (trainerId) {
     return <BlogPostForm presetTrainerId={trainerId} />;

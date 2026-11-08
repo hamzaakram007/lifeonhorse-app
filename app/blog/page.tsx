@@ -49,7 +49,8 @@ export default async function Page({
     filters.trainer ||
     filters.course ||
     filters.expert ||
-    filters.event;
+    filters.event ||
+    filters.seller;
   const entityTypeFilter = filters.club
     ? "club"
     : filters.trainer
@@ -60,7 +61,9 @@ export default async function Page({
           ? "expert"
           : filters.event
             ? "event"
-            : filters.entity_type;
+            : filters.seller
+              ? "seller"
+              : filters.entity_type;
   const wantsEntityFilter = Boolean(entityIdFilter || entityTypeFilter);
 
   let query = supabase
@@ -144,12 +147,20 @@ export default async function Page({
         .map((p) => p.linked_entity_id as string)
     ),
   ];
+  const sellerIds = [
+    ...new Set(
+      data
+        .filter((p) => p.linked_entity_type === "seller" && p.linked_entity_id)
+        .map((p) => p.linked_entity_id as string)
+    ),
+  ];
 
   const clubMap = new Map<string, EntityChip>();
   const trainerMap = new Map<string, EntityChip>();
   const courseMap = new Map<string, EntityChip>();
   const expertMap = new Map<string, EntityChip>();
   const eventMap = new Map<string, EntityChip>();
+  const sellerMap = new Map<string, EntityChip>();
 
   await Promise.all([
     clubIds.length
@@ -205,6 +216,17 @@ export default async function Page({
             }
           })
       : Promise.resolve(),
+    sellerIds.length
+      ? supabase
+          .from("seller_profiles")
+          .select("id, business_name")
+          .in("id", sellerIds)
+          .then(({ data: sellers }) => {
+            for (const s of sellers ?? []) {
+              sellerMap.set(s.id, { id: s.id, name: s.business_name });
+            }
+          })
+      : Promise.resolve(),
   ]);
 
   function entityNameFor(item: BlogListRow): string | undefined {
@@ -218,6 +240,8 @@ export default async function Page({
       return expertMap.get(item.linked_entity_id)?.name;
     if (item.linked_entity_type === "event")
       return eventMap.get(item.linked_entity_id)?.name;
+    if (item.linked_entity_type === "seller")
+      return sellerMap.get(item.linked_entity_id)?.name;
     return undefined;
   }
 
@@ -231,7 +255,9 @@ export default async function Page({
           ? `/blog/new?expert=${filters.expert}`
           : filters.event
             ? `/blog/new?event=${filters.event}`
-            : null;
+            : filters.seller
+              ? `/blog/new?seller=${filters.seller}`
+              : null;
   const emptyWriteLabel = filters.club
     ? "Write club update"
     : filters.trainer
@@ -242,7 +268,9 @@ export default async function Page({
           ? "Write health tip"
           : filters.event
             ? "Write event update"
-            : null;
+            : filters.seller
+              ? "Listing story"
+              : null;
   const emptyEntityCopy = filters.club
     ? "No published updates from this club yet."
     : filters.trainer
@@ -253,11 +281,15 @@ export default async function Page({
           ? "No published health tips from this expert yet."
           : filters.event
             ? "No published updates from this event yet."
-            : entityTypeFilter === "expert"
-              ? "No expert health tips published yet."
-              : entityTypeFilter === "event"
-                ? "No event updates published yet."
-                : "Try clearing filters or broadening your search.";
+            : filters.seller
+              ? "No published stories from this seller yet."
+              : entityTypeFilter === "expert"
+                ? "No expert health tips published yet."
+                : entityTypeFilter === "event"
+                  ? "No event updates published yet."
+                  : entityTypeFilter === "seller"
+                    ? "No seller stories published yet."
+                    : "Try clearing filters or broadening your search.";
 
   return (
     <div className="space-y-8">
@@ -281,6 +313,7 @@ export default async function Page({
           course: filters.course,
           expert: filters.expert,
           event: filters.event,
+          seller: filters.seller,
         }}
         fields={[
           {
@@ -298,6 +331,7 @@ export default async function Page({
               { value: "trainer", label: "Trainer tips" },
               { value: "course", label: "Course updates" },
               { value: "expert", label: "Expert health tips" },
+              { value: "seller", label: "Seller stories" },
             ],
             allLabel: "All posts",
           },
