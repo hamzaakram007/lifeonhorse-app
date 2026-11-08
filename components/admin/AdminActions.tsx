@@ -40,13 +40,31 @@ export function AdminActions({
           {isVerified ? "Unverify" : "Verify"}
         </Button>
       )}
+      {status === "draft" && (
+        <Button size="sm" onClick={() => update({ status: "published" })}>
+          Publish
+        </Button>
+      )}
       {status === "published" && (
-        <Button size="sm" variant="danger" onClick={() => update({ status: "hidden" })}>Hide</Button>
+        <>
+          <Button size="sm" variant="outline" onClick={() => update({ status: "draft" })}>
+            Unpublish
+          </Button>
+          <Button size="sm" variant="danger" onClick={() => update({ status: "hidden" })}>
+            Hide
+          </Button>
+        </>
       )}
       {status === "hidden" && (
-        <Button size="sm" onClick={() => update({ status: "published" })}>Restore</Button>
+        <Button size="sm" onClick={() => update({ status: "published" })}>
+          Restore
+        </Button>
       )}
-      <Button size="sm" variant="ghost" onClick={() => update({ status: "removed" })}>Remove</Button>
+      {status !== "removed" && (
+        <Button size="sm" variant="ghost" onClick={() => update({ status: "removed" })}>
+          Remove
+        </Button>
+      )}
     </div>
   );
 }
