@@ -14,6 +14,7 @@ import {
   normalizeBlogSearchParams,
   type BlogSearchParams,
 } from "@/lib/blog/blog-filters";
+import { isMissingLinkedEntityColumn } from "@/lib/blog/query";
 
 export const metadata: Metadata = {
   title: "Blog",
@@ -21,6 +22,15 @@ export const metadata: Metadata = {
 };
 
 type ClubChip = { id: string; name: string };
+type BlogListRow = {
+  id: string;
+  title: string;
+  category: string | null;
+  cover_image: string | null;
+  is_featured: boolean;
+  linked_entity_type?: string | null;
+  linked_entity_id?: string | null;
+};
 
 export default async function Page({
   searchParams,
@@ -29,6 +39,8 @@ export default async function Page({
 }) {
   const filters = normalizeBlogSearchParams(await searchParams);
   const supabase = await createClient();
+  const active = hasActiveBlogFilters(filters);
+  const wantsEntityFilter = Boolean(filters.club || filters.entity_type === "club");
 
   let query = supabase
     .from("blog_posts")
@@ -43,9 +55,7 @@ export default async function Page({
   if (filters.category) query = query.eq("category", filters.category);
   if (filters.featured) query = query.eq("is_featured", true);
   if (filters.club) {
-    query = query
-      .eq("linked_entity_type", "club")
-      .eq("linked_entity_id", filters.club);
+    query = query.eq("linked_entity_type", "club").eq("linked_entity_id", filters.club);
   } else if (filters.entity_type === "club") {
     query = query.eq("linked_entity_type", "club");
   }
@@ -54,12 +64,35 @@ export default async function Page({
     query = query.or(`title.ilike.%${q}%,excerpt.ilike.%${q}%,content.ilike.%${q}%`);
   }
 
-  const { data } = await query;
-  const active = hasActiveBlogFilters(filters);
+  const first = await query;
+  let data = (first.data ?? []) as BlogListRow[];
+
+  // Until 008_blog_entity_links is applied, fall back so the Journal still lists.
+  if (isMissingLinkedEntityColumn(first.error)) {
+    if (wantsEntityFilter) {
+      data = [];
+    } else {
+      let fallback = supabase
+        .from("blog_posts")
+        .select("id, title, category, cover_image, is_featured")
+        .eq("status", "published")
+        .order("is_featured", { ascending: false })
+        .order("published_at", { ascending: false })
+        .limit(24);
+      if (filters.category) fallback = fallback.eq("category", filters.category);
+      if (filters.featured) fallback = fallback.eq("is_featured", true);
+      if (filters.q) {
+        const q = escapeIlike(filters.q.replace(/,/g, " "));
+        fallback = fallback.or(`title.ilike.%${q}%,excerpt.ilike.%${q}%,content.ilike.%${q}%`);
+      }
+      const retry = await fallback;
+      data = (retry.data ?? []) as BlogListRow[];
+    }
+  }
 
   const clubIds = [
     ...new Set(
-      (data ?? [])
+      data
         .filter((p) => p.linked_entity_type === "club" && p.linked_entity_id)
         .map((p) => p.linked_entity_id as string)
     ),
@@ -112,7 +145,7 @@ export default async function Page({
         ]}
       />
 
-      {!data?.length ? (
+      {!data.length ? (
         <EmptyState
           title={active ? "No articles match these filters" : "No articles yet"}
           description={

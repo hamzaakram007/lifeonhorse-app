@@ -4,13 +4,14 @@ import { createClient } from "@/lib/supabase/server";
 import { requireAuth } from "@/lib/auth";
 import { OwnedList } from "@/components/dashboard/OwnedList";
 import { EmptyState } from "@/components/ui";
+import { isMissingLinkedEntityColumn } from "@/lib/blog/query";
 
 export default async function ClubOwnerDashboardPage() {
   const profile = await requireAuth();
   if (!profile) redirect("/auth/login?redirect=/dashboard/club");
 
   const supabase = await createClient();
-  const [{ data: clubs }, { data: events }, { data: pendingFeatured }, { data: drafts }] =
+  const [{ data: clubs }, { data: events }, { data: pendingFeatured }, updatesResult] =
     await Promise.all([
       supabase
         .from("clubs")
@@ -35,6 +36,7 @@ export default async function ClubOwnerDashboardPage() {
         .order("updated_at", { ascending: false })
         .limit(12),
     ]);
+  const drafts = isMissingLinkedEntityColumn(updatesResult.error) ? [] : updatesResult.data;
 
   const pendingKey = new Set(
     (pendingFeatured ?? []).map((r) => `${r.entity_type}:${r.entity_id}`)

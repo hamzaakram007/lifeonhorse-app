@@ -12,6 +12,7 @@ import { CLUB_TYPES } from "@/lib/constants";
 import { labelFromOptions } from "@/lib/labels";
 import { resolveClubPhotos } from "@/lib/club-covers";
 import { resolveBlogCover } from "@/lib/blog-covers";
+import { isMissingLinkedEntityColumn } from "@/lib/blog/query";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -34,7 +35,7 @@ export default async function ClubDetailPage({ params }: { params: Promise<{ id:
   const { data: owner } = await supabase.from("profiles").select("id").eq("id", club.owner_id).single();
   const isOwner = Boolean(profile && profile.id === club.owner_id);
 
-  const [{ data: activityPosts }, { data: upcomingEvents }] = await Promise.all([
+  const [activityResult, { data: upcomingEvents }] = await Promise.all([
     supabase
       .from("blog_posts")
       .select("id, title, category, cover_image, published_at, excerpt")
@@ -52,6 +53,9 @@ export default async function ClubDetailPage({ params }: { params: Promise<{ id:
       .order("start_date", { ascending: true })
       .limit(4),
   ]);
+  const activityPosts = isMissingLinkedEntityColumn(activityResult.error)
+    ? []
+    : activityResult.data;
 
   return (
     <div className="space-y-6">

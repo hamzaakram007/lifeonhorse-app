@@ -14,6 +14,7 @@ import { labelFromOptions, humanizeSlug } from "@/lib/labels";
 import { formatLocation } from "@/lib/location";
 import { firstPhoto } from "@/lib/storage/upload";
 import { formatPrice } from "@/lib/utils";
+import { isMissingLinkedEntityColumn } from "@/lib/blog/query";
 
 export const metadata: Metadata = buildMetadata({
   title: "Global Horse Marketplace & Community",
@@ -46,7 +47,10 @@ export default async function HomePage() {
       .eq("status", "published")
       .eq("linked_entity_type", "club")
       .order("published_at", { ascending: false })
-      .limit(4),
+      .limit(4)
+      .then((res) =>
+        isMissingLinkedEntityColumn(res.error) ? { data: [] as typeof res.data } : res
+      ),
     supabase
       .from("horses")
       .select("id, title, photos, price, currency, city, country_code")
