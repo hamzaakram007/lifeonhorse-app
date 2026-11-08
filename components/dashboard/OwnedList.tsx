@@ -7,6 +7,9 @@ export type OwnedListItem = {
   status?: string | null;
   href: string;
   editHref?: string | null;
+  /** Secondary per-row action (e.g. Write event update). */
+  actionHref?: string | null;
+  actionLabel?: string | null;
   meta?: string | null;
   /** When set, show featured request CTA for this listing. */
   featureEntityType?: string | null;
@@ -65,6 +68,14 @@ export function OwnedList({
                 {item.editHref ? (
                   <Link href={item.editHref} className="text-[var(--color-primary)] hover:underline">
                     Edit
+                  </Link>
+                ) : null}
+                {item.actionHref ? (
+                  <Link
+                    href={item.actionHref}
+                    className="font-medium text-[var(--color-primary)] hover:underline"
+                  >
+                    {item.actionLabel ?? "Update"}
                   </Link>
                 ) : null}
                 {item.featureEntityType ? (

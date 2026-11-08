@@ -13,6 +13,7 @@ import {
   defaultCategoryForLinkedEntity,
   type BlogComposerEntityType,
 } from "@/lib/blog/linked-entity";
+import { loadOwnedEventForUser } from "@/lib/blog/event-ownership";
 
 type EntityOption = { id: string; name: string };
 
@@ -33,10 +34,12 @@ function resolvePresetType(opts: {
   presetTrainerId?: string | null;
   presetCourseId?: string | null;
   presetExpertId?: string | null;
+  presetEventId?: string | null;
   initialType?: BlogComposerEntityType | null;
 }): BlogComposerEntityType | null {
-  // Priority when multiple params present: expert > trainer > course > club
+  // Priority when multiple params present: expert > event > trainer > course > club
   if (opts.presetExpertId) return "expert";
+  if (opts.presetEventId) return "event";
   if (opts.presetTrainerId) return "trainer";
   if (opts.presetCourseId) return "course";
   if (opts.presetClubId) return "club";
@@ -60,6 +63,7 @@ export function BlogPostForm({
   presetTrainerId,
   presetCourseId,
   presetExpertId,
+  presetEventId,
   heading,
 }: {
   initial?: BlogPostFormInitial;
@@ -67,6 +71,7 @@ export function BlogPostForm({
   presetTrainerId?: string | null;
   presetCourseId?: string | null;
   presetExpertId?: string | null;
+  presetEventId?: string | null;
   heading?: string;
 }) {
   const router = useRouter();
@@ -77,18 +82,21 @@ export function BlogPostForm({
     presetTrainerId,
     presetCourseId,
     presetExpertId,
+    presetEventId,
     initialType: initial?.linked_entity_type,
   });
   const presetId =
     (presetType === "expert"
       ? presetExpertId
-      : presetType === "trainer"
-        ? presetTrainerId
-        : presetType === "course"
-          ? presetCourseId
-          : presetType === "club"
-            ? presetClubId
-            : null) ||
+      : presetType === "event"
+        ? presetEventId
+        : presetType === "trainer"
+          ? presetTrainerId
+          : presetType === "course"
+            ? presetCourseId
+            : presetType === "club"
+              ? presetClubId
+              : null) ||
     (initial?.linked_entity_type ? initial.linked_entity_id : null) ||
     null;
 
@@ -130,18 +138,21 @@ export function BlogPostForm({
         presetTrainerId,
         presetCourseId,
         presetExpertId,
+        presetEventId,
         initialType: initial?.linked_entity_type,
       });
       const targetId =
         (targetType === "expert"
           ? presetExpertId
-          : targetType === "trainer"
-            ? presetTrainerId
-            : targetType === "course"
-              ? presetCourseId
-              : targetType === "club"
-                ? presetClubId
-                : null) ||
+          : targetType === "event"
+            ? presetEventId
+            : targetType === "trainer"
+              ? presetTrainerId
+              : targetType === "course"
+                ? presetCourseId
+                : targetType === "club"
+                  ? presetClubId
+                  : null) ||
         initial?.linked_entity_id ||
         null;
 
@@ -154,7 +165,9 @@ export function BlogPostForm({
                 ? "trainer"
                 : targetType === "course"
                   ? "course creator"
-                  : "expert";
+                  : targetType === "event"
+                    ? "event host"
+                    : "expert";
           setOwnershipError(`Sign in as the ${noun} to publish this update.`);
         }
         return;
@@ -193,6 +206,29 @@ export function BlogPostForm({
             ...prev,
             linked_entity_id: match.id,
             category: "health",
+          }));
+        }
+        return;
+      }
+
+      if (targetType === "event" && targetId) {
+        const owned = await loadOwnedEventForUser(supabase, user.id, targetId);
+        if (cancelled) return;
+        if (!owned) {
+          setOwnershipError(
+            "You can only post updates for events you host (or clubs you own)."
+          );
+          setForm((prev) => ({ ...prev, linked_entity_id: "" }));
+          setLinkedType(null);
+          setEntityName(null);
+        } else {
+          setOwnershipError("");
+          setEntityName(owned.title);
+          setLinkedType("event");
+          setForm((prev) => ({
+            ...prev,
+            linked_entity_id: owned.id,
+            category: prev.category || "events",
           }));
         }
         return;
@@ -281,6 +317,7 @@ export function BlogPostForm({
     presetTrainerId,
     presetCourseId,
     presetExpertId,
+    presetEventId,
     initial?.linked_entity_id,
     initial?.linked_entity_type,
   ]);
@@ -332,8 +369,19 @@ export function BlogPostForm({
       setLoading(false);
       return;
     }
+    if (resolvedType === "event" && entityId) {
+      const owned = await loadOwnedEventForUser(supabase, user.id, entityId);
+      if (!owned) {
+        setError("You can only post updates for events you host (or clubs you own).");
+        setLoading(false);
+        return;
+      }
+    }
     if (
-      (resolvedType === "trainer" || resolvedType === "course" || resolvedType === "expert") &&
+      (resolvedType === "trainer" ||
+        resolvedType === "course" ||
+        resolvedType === "expert" ||
+        resolvedType === "event") &&
       !entityId
     ) {
       setError("Missing linked entity.");
@@ -400,7 +448,9 @@ export function BlogPostForm({
             ? "Edit course update"
             : activeType === "expert"
               ? "Edit health tip"
-              : "Edit article"
+              : activeType === "event"
+                ? "Edit event update"
+                : "Edit article"
       : presetType === "club"
         ? "Write club update"
         : presetType === "trainer"
@@ -409,7 +459,9 @@ export function BlogPostForm({
             ? "Post about this course"
             : presetType === "expert"
               ? "Write health tip"
-              : "Write article");
+              : presetType === "event"
+                ? "Write event update"
+                : "Write article");
 
   const publishingCopy =
     activeType === "club"
@@ -420,15 +472,19 @@ export function BlogPostForm({
           ? "This note appears in the Journal and on the course page."
           : activeType === "expert"
             ? "Tips use the Health category and appear in the Journal and on your expert profile."
-            : null;
+            : activeType === "event"
+              ? "This update appears in the Journal and on the event page."
+              : null;
 
   const showClubSelect =
     !presetTrainerId &&
     !presetCourseId &&
     !presetExpertId &&
+    !presetEventId &&
     linkedType !== "trainer" &&
     linkedType !== "course" &&
     linkedType !== "expert" &&
+    linkedType !== "event" &&
     (clubs.length > 0 || Boolean(presetClubId));
 
   const showExpertSelect = activeType === "expert";
@@ -451,7 +507,9 @@ export function BlogPostForm({
               ? "Publish course update"
               : presetType === "expert"
                 ? "Publish health tip"
-                : "Publish article";
+                : presetType === "event"
+                  ? "Publish event update"
+                  : "Publish article";
 
   return (
     <form onSubmit={submit} className="mx-auto max-w-2xl space-y-4 px-4 py-8">
@@ -591,6 +649,13 @@ export function BlogPostForm({
       {(presetCourseId || linkedType === "course") && entityName ? (
         <div>
           <Label>Course</Label>
+          <Input value={entityName} disabled />
+        </div>
+      ) : null}
+
+      {(presetEventId || linkedType === "event") && entityName ? (
+        <div>
+          <Label>Event</Label>
           <Input value={entityName} disabled />
         </div>
       ) : null}

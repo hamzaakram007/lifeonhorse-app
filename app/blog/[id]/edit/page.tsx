@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireAuth } from "@/lib/auth";
 import { BlogPostForm } from "@/components/blog/BlogPostForm";
 import { isBlogComposerEntityType } from "@/lib/blog/linked-entity";
+import { loadOwnedEventForUser } from "@/lib/blog/event-ownership";
 
 export default async function EditBlogPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -54,6 +55,9 @@ export default async function EditBlogPage({ params }: { params: Promise<{ id: s
         .eq("user_id", profile.id)
         .maybeSingle();
       ownsLinked = Boolean(data);
+    } else if (linkedType === "event") {
+      const event = await loadOwnedEventForUser(supabase, profile.id, linkedId);
+      ownsLinked = Boolean(event);
     }
   }
 
@@ -70,7 +74,9 @@ export default async function EditBlogPage({ params }: { params: Promise<{ id: s
           ? "Edit course update"
           : linkedType === "expert"
             ? "Edit health tip"
-            : "Edit article";
+            : linkedType === "event"
+              ? "Edit event update"
+              : "Edit article";
 
   return (
     <BlogPostForm
@@ -79,6 +85,7 @@ export default async function EditBlogPage({ params }: { params: Promise<{ id: s
       presetTrainerId={linkedType === "trainer" ? linkedId : null}
       presetCourseId={linkedType === "course" ? linkedId : null}
       presetExpertId={linkedType === "expert" ? linkedId : null}
+      presetEventId={linkedType === "event" ? linkedId : null}
       initial={{
         id: post.id,
         title: post.title,

@@ -45,7 +45,11 @@ export default async function Page({
   const supabase = await createClient();
   const active = hasActiveBlogFilters(filters);
   const entityIdFilter =
-    filters.club || filters.trainer || filters.course || filters.expert;
+    filters.club ||
+    filters.trainer ||
+    filters.course ||
+    filters.expert ||
+    filters.event;
   const entityTypeFilter = filters.club
     ? "club"
     : filters.trainer
@@ -54,7 +58,9 @@ export default async function Page({
         ? "course"
         : filters.expert
           ? "expert"
-          : filters.entity_type;
+          : filters.event
+            ? "event"
+            : filters.entity_type;
   const wantsEntityFilter = Boolean(entityIdFilter || entityTypeFilter);
 
   let query = supabase
@@ -131,11 +137,19 @@ export default async function Page({
         .map((p) => p.linked_entity_id as string)
     ),
   ];
+  const eventIds = [
+    ...new Set(
+      data
+        .filter((p) => p.linked_entity_type === "event" && p.linked_entity_id)
+        .map((p) => p.linked_entity_id as string)
+    ),
+  ];
 
   const clubMap = new Map<string, EntityChip>();
   const trainerMap = new Map<string, EntityChip>();
   const courseMap = new Map<string, EntityChip>();
   const expertMap = new Map<string, EntityChip>();
+  const eventMap = new Map<string, EntityChip>();
 
   await Promise.all([
     clubIds.length
@@ -180,6 +194,17 @@ export default async function Page({
             }
           })
       : Promise.resolve(),
+    eventIds.length
+      ? supabase
+          .from("events")
+          .select("id, title")
+          .in("id", eventIds)
+          .then(({ data: events }) => {
+            for (const e of events ?? []) {
+              eventMap.set(e.id, { id: e.id, name: e.title });
+            }
+          })
+      : Promise.resolve(),
   ]);
 
   function entityNameFor(item: BlogListRow): string | undefined {
@@ -191,6 +216,8 @@ export default async function Page({
       return courseMap.get(item.linked_entity_id)?.name;
     if (item.linked_entity_type === "expert")
       return expertMap.get(item.linked_entity_id)?.name;
+    if (item.linked_entity_type === "event")
+      return eventMap.get(item.linked_entity_id)?.name;
     return undefined;
   }
 
@@ -202,7 +229,9 @@ export default async function Page({
         ? `/blog/new?course=${filters.course}`
         : filters.expert
           ? `/blog/new?expert=${filters.expert}`
-          : null;
+          : filters.event
+            ? `/blog/new?event=${filters.event}`
+            : null;
   const emptyWriteLabel = filters.club
     ? "Write club update"
     : filters.trainer
@@ -211,7 +240,9 @@ export default async function Page({
         ? "Post about course"
         : filters.expert
           ? "Write health tip"
-          : null;
+          : filters.event
+            ? "Write event update"
+            : null;
   const emptyEntityCopy = filters.club
     ? "No published updates from this club yet."
     : filters.trainer
@@ -220,9 +251,13 @@ export default async function Page({
         ? "No published notes from this course yet."
         : filters.expert
           ? "No published health tips from this expert yet."
-          : entityTypeFilter === "expert"
-            ? "No expert health tips published yet."
-            : "Try clearing filters or broadening your search.";
+          : filters.event
+            ? "No published updates from this event yet."
+            : entityTypeFilter === "expert"
+              ? "No expert health tips published yet."
+              : entityTypeFilter === "event"
+                ? "No event updates published yet."
+                : "Try clearing filters or broadening your search.";
 
   return (
     <div className="space-y-8">
@@ -245,6 +280,7 @@ export default async function Page({
           trainer: filters.trainer,
           course: filters.course,
           expert: filters.expert,
+          event: filters.event,
         }}
         fields={[
           {
@@ -258,6 +294,7 @@ export default async function Page({
             name: "entity_type",
             options: [
               { value: "club", label: "Club updates" },
+              { value: "event", label: "Event updates" },
               { value: "trainer", label: "Trainer tips" },
               { value: "course", label: "Course updates" },
               { value: "expert", label: "Expert health tips" },

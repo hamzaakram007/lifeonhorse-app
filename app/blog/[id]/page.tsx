@@ -15,6 +15,7 @@ import {
   linkedEntityFilterLabel,
   linkedEntityHref,
 } from "@/lib/blog/linked-entity";
+import { loadOwnedEventForUser } from "@/lib/blog/event-ownership";
 
 function readingTime(text: string) {
   const words = text.trim().split(/\s+/).length;
@@ -89,6 +90,13 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ id:
         .maybeSingle();
       if (data && href)
         linkedEntity = { id: data.id, name: data.display_name, href };
+    } else if (linkedType === "event") {
+      const { data } = await supabase
+        .from("events")
+        .select("id, title")
+        .eq("id", linkedId)
+        .maybeSingle();
+      if (data && href) linkedEntity = { id: data.id, name: data.title, href };
     }
   }
 
@@ -161,6 +169,9 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ id:
         .eq("id", linkedId)
         .eq("user_id", profile.id)
         .maybeSingle();
+      canEdit = Boolean(owned);
+    } else if (linkedType === "event") {
+      const owned = await loadOwnedEventForUser(supabase, profile.id, linkedId);
       canEdit = Boolean(owned);
     }
   }

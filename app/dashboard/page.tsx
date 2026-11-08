@@ -162,6 +162,8 @@ export default async function DashboardPage() {
                 title: e.title,
                 status: e.status,
                 href: `/events/${e.id}`,
+                actionHref: `/blog/new?event=${e.id}`,
+                actionLabel: "Event update",
               })) ?? []
             }
             createHref="/events/new"
