@@ -5,6 +5,7 @@ import { getCurrentProfile } from "@/lib/auth";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { ListingCard } from "@/components/ui";
 import { BlogCover } from "@/components/ui/BlogCover";
+import { HealthDisclaimerBlock } from "@/components/blog/HealthDisclaimerBlock";
 import { BLOG_CATEGORIES } from "@/lib/constants";
 import { labelFromOptions } from "@/lib/labels";
 import { resolveBlogCover } from "@/lib/blog-covers";
@@ -44,7 +45,11 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ id:
   if (!post) notFound();
 
   const isClubPost = post.linked_entity_type === "club" && Boolean(post.linked_entity_id);
+  const isExpertPost = post.linked_entity_type === "expert" && Boolean(post.linked_entity_id);
+  const showHealthDisclaimer = isExpertPost || post.category === "health";
+
   let club: { id: string; name: string } | null = null;
+  let expert: { id: string; display_name: string } | null = null;
   if (isClubPost) {
     const { data } = await supabase
       .from("clubs")
@@ -52,6 +57,14 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ id:
       .eq("id", post.linked_entity_id)
       .maybeSingle();
     club = data;
+  }
+  if (isExpertPost) {
+    const { data } = await supabase
+      .from("experts")
+      .select("id, display_name")
+      .eq("id", post.linked_entity_id)
+      .maybeSingle();
+    expert = data;
   }
 
   let relatedQuery = supabase
@@ -61,7 +74,11 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ id:
     .neq("id", id)
     .limit(3);
 
-  if (isClubPost && post.linked_entity_id) {
+  if (isExpertPost && post.linked_entity_id) {
+    relatedQuery = relatedQuery
+      .eq("linked_entity_type", "expert")
+      .eq("linked_entity_id", post.linked_entity_id);
+  } else if (isClubPost && post.linked_entity_id) {
     relatedQuery = relatedQuery
       .eq("linked_entity_type", "club")
       .eq("linked_entity_id", post.linked_entity_id);
@@ -99,15 +116,26 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ id:
       .maybeSingle();
     canEdit = Boolean(owned);
   }
+  if (!canEdit && profile && isExpertPost && post.linked_entity_id) {
+    const { data: owned } = await supabase
+      .from("experts")
+      .select("id")
+      .eq("id", post.linked_entity_id)
+      .eq("user_id", profile.id)
+      .maybeSingle();
+    canEdit = Boolean(owned);
+  }
 
   return (
     <article className="mx-auto max-w-4xl">
       <Breadcrumbs
         items={[
           { label: "Blog", href: "/blog" },
-          ...(isClubPost
-            ? [{ label: "Club updates", href: "/blog?entity_type=club" }]
-            : []),
+          ...(isExpertPost
+            ? [{ label: "Health tips", href: "/blog?entity_type=expert" }]
+            : isClubPost
+              ? [{ label: "Club updates", href: "/blog?entity_type=club" }]
+              : []),
           { label: post.title },
         ]}
       />
@@ -117,6 +145,16 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ id:
       <header className="mb-8 space-y-3">
         <div className="flex flex-wrap items-center gap-2">
           {categoryLabel ? <span className="badge badge-featured">{categoryLabel}</span> : null}
+          {expert ? (
+            <Link
+              href={`/horse-health/experts/${expert.id}`}
+              className="badge hover:opacity-90"
+            >
+              From {expert.display_name}
+            </Link>
+          ) : isExpertPost ? (
+            <span className="badge">Health tip</span>
+          ) : null}
           {club ? (
             <Link href={`/clubs/${club.id}`} className="badge hover:opacity-90">
               From {club.name}
@@ -145,6 +183,14 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ id:
             </time>
           ) : null}
           <span>{minutes} min read</span>
+          {expert ? (
+            <Link
+              href={`/horse-health/experts/${expert.id}`}
+              className="text-[var(--color-primary)] hover:underline"
+            >
+              {expert.display_name}
+            </Link>
+          ) : null}
           {club ? (
             <Link href={`/clubs/${club.id}`} className="text-[var(--color-primary)] hover:underline">
               {club.name}
@@ -153,13 +199,14 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ id:
         </div>
         {post.status === "draft" ? (
           <p className="text-sm text-amber-700">
-            Draft — only visible to you and club owners/admins.
+            Draft — only visible to you and linked entity owners/admins.
           </p>
         ) : null}
       </header>
       <div className="prose-legal max-w-none whitespace-pre-wrap text-base leading-relaxed">
         {post.content}
       </div>
+      {showHealthDisclaimer ? <HealthDisclaimerBlock /> : null}
       {related && related.length > 0 ? (
         <section className="mt-16 border-t border-[var(--color-border)] pt-10">
           <h2 className="font-serif text-2xl font-bold">Related articles</h2>
@@ -172,7 +219,9 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ id:
                 subtitle={labelFromOptions(BLOG_CATEGORIES, r.category) || undefined}
                 image={resolveBlogCover(r.title, r.cover_image)}
                 badges={
-                  r.linked_entity_type === "club" ? (
+                  r.linked_entity_type === "expert" ? (
+                    <span className="badge">Health tip</span>
+                  ) : r.linked_entity_type === "club" ? (
                     <span className="badge">Club update</span>
                   ) : null
                 }

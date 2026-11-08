@@ -15,6 +15,7 @@ export default async function EditBlogPage({ params }: { params: Promise<{ id: s
   const isAuthor = post.author_id === profile.id;
   const isAdmin = ["admin", "moderator"].includes(profile.role);
   let ownsClub = false;
+  let ownsExpert = false;
   if (post.linked_entity_type === "club" && post.linked_entity_id) {
     const { data: club } = await supabase
       .from("clubs")
@@ -24,17 +25,30 @@ export default async function EditBlogPage({ params }: { params: Promise<{ id: s
       .maybeSingle();
     ownsClub = Boolean(club);
   }
+  if (post.linked_entity_type === "expert" && post.linked_entity_id) {
+    const { data: expert } = await supabase
+      .from("experts")
+      .select("id")
+      .eq("id", post.linked_entity_id)
+      .eq("user_id", profile.id)
+      .maybeSingle();
+    ownsExpert = Boolean(expert);
+  }
 
-  if (!isAuthor && !isAdmin && !ownsClub) {
+  if (!isAuthor && !isAdmin && !ownsClub && !ownsExpert) {
     redirect(`/blog/${id}`);
   }
 
   const isClubPost = post.linked_entity_type === "club" && Boolean(post.linked_entity_id);
+  const isExpertPost = post.linked_entity_type === "expert" && Boolean(post.linked_entity_id);
 
   return (
     <BlogPostForm
-      heading={isClubPost ? "Edit club update" : "Edit article"}
+      heading={
+        isExpertPost ? "Edit health tip" : isClubPost ? "Edit club update" : "Edit article"
+      }
       presetClubId={isClubPost ? post.linked_entity_id : null}
+      presetExpertId={isExpertPost ? post.linked_entity_id : null}
       initial={{
         id: post.id,
         title: post.title,
@@ -42,7 +56,7 @@ export default async function EditBlogPage({ params }: { params: Promise<{ id: s
         content: post.content ?? "",
         category: post.category ?? "guides",
         cover_image: post.cover_image,
-        linked_entity_type: isClubPost ? "club" : null,
+        linked_entity_type: isExpertPost ? "expert" : isClubPost ? "club" : null,
         linked_entity_id: post.linked_entity_id,
         status: post.status === "draft" ? "draft" : "published",
       }}
