@@ -30,6 +30,7 @@ export async function updateSession(
     }
   );
 
+  // Refresh session cookies on every matched request.
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -38,7 +39,10 @@ export async function updateSession(
   const effectiveLocale =
     locale ?? request.cookies.get("NEXT_LOCALE")?.value ?? "en";
 
-  if ((pathname.startsWith("/admin") || pathname.startsWith("/dashboard")) && !user) {
+  const isProtected =
+    pathname.startsWith("/admin") || pathname.startsWith("/dashboard");
+
+  if (isProtected && !user) {
     const url = request.nextUrl.clone();
     url.pathname = withLocalePrefix("/auth/login", effectiveLocale);
     url.searchParams.set("redirect", request.nextUrl.pathname);
