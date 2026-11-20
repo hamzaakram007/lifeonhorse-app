@@ -22,7 +22,8 @@ Evidence for the reported account: `email_confirmed_at` was `null` while `confir
 2. **Login** — clear “confirm your email” error + resend; forgot-password link.
 3. **Forgot / reset password** — recovery email → `/auth/callback?next=…/auth/reset-password` → set new password.
 4. **Callback** — exchanges PKCE `code` for a session; skips locale middleware so links are not rewritten to `/ur/auth/callback`.
-5. **Authorization** — still uses `profiles.role` only (never `user_metadata`).
+5. **Sign out** — header uses a server action that redirects to locale home. `/auth/signout` is also excluded from next-intl (POST/GET → 303 home). Without that exclusion, next-intl treated `/auth/signout` as a missing `[locale]` page and returned **404**.
+6. **Authorization** — still uses `profiles.role` only (never `user_metadata`).
 
 ## Toggles to verify in the dashboard
 

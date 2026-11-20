@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { signOutAction } from "@/app/actions/sign-out";
 import { createClient } from "@/lib/supabase/server";
 import { HeaderNav } from "@/components/HeaderNav";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -49,7 +50,7 @@ export async function Header() {
                   {t("admin")}
                 </Link>
               )}
-              <form action="/auth/signout" method="post">
+              <form action={signOutAction}>
                 <button type="submit" className="btn btn-secondary px-3 py-2 text-sm">
                   {t("signOut")}
                 </button>

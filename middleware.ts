@@ -25,8 +25,9 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Skip i18n/auth for Next internals, Serwist SW, static icons/manifest, and assets.
+  // Skip Next internals, Serwist SW, static assets, and auth cookie endpoints.
+  // /auth/callback + /auth/signout must not go through next-intl (it 404s them as pages).
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|api|serwist/|icons/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|json|js|map)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|api|auth/callback|auth/signout|serwist/|icons/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|json|js|map)$).*)",
   ],
 };
