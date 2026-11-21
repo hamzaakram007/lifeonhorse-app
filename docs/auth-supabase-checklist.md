@@ -11,8 +11,8 @@ App: https://lifeonhorse.com
 | App signup UX (before fix) | Always redirected to `/dashboard` | Middleware bounced to login; login failed with **Email not confirmed** |
 | Profile trigger `handle_new_user` | OK (`public.profiles`, `search_path = ''`) | Profile was created; authz path was fine |
 | Site URL | `https://lifeonhorse.com` | OK |
-| Redirect allow list | `https://lifeonhorse.com/**`, `https://www.lifeonhorse.com/**` | OK for `/auth/callback` |
-| Custom SMTP | **Not configured** | Confirmation / reset emails use Supabase’s built-in mailer (strict rate limits; often land in spam) |
+| Redirect allow list | Must include **explicit** `/auth/callback` entries (wildcards alone can reject `?next=` and fall back to Site URL / homepage) | See URL list below |
+| Custom SMTP | Resend on port **587** | Required for reliable recovery mail |
 
 Evidence for the reported account: `email_confirmed_at` was `null` while `confirmation_sent_at` was set — the user never completed email confirmation (or never received the mail).
 
@@ -30,15 +30,24 @@ Evidence for the reported account: `email_confirmed_at` was `null` while `confir
 Open **Authentication → Providers → Email** and **Authentication → URL Configuration**:
 
 1. **Site URL** = `https://lifeonhorse.com`
-2. **Redirect URLs** include:
+2. **Redirect URLs** include (wildcards **and** explicit callback — LOH-62):
    - `https://lifeonhorse.com/**`
    - `https://www.lifeonhorse.com/**`
+   - `https://lifeonhorse.com/auth/callback`
+   - `https://lifeonhorse.com/auth/callback/**`
+   - `https://www.lifeonhorse.com/auth/callback`
+   - `https://www.lifeonhorse.com/auth/callback/**`
+   - `https://lifeonhorse.com/auth/reset-password`
+   - `https://lifeonhorse.com/ur/auth/reset-password`
+   - `https://lifeonhorse.com/ar/auth/reset-password`
+   - (and `www` variants of the reset-password paths)
    - (optional for local) `http://localhost:3000/**`
-3. **Confirm email**
+3. **Forgot-password flow** uses `redirectTo=/auth/callback?next=…/auth/reset-password` plus a short-lived `loh_auth_next` cookie so callback can recover if the query is stripped.
+4. **Confirm email**
    - **Enabled (recommended for production):** keep current setting. Users must click the email link (or use Resend) before password login works. The app now explains this.
    - **Disabled (`mailer_autoconfirm` on):** signup returns a session immediately and users can log in without email. Faster launch UX; weaker email ownership guarantee.
-4. **Secure email change** — leave enabled.
-5. **Custom SMTP** (strongly recommended) — Authentication → Emails / Project Settings → SMTP. Without it, confirmation and reset mail are unreliable under load (built-in rate limit is very low).
+5. **Secure email change** — leave enabled.
+6. **Custom SMTP** (strongly recommended) — Authentication → Emails / Project Settings → SMTP. Resend: host `smtp.resend.com`, port **587**, user `resend`, sender on your verified domain.
 
 ## Manual smoke path after deploy
 

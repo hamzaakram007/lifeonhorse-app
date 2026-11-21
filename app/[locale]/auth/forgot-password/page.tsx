@@ -5,7 +5,11 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { AuthAlert, AuthShell } from "@/components/auth/AuthShell";
 import { authErrorKey } from "@/lib/auth-errors";
-import { authCallbackUrl } from "@/lib/auth-redirect";
+import {
+  authCallbackUrl,
+  localizedPath,
+  rememberAuthNextPath,
+} from "@/lib/auth-redirect";
 import { createClient } from "@/lib/supabase/client";
 
 export default function ForgotPasswordPage() {
@@ -22,6 +26,12 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
     setLoading(true);
     setErrorKey(null);
+
+    // Keep ?next= for cross-device email opens (requires callback in Auth allow list).
+    // Also set a same-site cookie so callback still finds reset-password if GoTrue
+    // strips the query and would otherwise fall back to Site URL (homepage).
+    const nextPath = localizedPath("/auth/reset-password", locale);
+    rememberAuthNextPath(nextPath);
 
     const supabase = createClient();
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
