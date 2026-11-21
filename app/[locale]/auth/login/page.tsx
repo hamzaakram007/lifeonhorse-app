@@ -6,7 +6,12 @@ import { useSearchParams } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { AuthAlert, AuthShell } from "@/components/auth/AuthShell";
 import { authErrorKey } from "@/lib/auth-errors";
-import { authCallbackUrl, safeInternalPath } from "@/lib/auth-redirect";
+import {
+  authCallbackUrl,
+  localizedPath,
+  safeInternalPath,
+  setAuthNextCookie,
+} from "@/lib/auth-redirect";
 import { createClient } from "@/lib/supabase/client";
 
 function LoginForm() {
@@ -14,7 +19,10 @@ function LoginForm() {
   const tAuth = useTranslations("Auth");
   const locale = useLocale();
   const searchParams = useSearchParams();
-  const redirectTo = safeInternalPath(searchParams.get("redirect"));
+  const redirectTo = safeInternalPath(
+    searchParams.get("redirect"),
+    localizedPath("/dashboard", locale)
+  );
   const confirmed = searchParams.get("confirmed") === "1";
   const resetSent = searchParams.get("reset") === "1";
   const linkError = searchParams.get("error") === "link";
@@ -54,6 +62,7 @@ function LoginForm() {
     setResending(true);
     setErrorKey(null);
     const supabase = createClient();
+    setAuthNextCookie(redirectTo, locale);
     const { error } = await supabase.auth.resend({
       type: "signup",
       email,

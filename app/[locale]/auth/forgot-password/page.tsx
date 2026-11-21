@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { AuthAlert, AuthShell } from "@/components/auth/AuthShell";
 import { authErrorKey } from "@/lib/auth-errors";
-import { authCallbackUrl } from "@/lib/auth-redirect";
+import { authCallbackUrl, setAuthNextCookie } from "@/lib/auth-redirect";
 import { createClient } from "@/lib/supabase/client";
 
 export default function ForgotPasswordPage() {
@@ -24,6 +24,8 @@ export default function ForgotPasswordPage() {
     setErrorKey(null);
 
     const supabase = createClient();
+    // Cookie backup if GoTrue strips ?next= or falls back toward Site URL.
+    setAuthNextCookie("/auth/reset-password", locale);
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: authCallbackUrl(window.location.origin, "/auth/reset-password", locale),
     });

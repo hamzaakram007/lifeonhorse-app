@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { AuthAlert, AuthShell } from "@/components/auth/AuthShell";
 import { authErrorKey } from "@/lib/auth-errors";
-import { authCallbackUrl, localizedPath } from "@/lib/auth-redirect";
+import { authCallbackUrl, localizedPath, setAuthNextCookie } from "@/lib/auth-redirect";
 import { createClient } from "@/lib/supabase/client";
 
 type Phase = "form" | "check-email";
@@ -30,6 +30,7 @@ export default function SignupPage() {
     setErrorKey(null);
 
     const supabase = createClient();
+    setAuthNextCookie("/dashboard", locale);
     const emailRedirectTo = authCallbackUrl(
       window.location.origin,
       "/dashboard",
@@ -67,6 +68,7 @@ export default function SignupPage() {
     setResent(false);
     setErrorKey(null);
     const supabase = createClient();
+    setAuthNextCookie("/dashboard", locale);
     const { error } = await supabase.auth.resend({
       type: "signup",
       email,

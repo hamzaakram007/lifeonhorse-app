@@ -15,7 +15,35 @@ function isAuthApiPath(pathname: string) {
   );
 }
 
+/**
+ * When redirectTo is missing from uri_allow_list, GoTrue falls back to Site URL
+ * and drops the user on `/` (or a locale home) with `?code=…`. Rescue that onto
+ * `/auth/callback` so PKCE exchange still runs; `loh_auth_next` cookie supplies `next`.
+ */
+function rescueAuthCodeOnSiteUrl(request: NextRequest): NextResponse | null {
+  const { pathname, searchParams } = request.nextUrl;
+  if (isAuthApiPath(pathname)) return null;
+  if (!searchParams.get("code") && !searchParams.get("error")) return null;
+
+  // Only homepage / locale homes — avoid hijacking unrelated `?code=` query usage.
+  const isHome =
+    pathname === "/" ||
+    pathname === "/en" ||
+    pathname === "/ur" ||
+    pathname === "/ar";
+  if (!isHome) return null;
+
+  const url = request.nextUrl.clone();
+  url.pathname = "/auth/callback";
+  return NextResponse.redirect(url);
+}
+
 export async function middleware(request: NextRequest) {
+  const rescued = rescueAuthCodeOnSiteUrl(request);
+  if (rescued) {
+    return updateSession(request, rescued);
+  }
+
   if (isAuthApiPath(request.nextUrl.pathname)) {
     return updateSession(request, NextResponse.next());
   }
