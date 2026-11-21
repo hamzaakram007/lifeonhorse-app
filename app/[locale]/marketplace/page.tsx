@@ -27,6 +27,7 @@ export default async function MarketplacePage({
       href: "/marketplace/horses",
       label: tabsT("horses"),
       desc: tabsT("horsesDesc"),
+      browseLabel: c("browseHorses"),
       createHref: "/marketplace/horses/new",
       createLabel: c("listHorse"),
     },
@@ -34,6 +35,7 @@ export default async function MarketplacePage({
       href: "/marketplace/products",
       label: tabsT("products"),
       desc: tabsT("productsDesc"),
+      browseLabel: c("browseProducts"),
       createHref: "/marketplace/products/new",
       createLabel: c("listProduct"),
     },
@@ -41,6 +43,7 @@ export default async function MarketplacePage({
       href: "/marketplace/services",
       label: tabsT("services"),
       desc: tabsT("servicesDesc"),
+      browseLabel: c("browseServices"),
       createHref: "/marketplace/services/new",
       createLabel: c("listService"),
     },
@@ -48,6 +51,7 @@ export default async function MarketplacePage({
       href: "/marketplace/sellers",
       label: tabsT("sellers"),
       desc: tabsT("sellersDesc"),
+      browseLabel: c("browseSellers"),
       createHref: "/marketplace/sellers/register",
       createLabel: c("registerSeller"),
     },
@@ -67,7 +71,13 @@ export default async function MarketplacePage({
               <h2 className="font-serif text-xl font-semibold text-[var(--color-text)]">{tab.label}</h2>
               <p className="mt-1 text-sm text-[var(--color-muted)]">{tab.desc}</p>
             </Link>
-            <Link href={tab.createHref} className="btn btn-primary mt-5 text-sm">
+            <Link href={tab.href} className="btn btn-primary mt-5 text-sm">
+              {tab.browseLabel}
+            </Link>
+            <Link
+              href={tab.createHref}
+              className="mt-3 text-center text-sm text-[var(--color-muted)] underline-offset-2 hover:text-[var(--color-text)] hover:underline"
+            >
               + {tab.createLabel}
             </Link>
           </div>
