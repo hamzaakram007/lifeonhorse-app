@@ -35,7 +35,7 @@ This creates 10 demo auth users, then seeds horses, clubs, trainers, products, s
 | `npm run seed` | Seed content (requires users to exist) |
 | `npm run seed:all` | Users then content |
 | `npm run seed:cleanup` | Remove all demo data and users |
-| `npm run seed:products` | Upsert marketplace products + remap photos (Management API or SQL) |
+| `npm run seed:products` | Upsert marketplace products + remap photos (Management API or SQL). Idempotent fixed UUIDs; also removes legacy `[DEMO]`-prefixed product uploads so reseed never stacks duplicates. |
 
 ## Content seeded
 

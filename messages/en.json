@@ -121,6 +121,7 @@
     "browseProducts": "Browse products",
     "browseServices": "Browse services",
     "browseSellers": "Browse sellers",
+    "viewAll": "View all",
     "applyAsExpert": "Apply as expert",
     "create": "Create",
     "verified": "Verified",
@@ -178,7 +179,12 @@
   "Heroes": {
     "marketplace": {
       "title": "Global Horse Marketplace",
-      "subtitle": "Discover exceptional horses, premium tack, and trusted equestrian services from verified sellers across six continents."
+      "subtitle": "Discover exceptional horses, premium tack, and trusted equestrian services from verified sellers across six continents.",
+      "categoriesAria": "Marketplace categories",
+      "productsHeading": "Products for sale",
+      "productsSub": "Tack, feed, apparel, and stable essentials from verified sellers.",
+      "horsesHeading": "Horses for sale",
+      "horsesSub": "Browse bloodlines, disciplines, and listings from breeders worldwide."
     },
     "marketplaceTabs": {
       "horses": "Horses",
