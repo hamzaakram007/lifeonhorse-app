@@ -4,6 +4,11 @@
 -- Apply via Supabase SQL editor or:
 --   SUPABASE_ACCESS_TOKEN=… npm run seed:products
 
+-- Drop one-off [DEMO]-prefixed uploads so reseed never stacks duplicates
+-- (professional catalog below uses fixed d6666666-… UUIDs + ON CONFLICT)
+DELETE FROM public.products WHERE title LIKE '[DEMO]%';
+DELETE FROM public.products WHERE id::text LIKE 'd0e00001-%';
+
 -- Remap existing live product photos to owned local assets
 UPDATE public.products SET photos = '["/images/demo/product-saddle.jpg"]'::jsonb
 WHERE id IN (
@@ -173,3 +178,17 @@ UPDATE public.products SET category = 'grooming'
 WHERE category IN ('health') AND status = 'published';
 UPDATE public.products SET category = 'feed'
 WHERE category IN ('supplements', 'salt_blocks') AND status = 'published';
+
+-- Safety: collapse any remaining exact-title duplicates among seed UUID prefixes
+DELETE FROM public.products p
+USING public.products keep
+WHERE p.title = keep.title
+  AND p.id > keep.id
+  AND (
+    p.id::text LIKE 'd6666666-%'
+    OR p.id::text LIKE 'd4444444-%'
+    OR p.id::text LIKE 'd0e00001-%'
+    OR keep.id::text LIKE 'd6666666-%'
+    OR keep.id::text LIKE 'd4444444-%'
+    OR keep.id::text LIKE 'd0e00001-%'
+  );
